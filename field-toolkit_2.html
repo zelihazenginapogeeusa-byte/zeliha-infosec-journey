@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Red/Blue Field Toolkit — eJPT + BTL1</title>
+<style>
+  :root{
+    /* eJPT (red/offensive) + BTL1 (blue/defensive) — violet is the "merged" neutral identity for shared tools/links */
+    --bg:#0a0e14; --bg-img: radial-gradient(circle at 12% 0%, rgba(239,68,68,.08), transparent 38%), radial-gradient(circle at 88% 10%, rgba(56,139,253,.08), transparent 38%);
+    --text:#dbe2ef; --muted:#8891a3;
+    --mono:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;
+    --accent:#a78bfa; --accent2:#8b6ff0;
+    --red:#f85149; --red-soft:rgba(248,81,73,.5);
+    --blue:#4a9eff; --blue-soft:rgba(74,158,255,.5);
+    --green:#4ade80;
+    --border: rgba(90,100,130,.28);
+    --card-bg: rgba(18,21,30,.72);
+    --field-bg: rgba(0,0,0,.32);
+    --code-bg: rgba(0,0,0,.38);
+    --shadow: 0 8px 24px rgba(0,0,0,.4);
+  }
+  html[data-theme="light"]{
+    --bg:#f3f4f8; --bg-img: radial-gradient(circle at 12% 0%, rgba(239,68,68,.06), transparent 38%), radial-gradient(circle at 88% 10%, rgba(37,99,235,.06), transparent 38%);
+    --text:#1a1d29; --muted:#5c6478;
+    --accent:#7c3aed; --accent2:#a78bfa;
+    --red:#dc2626; --red-soft:rgba(220,38,38,.4);
+    --blue:#2563eb; --blue-soft:rgba(37,99,235,.4);
+    --border: rgba(90,100,140,.25);
+    --card-bg: rgba(255,255,255,.75);
+    --field-bg: rgba(0,0,0,.045);
+    --code-bg: rgba(0,0,0,.055);
+    --shadow: 0 8px 24px rgba(0,0,0,.08);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg) var(--bg-img); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.5; transition:background-color .25s, color .25s;
+  }
+  header{
+    padding:16px 24px; border-bottom:1px solid var(--border);
+    position:sticky; top:0; z-index:10;
+    background:rgba(16,16,20,.78); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+  }
+  html[data-theme="light"] header{ background:rgba(244,243,240,.78); }
+  .toolbar{display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;}
+  .brand{display:flex; align-items:baseline; gap:10px; cursor:default;}
+  .brand h1{margin:0; font-size:1.25rem; letter-spacing:-0.01em;}
+  .brand .red{color:var(--red);} .brand .blue{color:var(--blue);}
+  .brand .stats{color:var(--muted); font-size:0.78rem; font-family:var(--mono);}
+  .toolbar-right{display:flex; align-items:center; gap:10px;}
+  .themebtn{
+    background:var(--field-bg); border:1px solid var(--border); border-radius:20px;
+    width:34px; height:34px; display:flex; align-items:center; justify-content:center;
+    cursor:pointer; color:var(--accent); padding:0;
+  }
+  .themebtn svg{width:16px; height:16px; transition:transform .3s;}
+  header p.tagline{margin:8px 0 12px; color:var(--muted); font-size:0.85rem;}
+  nav{display:flex; gap:8px; flex-wrap:wrap;}
+  nav button{
+    background:var(--field-bg); border:1px solid var(--border);
+    color:var(--muted); padding:8px 16px; font-size:0.85rem; cursor:pointer;
+    border-radius:999px; font-weight:600; transition:all .15s;
+  }
+  nav button.active{ color:#fff; background:var(--accent); border-color:var(--accent); }
+  nav button.active[data-tab="red"]{ background:var(--red); border-color:var(--red); }
+  nav button.active[data-tab="blue"]{ background:var(--blue); border-color:var(--blue); }
+  nav button:hover:not(.active){ color:var(--text); border-color:var(--accent); }
+  main{max-width:1100px; margin:0 auto; padding:20px 24px 60px;}
+  .tab{display:none;}
+  .tab.active{display:block;}
+  .searchwrap{position:relative; margin-bottom:18px;}
+  .searchbox{
+    width:100%; padding:10px 38px 10px 14px; font-size:0.95rem;
+    background:var(--field-bg); border:1px solid var(--border); border-radius:10px; color:var(--text);
+  }
+  .searchbox:focus{outline:2px solid var(--accent); outline-offset:-1px;}
+  .clearbtn{
+    position:absolute; right:10px; top:50%; transform:translateY(-50%);
+    background:none; border:none; color:var(--muted); cursor:pointer; font-size:1rem;
+    display:none; padding:2px 4px;
+  }
+  .clearbtn:hover{color:var(--text);}
+  .catpills{display:flex; gap:7px; flex-wrap:wrap; margin-bottom:16px;}
+  .catpill{
+    background:var(--field-bg); border:1px solid var(--border); color:var(--muted);
+    padding:6px 13px; font-size:0.78rem; font-weight:600; border-radius:999px; cursor:pointer; transition:all .15s;
+  }
+  .catpill:hover:not(.active){color:var(--text); border-color:var(--accent);}
+  .catpill .count{opacity:.7; margin-left:3px; font-weight:400;}
+  #red .catpill.active{background:var(--red); border-color:var(--red); color:#fff;}
+  #blue .catpill.active{background:var(--blue); border-color:var(--blue); color:#fff;}
+  details.card{
+    background:var(--card-bg); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+    border:1px solid var(--border); border-radius:10px; box-shadow:var(--shadow);
+    margin-bottom:12px; padding:0; overflow:hidden;
+  }
+  details.card[open]{border-color:rgba(167,139,250,.45);}
+  #red details.card[open]{border-color:var(--red-soft);}
+  #blue details.card[open]{border-color:var(--blue-soft);}
+  details.card summary{
+    padding:14px 16px; cursor:pointer; font-weight:600; font-size:0.98rem;
+    list-style:none; display:flex; justify-content:space-between; align-items:center; gap:10px;
+  }
+  details.card summary::-webkit-details-marker{display:none;}
+  details.card summary::after{
+    content:'›'; color:var(--muted); font-weight:400; font-size:1.3rem; line-height:1;
+    transition:transform .2s; flex-shrink:0;
+  }
+  details.card[open] summary::after{transform:rotate(90deg); color:var(--accent);}
+  details.card summary .tag{
+    font-size:0.68rem; font-weight:700; padding:2px 9px; border-radius:20px; margin-right:8px;
+    text-transform:uppercase; letter-spacing:0.04em;
+  }
+  .tag.red{background:rgba(248,113,113,0.15); color:var(--red);}
+  .tag.blue{background:rgba(125,211,252,0.15); color:var(--blue);}
+  .tag.calc{background:rgba(167,139,250,0.18); color:var(--accent);}
+  .tag.cat{background:var(--field-bg); color:var(--muted); text-transform:none; letter-spacing:0; font-weight:600; border:1px solid var(--border);}
+  .card-body{padding:0 16px 16px; border-top:1px solid var(--border); padding-top:14px;}
+  .card-body p.desc{color:var(--muted); font-size:0.88rem; margin-top:0;}
+  textarea, input[type=text], input[type=number]{
+    width:100%; background:var(--field-bg); border:1px solid var(--border); border-radius:8px;
+    color:var(--text); padding:9px 11px; font-family:var(--mono); font-size:0.87rem;
+  }
+  textarea{min-height:70px; resize:vertical;}
+  .row{display:flex; gap:10px; flex-wrap:wrap; margin:8px 0;}
+  .row > *{flex:1; min-width:180px;}
+  button.btn{
+    background:var(--accent); color:#fff; border:none; border-radius:8px;
+    padding:8px 16px; font-size:0.85rem; font-weight:700; cursor:pointer; transition:opacity .15s;
+  }
+  button.btn.secondary{background:var(--field-bg); color:var(--text); border:1px solid var(--border); font-weight:600;}
+  button.btn:hover{opacity:0.85;}
+  .btnrow{display:flex; gap:8px; flex-wrap:wrap; margin:10px 0;}
+  .output{
+    margin-top:10px; background:var(--code-bg); border:1px solid var(--border); border-radius:8px;
+    padding:10px 12px; font-family:var(--mono); font-size:0.85rem; white-space:pre-wrap; word-break:break-all;
+    min-height:20px; position:relative;
+  }
+  .copybtn{
+    position:absolute; top:6px; right:6px; background:var(--field-bg); border:1px solid var(--border);
+    color:var(--muted); font-size:0.7rem; padding:3px 8px; border-radius:4px; cursor:pointer;
+    opacity:0; transition:opacity .15s;
+  }
+  .output:hover .copybtn{opacity:1;}
+  .copybtn:hover{color:var(--text);}
+  table.ref{width:100%; border-collapse:collapse; font-size:0.85rem; margin-top:8px;}
+  table.ref th{text-align:left; color:var(--muted); font-weight:600; padding:6px 10px; border-bottom:1px solid var(--border); font-size:0.72rem; text-transform:uppercase; letter-spacing:.03em;}
+  table.ref td{padding:6px 10px; border-bottom:1px solid var(--border); vertical-align:top;}
+  table.ref tr:last-child td{border-bottom:none;}
+  table.ref code{background:var(--code-bg); padding:1px 5px; border-radius:4px; font-family:var(--mono);}
+  .note{background:rgba(167,139,250,0.1); border:1px solid rgba(167,139,250,0.3); color:var(--accent); padding:8px 12px; border-radius:8px; font-size:0.82rem; margin-top:10px;}
+  .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:14px;}
+  .linkcat{
+    background:var(--card-bg); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+    border:1px solid var(--border); border-radius:10px; box-shadow:var(--shadow); padding:14px 16px;
+  }
+  .linkcat h3{margin:0 0 10px; font-size:0.92rem; color:var(--accent);}
+  .linkcat h3.kind-red{color:var(--red);}
+  .linkcat h3.kind-blue{color:var(--blue);}
+  .linkcat h3.kind-violet{color:var(--accent);}
+  .linkcat ul{list-style:none; margin:0; padding:0;}
+  .linkcat li{margin-bottom:8px; font-size:0.87rem;}
+  .linkcat a{color:var(--text); text-decoration:none; font-weight:600;}
+  .linkcat a:hover{color:var(--accent); text-decoration:underline;}
+  .linkcat .why{color:var(--muted); font-size:0.78rem; display:block; margin-top:1px; font-weight:400;}
+  footer{max-width:1100px; margin:0 auto; padding:0 24px 40px; color:var(--muted); font-size:0.8rem;}
+  .hidden{display:none !important;}
+  code.inline{background:var(--code-bg); padding:1px 6px; border-radius:4px; font-family:var(--mono);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="toolbar">
+    <div class="brand">
+      <h1><span class="red">Red</span> / <span class="blue">Blue</span> Field Toolkit</h1>
+      <span class="stats" id="statsText"></span>
+    </div>
+    <div class="toolbar-right">
+      <button class="themebtn" id="themeToggle" title="Toggle dark/light" aria-label="Toggle theme">
+        <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+      </button>
+      <a href="https://awcl.github.io/notred/" target="_blank" rel="noopener" style="color:var(--muted); font-size:0.78rem; text-decoration:none;">inspired by notred ↗</a>
+    </div>
+  </div>
+  <p class="tagline">Offline reference cards + calculators for eJPT and BTL1 — single file, no server, no dependencies, no accounts.</p>
+  <nav>
+    <button class="tabbtn active" data-tab="calc">Calculators</button>
+    <button class="tabbtn" data-tab="red">Red Team Cards</button>
+    <button class="tabbtn" data-tab="blue">Blue Team Cards</button>
+    <button class="tabbtn" data-tab="links">Tool Links</button>
+  </nav>
+</header>
+
+<main>
+
+<!-- ============ CALCULATORS TAB ============ -->
+<section id="calc" class="tab active">
+  <div class="searchwrap"><input type="text" class="searchbox" id="calcSearch" placeholder="Filter calculators (e.g. 'hash', 'timestamp', 'subnet')..."><button class="clearbtn" data-clears="calcSearch">×</button></div>
+
+  <details class="card" data-search="base64 encode decode text obfuscation" open>
+    <summary><span><span class="tag calc">Calc</span>Base64 Encode / Decode</span></summary>
+    <div class="card-body">
+      <p class="desc">Encode/decode Base64 — common in phishing macro payloads, PowerShell <code class="inline">-enc</code> commands, and URL parameter obfuscation.</p>
+      <textarea id="b64in" placeholder="Text or Base64 string..."></textarea>
+      <div class="btnrow">
+        <button class="btn" onclick="b64Encode()">Encode →</button>
+        <button class="btn secondary" onclick="b64Decode()">← Decode</button>
+      </div>
+      <div class="output" id="b64out"><button class="copybtn" onclick="copyOut('b64out')">copy</button></div>
+    </div>
+  </details>
+
+  <details class="card" data-search="defang refang url ioc phishing report">
+    <summary><span><span class="tag calc">Calc</span>URL / IOC Defang &amp; Refang</span></summary>
+    <div class="card-body">
+      <p class="desc">Convert a live URL/IP/email into a safe, non-clickable defanged form for a report — or reverse it to test the real link.</p>
+      <textarea id="defangIn" placeholder="http://evil-domain.com/payload.exe or hxxp://evil-domain[.]com"></textarea>
+      <div class="btnrow">
+        <button class="btn" onclick="doDefang()">Defang →</button>
+        <button class="btn secondary" onclick="doRefang()">← Refang</button>
+      </div>
+      <div class="output" id="defangOut"><button class="copybtn" onclick="copyOut('defangOut')">copy</button></div>
+    </div>
+  </details>
+
+  <details class="card" data-search="hash identifier md5 sha1 sha256 ntlm bcrypt kerberoast">
+    <summary><span><span class="tag calc">Calc</span>Hash Identifier</span></summary>
+    <div class="card-body">
+      <p class="desc">Guess a hash's type from its length/prefix so you pick the right <code class="inline">hashcat -m</code> or <code class="inline">john --format</code> before burning cracking time on the wrong mode.</p>
+      <input type="text" id="hashIn" placeholder="Paste a hash...">
+      <div class="btnrow"><button class="btn" onclick="doIdentifyHash()">Identify</button></div>
+      <div class="output" id="hashOut"></div>
+    </div>
+  </details>
+
+  <details class="card" data-search="hashcat john mode lookup table cracking">
+    <summary><span><span class="tag calc">Calc</span>Hashcat / John Mode Lookup</span></summary>
+    <div class="card-body">
+      <p class="desc">Search by hash type to get the matching <code class="inline">hashcat -m</code> number and John format name side by side — full detail in <code class="inline">hashcat-cheatsheet-professional.md</code> / <code class="inline">john-the-ripper-cheatsheet-professional.md</code>.</p>
+      <input type="text" id="modeSearch" placeholder="Search: ntlm, kerberoast, bcrypt, shadow..." oninput="renderModeTable()">
+      <table class="ref"><thead><tr><th>Hash Type</th><th>Hashcat -m</th><th>John --format</th></tr></thead><tbody id="modeTable"></tbody></table>
+    </div>
+  </details>
+
+  <details class="card" data-search="epoch unix timestamp filetime windows converter forensics">
+    <summary><span><span class="tag calc">Calc</span>Timestamp Converter</span></summary>
+    <div class="card-body">
+      <p class="desc">Convert between Unix epoch, human-readable UTC, and Windows FILETIME (used in Volatility/Autopsy/registry timestamps) — DFIR needs all three constantly.</p>
+      <div class="row">
+        <div>
+          <label style="font-size:0.8rem;color:var(--muted);">Epoch seconds</label>
+          <input type="text" id="epochIn" placeholder="1735689600">
+        </div>
+        <div>
+          <label style="font-size:0.8rem;color:var(--muted);">Human date (any parseable format)</label>
+          <input type="text" id="humanIn" placeholder="2025-01-01 00:00:00 UTC">
+        </div>
+        <div>
+          <label style="font-size:0.8rem;color:var(--muted);">Windows FILETIME</label>
+          <input type="text" id="filetimeIn" placeholder="133805... (100ns since 1601)">
+        </div>
+      </div>
+      <div class="btnrow">
+        <button class="btn" onclick="convFromEpoch()">From Epoch</button>
+        <button class="btn" onclick="convFromHuman()">From Human Date</button>
+        <button class="btn" onclick="convFromFiletime()">From FILETIME</button>
+        <button class="btn secondary" onclick="convNow()">Now</button>
+      </div>
+      <div class="output" id="tsOut"></div>
+      <div class="note">FILETIME conversion uses JS floating point — treat as accurate to the second, not sub-second precision.</div>
+    </div>
+  </details>
+
+  <details class="card" data-search="subnet cidr network mask broadcast host range ip">
+    <summary><span><span class="tag calc">Calc</span>Subnet / CIDR Calculator</span></summary>
+    <div class="card-body">
+      <p class="desc">Given an IP and prefix length, get the network/broadcast address, usable host range, and total host count — for scoping a range before an nmap sweep.</p>
+      <input type="text" id="cidrIn" placeholder="192.168.1.0/24">
+      <div class="btnrow"><button class="btn" onclick="doSubnet()">Calculate</button></div>
+      <div class="output" id="subnetOut"></div>
+    </div>
+  </details>
+
+  <details class="card" data-search="port lookup common services tcp udp">
+    <summary><span><span class="tag calc">Calc</span>Common Port Lookup</span></summary>
+    <div class="card-body">
+      <p class="desc">Quick lookup for what's normally running on a given port — the first question after an nmap scan comes back.</p>
+      <input type="text" id="portSearch" placeholder="Search by port number or service name..." oninput="renderPortTable()">
+      <table class="ref"><thead><tr><th>Port</th><th>Protocol</th><th>Service</th></tr></thead><tbody id="portTable"></tbody></table>
+    </div>
+  </details>
+
+  <details class="card" data-search="http status code reference web">
+    <summary><span><span class="tag calc">Calc</span>HTTP Status Code Reference</span></summary>
+    <div class="card-body">
+      <p class="desc">Quick lookup while reading Burp/gobuster/dirb output.</p>
+      <input type="text" id="httpSearch" placeholder="Search by code or meaning..." oninput="renderHttpTable()">
+      <table class="ref"><thead><tr><th>Code</th><th>Meaning</th><th>Note</th></tr></thead><tbody id="httpTable"></tbody></table>
+    </div>
+  </details>
+
+  <details class="card" data-search="hex decimal octal binary ascii base converter number">
+    <summary><span><span class="tag calc">Calc</span>Number Base / ASCII Converter</span></summary>
+    <div class="card-body">
+      <p class="desc">Convert a value between hex, decimal, octal, binary, and its ASCII character — for reading raw bytes, shellcode, or offsets.</p>
+      <div class="row">
+        <input type="text" id="baseIn" placeholder="Value, e.g. 41 or 0x41">
+        <select id="baseFrom" style="background:var(--panel2);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:9px;">
+          <option value="16">From Hex</option>
+          <option value="10">From Decimal</option>
+          <option value="8">From Octal</option>
+          <option value="2">From Binary</option>
+        </select>
+      </div>
+      <div class="btnrow"><button class="btn" onclick="doBaseConvert()">Convert</button></div>
+      <div class="output" id="baseOut"></div>
+    </div>
+  </details>
+
+  <details class="card" data-search="rot13 rot47 cipher obfuscation encode">
+    <summary><span><span class="tag calc">Calc</span>ROT13 / ROT47</span></summary>
+    <div class="card-body">
+      <p class="desc">Simple substitution cipher, self-reversing — apply the same function again to undo it.</p>
+      <textarea id="rotIn" placeholder="Text to transform..."></textarea>
+      <div class="btnrow">
+        <button class="btn" onclick="doRot13()">ROT13</button>
+        <button class="btn secondary" onclick="doRot47()">ROT47</button>
+      </div>
+      <div class="output" id="rotOut"><button class="copybtn" onclick="copyOut('rotOut')">copy</button></div>
+    </div>
+  </details>
+
+  <details class="card" data-search="windows event id lookup search reference">
+    <summary><span><span class="tag calc">Calc</span>Windows Event ID Lookup</span></summary>
+    <div class="card-body">
+      <p class="desc">Search the Event ID reference table live — full detail (attack→Event ID mapping, Sysmon IDs, logon types) in <code class="inline">windows-event-id-reference-cheatsheet-professional.md</code>.</p>
+      <input type="text" id="eidSearch" placeholder="Search: 4625, kerberoast, lsass, powershell..." oninput="renderEidTable()">
+      <table class="ref"><thead><tr><th>Event ID</th><th>Meaning</th></tr></thead><tbody id="eidTable"></tbody></table>
+    </div>
+  </details>
+
+  <details class="card" data-search="cron parser schedule expression">
+    <summary><span><span class="tag calc">Calc</span>Cron Expression Parser</span></summary>
+    <div class="card-body">
+      <p class="desc">Break down a 5-field cron expression field by field — useful when a Linux privesc check surfaces a suspicious cron job.</p>
+      <input type="text" id="cronIn" placeholder="*/5 * * * *">
+      <div class="btnrow"><button class="btn" onclick="doCron()">Parse</button></div>
+      <div class="output" id="cronOut"></div>
+    </div>
+  </details>
+
+</section>
+
+<!-- ============ RED TEAM CARDS TAB ============ -->
+<section id="red" class="tab">
+  <div class="searchwrap"><input type="text" class="searchbox" id="redSearch" placeholder="Filter red team reference cards..."><button class="clearbtn" data-clears="redSearch">×</button></div>
+  <div class="catpills" id="redCatPills">
+    <button class="catpill active" data-cat="all">All</button>
+    <button class="catpill" data-cat="Assessment Methodologies">Assessment Methodologies</button>
+    <button class="catpill" data-cat="Host & Networking Auditing">Host &amp; Networking Auditing</button>
+    <button class="catpill" data-cat="Host & Network Penetration Testing">Host &amp; Network Penetration Testing</button>
+    <button class="catpill" data-cat="Web Application Penetration Testing">Web Application Penetration Testing</button>
+    <button class="catpill" data-cat="AI Enhanced Pentesting">AI Enhanced Pentesting</button>
+  </div>
+
+  <details class="card" data-search="nmap scan types timing auditing" data-cat="Host & Networking Auditing" open>
+    <summary><span><span class="tag red">Red</span><span class="tag cat">Host &amp; Networking Auditing</span>Nmap — Scan Types &amp; Timing</span></summary>
+    <div class="card-body">
+      <p class="desc">The scan-type and timing flags reached for on nearly every engagement, from the first host-discovery sweep through service/OS fingerprinting.</p>
+      <table class="ref">
+        <tr><td><code>-sS</code></td><td>TCP SYN (half-open) — default as root, fast, less logged</td></tr>
+        <tr><td><code>-sT</code></td><td>TCP Connect — non-root fallback</td></tr>
+        <tr><td><code>-sU</code></td><td>UDP scan — slow, relies on ICMP unreachable</td></tr>
+        <tr><td><code>-sV / -O</code></td><td>Service version / OS fingerprint</td></tr>
+        <tr><td><code>-A</code></td><td>Aggressive: <code>-sV -O -sC --traceroute</code></td></tr>
+        <tr><td><code>-T0…-T5</code></td><td>Paranoid → Insane timing (T4 common for labs)</td></tr>
+        <tr><td><code>--script vuln</code></td><td>NSE vulnerability-category sweep</td></tr>
+      </table>
+      <p class="desc" style="margin-top:8px;">Full reference: <code class="inline">nmap-cheatsheet-professional.md</code></p>
+    </div>
+  </details>
+
+  <details class="card" data-search="active directory kerberoasting asrep attacks" data-cat="Host & Network Penetration Testing">
+    <summary><span><span class="tag red">Red</span><span class="tag cat">Host &amp; Network Penetration Testing</span>AD Attack Quick Map</span></summary>
+    <div class="card-body">
+      <p class="desc">The five Active Directory attack paths that come up most in engagements and eJPT labs, each with the exact tool chain that takes it from enumeration to cracked credential.</p>
+      <table class="ref">
+        <tr><td>Kerberoasting</td><td><code>GetUserSPNs.py</code> → <code>hashcat -m 13100</code></td></tr>
+        <tr><td>AS-REP Roasting</td><td><code>GetNPUsers.py</code> → <code>hashcat -m 18200</code></td></tr>
+        <tr><td>Pass-the-Hash</td><td><code>crackmapexec smb target -u user -H ntlmhash</code></td></tr>
+        <tr><td>DCSync</td><td><code>secretsdump.py</code> with Replication rights</td></tr>
+        <tr><td>Password Spraying</td><td>Check lockout policy first — <code>crackmapexec --pass-pol</code></td></tr>
+      </table>
+      <p class="desc" style="margin-top:8px;">Full reference: <code class="inline">active-directory-enumeration-cheatsheet-professional.md</code></p>
+    </div>
+  </details>
+
+  <details class="card" data-search="testing types assessment box model" data-cat="Assessment Methodologies">
+    <summary><span><span class="tag red">Red</span><span class="tag cat">Assessment Methodologies</span>Assessment Types &amp; Box Models</span></summary>
+    <div class="card-body">
+      <p class="desc">What kind of engagement this actually is and how much starting information the tester has — the two things that should be settled before any tool gets opened.</p>
+      <table class="ref">
+        <tr><td>Vulnerability Assessment</td><td>Identify only, no exploitation</td></tr>
+        <tr><td>Penetration Test</td><td>Prove exploitability + impact (eJPT maps here)</td></tr>
+        <tr><td>Red Team</td><td>Test detection/response, active evasion</td></tr>
+        <tr><td>Black / Grey / White Box</td><td>None / partial / full starting info (eJPT labs ≈ grey box)</td></tr>
+      </table>
+      <p class="desc" style="margin-top:8px;">Full reference: <code class="inline">penetration-testing-methodology-cheatsheet-professional.md</code></p>
+    </div>
+  </details>
+
+  <details class="card" data-search="linux windows privesc checklist" data-cat="Host & Network Penetration Testing">
+    <summary><span><span class="tag red">Red</span><span class="tag cat">Host &amp; Network Penetration Testing</span>Privesc Checklist</span></summary>
+    <div class="card-body">
+      <p class="desc">The first commands to run on any freshly-landed shell to find a path from low-privilege user to root/SYSTEM.</p>
+      <table class="ref">
+        <tr><td>Linux</td><td><code>sudo -l</code>, SUID (<code>find / -perm -4000</code>), cron jobs, <code>getcap -r /</code></td></tr>
+        <tr><td>Windows</td><td><code>whoami /priv</code>, unquoted service paths, AlwaysInstallElevated, weak service perms</td></tr>
+        <tr><td>Automated</td><td>linpeas.sh / winPEAS.exe as the first pass, verify manually</td></tr>
+      </table>
+      <p class="desc" style="margin-top:8px;">Full reference: <code class="inline">linux-windows-pentest-cheatsheet-professional.md</code></p>
+    </div>
+  </details>
+
+  <details class="card" data-search="web enumeration lfi xss ssrf injection" data-cat="Web Application Penetration Testing">
+    <summary><span><span class="tag red">Red</span><span class="tag cat">Web Application Penetration Testing</span>Web Vuln Quick Triggers</span></summary>
+    <div class="card-body">
+      <p class="desc">The minimal payload or command that confirms each common web vulnerability class is actually exploitable, before investing time in a full exploit chain.</p>
+      <table class="ref">
+        <tr><td>LFI</td><td><code>?page=../../../../etc/passwd</code></td></tr>
+        <tr><td>Command Injection</td><td><code>; whoami</code> / <code>&amp;&amp; whoami</code> / <code>`whoami`</code></td></tr>
+        <tr><td>Blind injection test</td><td><code>; sleep 5</code> — time-based confirmation</td></tr>
+        <tr><td>SQLi automation</td><td><code>sqlmap -u URL --batch --dbs</code></td></tr>
+      </table>
+      <p class="desc" style="margin-top:8px;">Full reference: <code class="inline">web-enumeration-common-vulns-cheatsheet-professional.md</code>, <code class="inline">sqlmap-cheatsheet-professional.md</code></p>
+    </div>
+  </details>
+
+  <details class="card" data-search="metasploit msfconsole meterpreter exploit module" data-cat="Host & Network Penetration Testing">
+    <summary><span><span class="tag red">Red</span><span class="tag cat">Host &amp; Network Penetration Testing</span>Metasploit — Quick Start</span></summary>
+    <div class="card-body">
+      <p class="desc">The core msfconsole workflow — find a module, set options, catch a Meterpreter shell — condensed to the commands used in almost every exploitation phase.</p>
+      <table class="ref">
+        <tr><td><code>search type:exploit platform:windows smb</code></td><td>Find a module by platform/service</td></tr>
+        <tr><td><code>use exploit/...</code></td><td>Load the module</td></tr>
+        <tr><td><code>show options</code> / <code>set RHOSTS ...</code></td><td>Review and set required options</td></tr>
+        <tr><td><code>set PAYLOAD windows/meterpreter/reverse_tcp</code></td><td>Pick a payload matching the target</td></tr>
+        <tr><td><code>run</code> / <code>exploit</code></td><td>Launch it</td></tr>
+        <tr><td><code>msfvenom -p ... -f exe -o shell.exe</code></td><td>Generate a standalone payload outside msfconsole</td></tr>
+      </table>
+      <p class="desc" style="margin-top:8px;">Full reference: <code class="inline">metasploit-cheatsheet-professional.md</code></p>
+    </div>
+  </details>
+
+  <details class="card" data-search="ai generative llm pentesting assisted recon reporting" data-cat="AI Enhanced Pentesting">
+    <summary><span><span class="tag red">Red</span><span class="tag cat">AI Enhanced Pentesting</span>AI-Assisted Pentesting — Practical Use</span></summary>
+    <div class="card-body">
+      <p class="desc">Where generative AI tools genuinely save time in an engagement versus where they introduce risk — treat AI output as a draft that still needs verification, not a source of truth.</p>
+      <table class="ref">
+        <tr><td>Recon triage</td><td>Summarizing large nmap/enum output to spot what's worth investigating first</td></tr>
+        <tr><td>Script/payload review</td><td>Explaining an unfamiliar exploit script before running it against a live target</td></tr>
+        <tr><td>Report writing</td><td>Drafting finding descriptions/remediation text from your own raw notes — always fact-check against evidence</td></tr>
+        <tr><td>⚠️ Risk</td><td>Never paste client-confidential scope, credentials, or live target data into a public/hosted AI tool</td></tr>
+      </table>
+      <p class="desc" style="margin-top:8px;">General guidance, not tied to a specific exam objective — treat as a productivity habit layered on top of the core methodology in <code class="inline">penetration-testing-methodology-cheatsheet-professional.md</code>.</p>
+    </div>
+  </details>
+</section>
+
+<!-- ============ BLUE TEAM CARDS TAB ============ -->
+<section id="blue" class="tab">
+  <div class="searchwrap"><input type="text" class="searchbox" id="blueSearch" placeholder="Filter blue team reference cards..."><button class="clearbtn" data-clears="blueSearch">×</button></div>
+  <div class="catpills" id="blueCatPills">
+    <button class="catpill active" data-cat="all">All</button>
+    <button class="catpill" data-cat="Security Fundamentals">Security Fundamentals</button>
+    <button class="catpill" data-cat="Phishing Analysis">Phishing Analysis</button>
+    <button class="catpill" data-cat="Threat Intelligence">Threat Intelligence</button>
+    <button class="catpill" data-cat="Digital Forensics">Digital Forensics</button>
+    <button class="catpill" data-cat="SIEM">SIEM</button>
+    <button class="catpill" data-cat="Incident Response">Incident Response</button>
+  </div>
+
+  <details class="card" data-search="picerl incident response lifecycle phases" data-cat="Incident Response" open>
+    <summary><span><span class="tag blue">Blue</span><span class="tag cat">Incident Response</span>PICERL — Incident Response Phases</span></summary>
+    <div class="card-body">
+      <p class="desc">The six-phase NIST SP 800-61 lifecycle that structures every incident from first alert to the post-mortem that feeds back into next time's Preparation.</p>
+      <table class="ref">
+        <tr><td>Preparation</td><td>Playbooks, log coverage, forensic toolkit readiness</td></tr>
+        <tr><td>Identification</td><td>Is it actually an incident? Scope + severity</td></tr>
+        <tr><td>Containment</td><td>Stop the spread — isolate, don't destroy evidence</td></tr>
+        <tr><td>Eradication</td><td>Remove the root cause, not just the symptom</td></tr>
+        <tr><td>Recovery</td><td>Return to normal, monitor for reinfection</td></tr>
+        <tr><td>Lessons Learned</td><td>Post-Incident Review, feed back into Preparation</td></tr>
+      </table>
+      <p class="desc" style="margin-top:8px;">Full reference: <code class="inline">incident-response-lifecycle-cheatsheet-professional.md</code></p>
+    </div>
+  </details>
+
+  <details class="card" data-search="mitre attack tactics" data-cat="Threat Intelligence">
+    <summary><span><span class="tag blue">Blue</span><span class="tag cat">Threat Intelligence</span>MITRE ATT&amp;CK — 12 Tactics</span></summary>
+    <div class="card-body">
+      <p class="desc">The 12 tactic categories of the ATT&amp;CK Enterprise matrix, in rough attack-chain order, for mapping a detection or finding back to adversary intent.</p>
+      <table class="ref">
+        <tr><td>Reconnaissance</td><td>Initial Access</td></tr>
+        <tr><td>Execution</td><td>Persistence</td></tr>
+        <tr><td>Privilege Escalation</td><td>Defense Evasion</td></tr>
+        <tr><td>Credential Access</td><td>Discovery</td></tr>
+        <tr><td>Lateral Movement</td><td>Collection</td></tr>
+        <tr><td>Command and Control</td><td>Exfiltration / Impact</td></tr>
+      </table>
+      <p class="desc" style="margin-top:8px;">Full reference: <code class="inline">threat-intelligence-mitre-attack-cheatsheet-professional.md</code></p>
+    </div>
+  </details>
+
+  <details class="card" data-search="pyramid of pain ioc ttp" data-cat="Threat Intelligence">
+    <summary><span><span class="tag blue">Blue</span><span class="tag cat">Threat Intelligence</span>Pyramid of Pain</span></summary>
+    <div class="card-body">
+      <p class="desc">David Bianco's model for ranking IOC types by how much it actually costs an attacker when that indicator gets blocked — the case for detecting TTPs over hashes.</p>
+      <table class="ref">
+        <tr><td>Hash Values</td><td>Trivial for attacker to change</td></tr>
+        <tr><td>IP Addresses</td><td>Easy — spin up a new VPS</td></tr>
+        <tr><td>Domain Names</td><td>Moderate — register a new one</td></tr>
+        <tr><td>Network/Host Artifacts</td><td>Hard — reconfigure the malware</td></tr>
+        <tr><td>Tools</td><td>Very hard — develop/acquire a new one</td></tr>
+        <tr><td>TTPs</td><td>Hardest — rethink the whole operation</td></tr>
+      </table>
+      <p class="desc" style="margin-top:8px;">Full reference: <code class="inline">threat-intelligence-mitre-attack-cheatsheet-professional.md</code></p>
+    </div>
+  </details>
+
+  <details class="card" data-search="spf dkim dmarc phishing email authentication" data-cat="Phishing Analysis">
+    <summary><span><span class="tag blue">Blue</span><span class="tag cat">Phishing Analysis</span>SPF / DKIM / DMARC Quick Read</span></summary>
+    <div class="card-body">
+      <p class="desc">What each email authentication mechanism actually verifies, and the trap where all three passing still doesn't rule out phishing.</p>
+      <table class="ref">
+        <tr><td>SPF</td><td>Which IPs/servers may send for this domain</td></tr>
+        <tr><td>DKIM</td><td>Digital signature proving the message wasn't altered</td></tr>
+        <tr><td>DMARC</td><td>What to do on failure: none / quarantine / reject</td></tr>
+        <tr><td>⚠️ Trap</td><td>All three can PASS and the email can still be phishing (attacker's own legitimately-authenticated domain)</td></tr>
+      </table>
+      <p class="desc" style="margin-top:8px;">Full reference: <code class="inline">phishing-cheatsheet.md</code></p>
+    </div>
+  </details>
+
+  <details class="card" data-search="volatility memory forensics commands" data-cat="Digital Forensics">
+    <summary><span><span class="tag blue">Blue</span><span class="tag cat">Digital Forensics</span>Volatility3 Quick Commands</span></summary>
+    <div class="card-body">
+      <p class="desc">The Volatility3 plugins that cover the first pass of any memory image — running processes, network activity, and injected code.</p>
+      <table class="ref">
+        <tr><td>Process list / hidden scan</td><td><code>windows.pslist</code> / <code>windows.psscan</code></td></tr>
+        <tr><td>Process tree</td><td><code>windows.pstree</code></td></tr>
+        <tr><td>Network connections</td><td><code>windows.netscan</code></td></tr>
+        <tr><td>Injection detection</td><td><code>windows.malfind</code></td></tr>
+        <tr><td>Hash dump</td><td><code>windows.hashdump</code></td></tr>
+      </table>
+      <p class="desc" style="margin-top:8px;">Full reference: <code class="inline">volatility-autopsy-forensics-cheatsheet-professional.md</code></p>
+    </div>
+  </details>
+
+  <details class="card" data-search="deepblue cli wireshark detection" data-cat="Digital Forensics">
+    <summary><span><span class="tag blue">Blue</span><span class="tag cat">Digital Forensics</span>Fast Triage Tools</span></summary>
+    <div class="card-body">
+      <p class="desc">The fastest tools for a first-pass triage of Windows Event Logs and packet captures, before reaching for a deeper forensic workflow.</p>
+      <table class="ref">
+        <tr><td>DeepBlueCLI</td><td><code>.\DeepBlue.ps1 file.evtx</code> — automated Event Log hunting</td></tr>
+        <tr><td>Wireshark C2 tell</td><td>Regular time intervals to the same external host = beaconing</td></tr>
+        <tr><td>tshark</td><td><code>tshark -r file.pcap -Y "filter"</code> — CLI Wireshark for large captures</td></tr>
+      </table>
+      <p class="desc" style="margin-top:8px;">Full reference: <code class="inline">deepblue-cli-cheatsheet-professional.md</code>, <code class="inline">wireshark-advanced-cheatsheet.md</code></p>
+    </div>
+  </details>
+
+  <details class="card" data-search="cia triad confidentiality integrity availability defense in depth security controls" data-cat="Security Fundamentals">
+    <summary><span><span class="tag blue">Blue</span><span class="tag cat">Security Fundamentals</span>CIA Triad &amp; Defense in Depth</span></summary>
+    <div class="card-body">
+      <p class="desc">The foundational model behind every security decision downstream — what you're protecting (CIA) and why no single control is ever trusted alone (defense in depth).</p>
+      <table class="ref">
+        <tr><td>Confidentiality</td><td>Only authorized parties can read the data — broken by data leaks/breaches</td></tr>
+        <tr><td>Integrity</td><td>Data hasn't been altered without authorization — broken by tampering</td></tr>
+        <tr><td>Availability</td><td>Authorized parties can access data/systems when needed — broken by DoS/ransomware</td></tr>
+        <tr><td>Defense in Depth</td><td>Layer preventive, detective, and corrective controls so one failure isn't total compromise</td></tr>
+        <tr><td>Control types</td><td>Preventive (block it) → Detective (notice it) → Corrective (recover from it)</td></tr>
+      </table>
+      <p class="desc" style="margin-top:8px;">Baseline vocabulary underpinning the rest of the BTL1-oriented cards in this tab.</p>
+    </div>
+  </details>
+
+  <details class="card" data-search="siem splunk elk spl kql query search" data-cat="SIEM">
+    <summary><span><span class="tag blue">Blue</span><span class="tag cat">SIEM</span>SIEM Quick Query Reference</span></summary>
+    <div class="card-body">
+      <p class="desc">The handful of Splunk SPL / ELK query patterns used constantly when pivoting from an alert to the raw events behind it.</p>
+      <table class="ref">
+        <tr><td>Splunk — basic search</td><td><code>index=main sourcetype=winlog EventCode=4625</code></td></tr>
+        <tr><td>Splunk — count by field</td><td><code>... | stats count by src_ip</code></td></tr>
+        <tr><td>Splunk — time window</td><td><code>earliest=-24h latest=now</code></td></tr>
+        <tr><td>ELK/KQL — basic search</td><td><code>event.code:4625 and source.ip:*</code></td></tr>
+        <tr><td>ELK — field exists</td><td><code>_exists_:user.name</code></td></tr>
+      </table>
+      <p class="desc" style="margin-top:8px;">Full reference: <code class="inline">siem-splunk-elk-cheatsheet-professional.md</code></p>
+    </div>
+  </details>
+</section>
+
+<!-- ============ TOOL LINKS TAB ============ -->
+<section id="links" class="tab">
+  <div class="searchwrap"><input type="text" class="searchbox" id="linksSearch" placeholder="Filter tool links..."><button class="clearbtn" data-clears="linksSearch">×</button></div>
+  <div class="grid" id="linksGrid"></div>
+</section>
+
+</main>
+
+<footer>
+  Offline reference — no network calls, no accounts, no telemetry. Companion to the full eJPT/BTL1 cheat sheet collection. External links in the Tool Links tab open third-party sites and require an internet connection.
+</footer>
+
+<script>
+// ---------- Tab switching ----------
+document.querySelectorAll('.tabbtn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tabbtn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.add('active');
+  });
+});
+
+// ---------- Generic card search filter ----------
+function wireSearch(inputId, containerSelector){
+  const input = document.getElementById(inputId);
+  if(!input) return;
+  input.addEventListener('input', ()=>{
+    const q = input.value.toLowerCase().trim();
+    if(containerSelector){
+      document.querySelectorAll(containerSelector).forEach(card=>{
+        const hay = (card.dataset.search||'') + ' ' + card.textContent.toLowerCase();
+        card.classList.toggle('hidden', q && !hay.toLowerCase().includes(q));
+      });
+    }
+  });
+}
+wireSearch('calcSearch', '#calc > details.card');
+wireSearch('linksSearch', null); // linksSearch has its own re-render (renderLinks), just needs the clear-button wiring below
+
+// ---------- Category pills + search, combined (Red/Blue Team Cards tabs) ----------
+function wireCategorySection(sectionId, searchInputId, pillsWrapId){
+  const searchInput = document.getElementById(searchInputId);
+  const pillsWrap = document.getElementById(pillsWrapId);
+  const cards = document.querySelectorAll('#'+sectionId+' > details.card');
+
+  function apply(){
+    const q = (searchInput ? searchInput.value : '').toLowerCase().trim();
+    const activePill = pillsWrap ? pillsWrap.querySelector('.catpill.active') : null;
+    const cat = activePill ? activePill.dataset.cat : 'all';
+    cards.forEach(card=>{
+      const hay = ((card.dataset.search||'') + ' ' + card.textContent).toLowerCase();
+      const matchesSearch = !q || hay.includes(q);
+      const matchesCat = cat === 'all' || card.dataset.cat === cat;
+      card.classList.toggle('hidden', !(matchesSearch && matchesCat));
+    });
+  }
+
+  if(searchInput) searchInput.addEventListener('input', apply);
+  if(pillsWrap){
+    pillsWrap.querySelectorAll('.catpill').forEach(pill=>{
+      pill.addEventListener('click', ()=>{
+        pillsWrap.querySelectorAll('.catpill').forEach(p=>p.classList.remove('active'));
+        pill.classList.add('active');
+        apply();
+      });
+    });
+  }
+}
+wireCategorySection('red', 'redSearch', 'redCatPills');
+wireCategorySection('blue', 'blueSearch', 'blueCatPills');
+
+// ---------- Search clear (×) buttons ----------
+document.querySelectorAll('.clearbtn').forEach(btn=>{
+  const input = document.getElementById(btn.dataset.clears);
+  if(!input) return;
+  const sync = ()=> btn.style.display = input.value ? 'block' : 'none';
+  input.addEventListener('input', sync);
+  btn.addEventListener('click', ()=>{
+    input.value = '';
+    input.dispatchEvent(new Event('input'));
+    input.focus();
+  });
+  sync();
+});
+
+// ---------- Theme toggle (dark default, in-memory only — no storage APIs) ----------
+const SUN_PATH = '<circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>';
+const MOON_PATH = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>';
+document.getElementById('themeToggle').addEventListener('click', ()=>{
+  const root = document.documentElement;
+  const isLight = root.getAttribute('data-theme') === 'light';
+  root.setAttribute('data-theme', isLight ? 'dark' : 'light');
+  document.getElementById('themeIcon').innerHTML = isLight ? MOON_PATH : SUN_PATH;
+});
+
+// ---------- Stats count in header ----------
+function updateStats(){
+  const calcCount = document.querySelectorAll('#calc > details.card').length;
+  const redCount = document.querySelectorAll('#red > details.card').length;
+  const blueCount = document.querySelectorAll('#blue > details.card').length;
+  const linkCount = LINK_CATS.reduce((n,c)=>n+c.links.length,0);
+  const total = calcCount + redCount + blueCount + linkCount;
+  document.getElementById('statsText').textContent =
+    total + ' entries · ' + calcCount + ' calculators · ' + (redCount+blueCount) + ' ref cards · ' + linkCount + ' tool links';
+}
+
+// ---------- Copy helper ----------
+function copyOut(id){
+  const el = document.getElementById(id);
+  const text = el.textContent.replace('copy','').trim();
+  navigator.clipboard.writeText(text).catch(()=>{});
+}
+
+// ---------- Base64 ----------
+function b64Encode(){
+  const v = document.getElementById('b64in').value;
+  let out;
+  try{ out = btoa(unescape(encodeURIComponent(v))); }catch(e){ out = 'Error: '+e.message; }
+  setOut('b64out', out);
+}
+function b64Decode(){
+  const v = document.getElementById('b64in').value.trim();
+  let out;
+  try{ out = decodeURIComponent(escape(atob(v))); }catch(e){ out = 'Error: not valid Base64'; }
+  setOut('b64out', out);
+}
+function setOut(id, text){
+  document.getElementById(id).innerHTML = '<button class="copybtn" onclick="copyOut(\''+id+'\')">copy</button>' + escapeHtml(text);
+}
+function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ---------- Defang / Refang ----------
+function doDefang(){
+  let v = document.getElementById('defangIn').value;
+  v = v.replace(/http/gi, m=> m[0]==='H' ? 'HXXP' : 'hxxp')
+       .replace(/\./g, '[.]')
+       .replace(/@/g, '[@]');
+  setOut('defangOut', v);
+}
+function doRefang(){
+  let v = document.getElementById('defangIn').value;
+  v = v.replace(/hxxp/gi, m=> m[0]==='H' ? 'HTTP' : 'http')
+       .replace(/\[\.\]/g, '.')
+       .replace(/\[@\]/g, '@');
+  setOut('defangOut', v);
+}
+
+// ---------- Hash Identifier ----------
+function doIdentifyHash(){
+  const h = document.getElementById('hashIn').value.trim();
+  const results = [];
+  if(/^\$2[aby]?\$/.test(h)) results.push('bcrypt');
+  else if(/^\$6\$/.test(h)) results.push('sha512crypt (/etc/shadow) — hashcat -m 1800');
+  else if(/^\$5\$/.test(h)) results.push('sha256crypt (/etc/shadow) — hashcat -m 7400');
+  else if(/^\$1\$/.test(h)) results.push('md5crypt (/etc/shadow, legacy) — hashcat -m 500');
+  else if(/^\$krb5tgs\$/i.test(h)) results.push('Kerberoast (TGS-REP) — hashcat -m 13100');
+  else if(/^\$krb5asrep\$/i.test(h)) results.push('AS-REP Roast — hashcat -m 18200');
+  else if(/^[a-fA-F0-9]{32}:[a-fA-F0-9]{32}$/.test(h)) results.push('LM:NTLM pair');
+  else if(/^[a-fA-F0-9]+$/.test(h)){
+    const len = h.length;
+    const map = {32:'MD5 / NTLM / MD4 (32 hex — ambiguous, context decides)', 40:'SHA1 / MySQL5 (40 hex)', 56:'SHA224 (56 hex)', 64:'SHA256 / SHA3-256 (64 hex)', 96:'SHA384 (96 hex)', 128:'SHA512 / Whirlpool (128 hex)'};
+    if(map[len]) results.push(map[len]);
+    else results.push(len+' hex characters — not a standard round hash length, check for a salt or custom format');
+  }
+  if(results.length===0) results.push(h ? 'Unrecognized format — try `hashcat --identify` locally for a definitive match.' : 'Enter a hash above.');
+  document.getElementById('hashOut').innerHTML = results.map(r=>'• '+escapeHtml(r)).join('<br>');
+}
+
+// ---------- Hashcat/John Mode Table ----------
+const MODES = [
+  {type:'MD5', mode:'0', john:'raw-md5'},
+  {type:'SHA1', mode:'100', john:'raw-sha1'},
+  {type:'SHA256', mode:'1400', john:'raw-sha256'},
+  {type:'SHA512', mode:'1700', john:'raw-sha512'},
+  {type:'NTLM', mode:'1000', john:'nt'},
+  {type:'md5crypt (/etc/shadow, legacy)', mode:'500', john:'md5crypt'},
+  {type:'sha256crypt (/etc/shadow)', mode:'7400', john:'sha256crypt'},
+  {type:'sha512crypt (/etc/shadow)', mode:'1800', john:'sha512crypt'},
+  {type:'bcrypt', mode:'3200', john:'bcrypt'},
+  {type:'Kerberos 5 TGS-REP (Kerberoasting)', mode:'13100', john:'krb5tgs'},
+  {type:'Kerberos 5 AS-REP (AS-REP Roasting)', mode:'18200', john:'krb5asrep'},
+  {type:'WPA/WPA2', mode:'22000', john:'wpapsk'},
+];
+function renderModeTable(){
+  const q = (document.getElementById('modeSearch').value||'').toLowerCase();
+  const rows = MODES.filter(m=> !q || (m.type+m.mode+m.john).toLowerCase().includes(q));
+  document.getElementById('modeTable').innerHTML = rows.map(m=>
+    '<tr><td>'+m.type+'</td><td><code>-m '+m.mode+'</code></td><td><code>'+m.john+'</code></td></tr>'
+  ).join('') || '<tr><td colspan="3" style="color:var(--muted)">No matches</td></tr>';
+}
+renderModeTable();
+
+// ---------- Timestamp Converter ----------
+const FT_EPOCH_DIFF = 11644473600; // seconds between 1601-01-01 and 1970-01-01
+function convFromEpoch(){
+  const v = Number(document.getElementById('epochIn').value);
+  if(isNaN(v)){ setOut2('tsOut','Enter a valid epoch number.'); return; }
+  const d = new Date(v*1000);
+  const ft = (v + FT_EPOCH_DIFF) * 10000000;
+  setOut2('tsOut', 'UTC: '+d.toUTCString()+'\nISO: '+d.toISOString()+'\nWindows FILETIME (approx): '+ft.toString());
+}
+function convFromHuman(){
+  const v = document.getElementById('humanIn').value;
+  const d = new Date(v);
+  if(isNaN(d.getTime())){ setOut2('tsOut','Could not parse that date — try an ISO format like 2025-01-01T00:00:00Z.'); return; }
+  const epoch = Math.floor(d.getTime()/1000);
+  const ft = (epoch + FT_EPOCH_DIFF) * 10000000;
+  setOut2('tsOut', 'Epoch: '+epoch+'\nUTC: '+d.toUTCString()+'\nWindows FILETIME (approx): '+ft.toString());
+}
+function convFromFiletime(){
+  const v = Number(document.getElementById('filetimeIn').value);
+  if(isNaN(v)){ setOut2('tsOut','Enter a valid FILETIME number.'); return; }
+  const epoch = v/10000000 - FT_EPOCH_DIFF;
+  const d = new Date(epoch*1000);
+  setOut2('tsOut', 'Epoch: '+Math.floor(epoch)+'\nUTC: '+d.toUTCString());
+}
+function convNow(){
+  const now = new Date();
+  const epoch = Math.floor(now.getTime()/1000);
+  const ft = (epoch + FT_EPOCH_DIFF) * 10000000;
+  setOut2('tsOut', 'Epoch: '+epoch+'\nUTC: '+now.toUTCString()+'\nWindows FILETIME (approx): '+ft.toString());
+}
+function setOut2(id, text){ document.getElementById(id).textContent = text; }
+
+// ---------- Subnet Calculator ----------
+function ipToInt(ip){ const p=ip.split('.').map(Number); return ((p[0]<<24)|(p[1]<<16)|(p[2]<<8)|p[3])>>>0; }
+function intToIp(i){ return [(i>>>24)&255,(i>>>16)&255,(i>>>8)&255,i&255].join('.'); }
+function doSubnet(){
+  const v = document.getElementById('cidrIn').value.trim();
+  const parts = v.split('/');
+  if(parts.length!==2 || !/^\d{1,3}(\.\d{1,3}){3}$/.test(parts[0])){
+    setOut2('subnetOut','Enter in the form 192.168.1.0/24'); return;
+  }
+  const ip = parts[0]; const prefix = parseInt(parts[1]);
+  if(isNaN(prefix) || prefix<0 || prefix>32){ setOut2('subnetOut','Prefix must be 0-32.'); return; }
+  const ipInt = ipToInt(ip);
+  const mask = prefix===0 ? 0 : (0xFFFFFFFF << (32-prefix))>>>0;
+  const network = (ipInt & mask)>>>0;
+  const broadcast = (network | (~mask>>>0))>>>0;
+  const total = Math.pow(2,32-prefix);
+  let firstHost, lastHost, usable;
+  if(prefix>=31){ firstHost=intToIp(network); lastHost=intToIp(broadcast); usable=total; }
+  else { firstHost=intToIp(network+1); lastHost=intToIp(broadcast-1); usable=total-2; }
+  setOut2('subnetOut',
+    'Network:    '+intToIp(network)+'\n'+
+    'Broadcast:  '+intToIp(broadcast)+'\n'+
+    'Netmask:    '+intToIp(mask)+'\n'+
+    'Host range: '+firstHost+' - '+lastHost+'\n'+
+    'Usable hosts: '+usable
+  );
+}
+
+// ---------- Port Table ----------
+const PORTS = [
+  [21,'TCP','FTP'],[22,'TCP','SSH'],[23,'TCP','Telnet'],[25,'TCP','SMTP'],
+  [53,'TCP/UDP','DNS'],[80,'TCP','HTTP'],[88,'TCP/UDP','Kerberos'],
+  [110,'TCP','POP3'],[111,'TCP/UDP','RPCbind'],[135,'TCP','MSRPC'],
+  [139,'TCP','NetBIOS Session'],[143,'TCP','IMAP'],[161,'UDP','SNMP'],
+  [389,'TCP/UDP','LDAP'],[443,'TCP','HTTPS'],[445,'TCP','SMB'],
+  [464,'TCP/UDP','Kerberos password change'],[512,'TCP','rexec'],
+  [513,'TCP','rlogin'],[514,'TCP/UDP','rsh / syslog'],
+  [636,'TCP','LDAPS'],[1433,'TCP','MSSQL'],[1521,'TCP','Oracle DB'],
+  [2049,'TCP/UDP','NFS'],[3268,'TCP','Global Catalog (AD)'],
+  [3306,'TCP','MySQL'],[3389,'TCP','RDP'],[5432,'TCP','PostgreSQL'],
+  [5900,'TCP','VNC'],[5985,'TCP','WinRM (HTTP)'],[5986,'TCP','WinRM (HTTPS)'],
+  [6379,'TCP','Redis'],[8080,'TCP','HTTP-alt / proxy'],[8443,'TCP','HTTPS-alt'],
+  [9200,'TCP','Elasticsearch'],[27017,'TCP','MongoDB']
+];
+function renderPortTable(){
+  const q = (document.getElementById('portSearch').value||'').toLowerCase();
+  const rows = PORTS.filter(p=> !q || (p[0]+p[1]+p[2]).toLowerCase().includes(q));
+  document.getElementById('portTable').innerHTML = rows.map(p=>
+    '<tr><td>'+p[0]+'</td><td>'+p[1]+'</td><td>'+p[2]+'</td></tr>'
+  ).join('') || '<tr><td colspan="3" style="color:var(--muted)">No matches</td></tr>';
+}
+renderPortTable();
+
+// ---------- HTTP Status Table ----------
+const HTTP_CODES = [
+  [200,'OK','Request succeeded'],[204,'No Content','Success, empty body'],
+  [301,'Moved Permanently','Follow the redirect'],[302,'Found','Temporary redirect'],
+  [400,'Bad Request','Malformed request'],[401,'Unauthorized','Auth required'],
+  [403,'Forbidden','Found but blocked — worth probing further'],
+  [404,'Not Found','Watch for soft-404s serving 200 instead'],
+  [405,'Method Not Allowed','Try a different HTTP verb'],
+  [500,'Internal Server Error','Often a good injection/fuzzing signal'],
+  [502,'Bad Gateway','Upstream/proxy issue'],[503,'Service Unavailable','Overloaded or maintenance']
+];
+function renderHttpTable(){
+  const q = (document.getElementById('httpSearch').value||'').toLowerCase();
+  const rows = HTTP_CODES.filter(c=> !q || (c[0]+c[1]+c[2]).toLowerCase().includes(q));
+  document.getElementById('httpTable').innerHTML = rows.map(c=>
+    '<tr><td>'+c[0]+'</td><td>'+c[1]+'</td><td>'+c[2]+'</td></tr>'
+  ).join('') || '<tr><td colspan="3" style="color:var(--muted)">No matches</td></tr>';
+}
+renderHttpTable();
+
+// ---------- Base Converter ----------
+function doBaseConvert(){
+  let v = document.getElementById('baseIn').value.trim();
+  const from = parseInt(document.getElementById('baseFrom').value);
+  v = v.replace(/^0x/i,'');
+  const dec = parseInt(v, from);
+  if(isNaN(dec)){ setOut2('baseOut','Could not parse that value in the selected base.'); return; }
+  const ascii = (dec>=32 && dec<=126) ? String.fromCharCode(dec) : '(non-printable)';
+  setOut2('baseOut', 'Decimal: '+dec+'\nHex: 0x'+dec.toString(16)+'\nOctal: '+dec.toString(8)+'\nBinary: '+dec.toString(2)+'\nASCII: '+ascii);
+}
+
+// ---------- ROT13 / ROT47 ----------
+function doRot13(){
+  const v = document.getElementById('rotIn').value;
+  const out = v.replace(/[a-zA-Z]/g, c=>{
+    const base = c <= 'Z' ? 65 : 97;
+    return String.fromCharCode((c.charCodeAt(0) - base + 13) % 26 + base);
+  });
+  setOut('rotOut', out);
+}
+function doRot47(){
+  const v = document.getElementById('rotIn').value;
+  const out = v.replace(/[!-~]/g, c=> String.fromCharCode(33 + ((c.charCodeAt(0) + 14) % 94)));
+  setOut('rotOut', out);
+}
+
+// ---------- Event ID Table ----------
+const EIDS = [
+  [4624,'Successful logon'],[4625,'Failed logon — brute-force/spray foundation'],
+  [4634,'Logoff'],[4648,'Explicit-credential logon — possible lateral movement'],
+  [4720,'New user account created'],[4728,'User added to a global security group'],
+  [4732,'User added to a local group (e.g. Administrators) — privesc indicator'],
+  [4740,'Account locked out'],
+  [4688,'New process created (command-line logging shows the full command)'],
+  [4663,'Object access attempt (file/registry)'],
+  [4662,'Directory service object access — DCSync indicator'],
+  [5140,'Network share accessed'],
+  [4768,'Kerberos TGT request'],[4769,'Kerberos TGS request — Kerberoasting foundation'],
+  [4771,'Kerberos pre-auth failed — AS-REP Roasting indicator'],
+  [4104,'PowerShell Script Block Logging — full deobfuscated code executed'],
+  [7045,'New service installed'],
+  ['Sysmon 1','Process creation with full command line'],
+  ['Sysmon 3','Network connection'],
+  ['Sysmon 8','CreateRemoteThread — process injection indicator'],
+  ['Sysmon 10','Process access (e.g. lsass.exe — credential dumping)'],
+  ['Sysmon 11','File created'],['Sysmon 22','DNS query'],
+  ['Logon Type 2','Interactive — physical console'],
+  ['Logon Type 3','Network — SMB, commonly seen with pass-the-hash'],
+  ['Logon Type 10','RemoteInteractive — RDP']
+];
+function renderEidTable(){
+  const q = (document.getElementById('eidSearch').value||'').toLowerCase();
+  const rows = EIDS.filter(e=> !q || (e[0]+' '+e[1]).toLowerCase().includes(q));
+  document.getElementById('eidTable').innerHTML = rows.map(e=>
+    '<tr><td>'+e[0]+'</td><td>'+e[1]+'</td></tr>'
+  ).join('') || '<tr><td colspan="2" style="color:var(--muted)">No matches</td></tr>';
+}
+renderEidTable();
+
+// ---------- Cron Parser ----------
+function doCron(){
+  const v = document.getElementById('cronIn').value.trim();
+  const fields = v.split(/\s+/);
+  if(fields.length!==5){ setOut2('cronOut','Enter a standard 5-field cron expression: minute hour day-of-month month day-of-week'); return; }
+  const labels = ['Minute (0-59)','Hour (0-23)','Day of month (1-31)','Month (1-12)','Day of week (0-6, Sun=0)'];
+  const desc = f=>{
+    if(f==='*') return 'every value';
+    if(f.startsWith('*/')) return 'every '+f.slice(2)+' units';
+    if(f.includes(',')) return 'at: '+f;
+    if(f.includes('-')) return 'range: '+f;
+    return 'exactly '+f;
+  };
+  let out = '';
+  fields.forEach((f,i)=>{ out += labels[i]+': '+f+'  →  '+desc(f)+'\n'; });
+  setOut2('cronOut', out.trim());
+}
+
+// ---------- Tool Links ----------
+const LINK_CATS = [
+  {title:'Red Team — Recon & Infrastructure', kind:'red', links:[
+    ['Shodan','https://www.shodan.io/','Internet-connected device search engine'],
+    ['Censys','https://censys.com/','Internet-wide asset search, cert data'],
+    ['crt.sh','https://crt.sh/','Certificate Transparency subdomain discovery'],
+    ['IPinfo','https://ipinfo.io/','IP geolocation, ASN, hosting provider'],
+    ['DomainTools WHOIS','https://whois.domaintools.com/','Deep WHOIS / registration history'],
+    ['MXToolbox','https://mxtoolbox.com/','MX/SPF/DKIM/DMARC lookup, blacklist check'],
+    ['DNSDumpster','https://dnsdumpster.com/','Passive DNS recon, subdomain mapping'],
+    ['Have I Been Pwned','https://haveibeenpwned.com/','Check breach exposure for an email']
+  ]},
+  {title:'Blue Team — File / Hash / Sandbox', kind:'blue', links:[
+    ['VirusTotal','https://www.virustotal.com/','Multi-AV file/hash/URL/IP verdict'],
+    ['Any.Run','https://any.run/','Interactive malware sandbox'],
+    ['Hybrid Analysis','https://www.hybrid-analysis.com/','Free automated sandbox report'],
+    ['Joe Sandbox','https://www.joesandbox.com/','Deep behavioral sandbox reports'],
+    ['MetaDefender Cloud','https://metadefender.com/','Multi-engine file/URL/IP scan'],
+    ['Intezer Analyze','https://analyze.intezer.com/','Code-reuse malware family attribution']
+  ]},
+  {title:'Blue Team — IP / URL / Threat Intel', kind:'blue', links:[
+    ['AbuseIPDB','https://www.abuseipdb.com/','Community-reported IP abuse database'],
+    ['GreyNoise','https://www.greynoise.io/','Internet noise vs. targeted-attacker IPs'],
+    ['Talos Intelligence','https://talosintelligence.com/','IP/domain/file reputation (Cisco)'],
+    ['IPVoid','https://www.ipvoid.com/','Aggregated IP blacklist check'],
+    ['urlscan.io','https://urlscan.io/','Sandboxed URL scan + screenshot'],
+    ['AlienVault OTX','https://otx.alienvault.com/','Open Threat Exchange IOC pulses'],
+    ['ThreatMiner','https://www.threatminer.org/','Threat intel data mining / pivoting'],
+    ['Pulsedive','https://pulsedive.com/','Free threat intel search engine']
+  ]},
+  {title:'Reference & Frameworks', kind:'violet', links:[
+    ['MITRE ATT&CK Navigator','https://attack.mitre.org/resources/navigator/','Build a technique coverage heat map'],
+    ['GTFOBins','https://gtfobins.github.io/','Linux SUID/sudo privesc lookup by binary'],
+    ['LOLBAS','https://lolbas-project.github.io/','Windows living-off-the-land binary lookup'],
+    ['Exploit-DB / GHDB','https://www.exploit-db.com/google-hacking-database','Google Hacking Database dork collection']
+  ]}
+];
+function renderLinks(){
+  const q = (document.getElementById('linksSearch').value||'').toLowerCase();
+  const grid = document.getElementById('linksGrid');
+  grid.innerHTML = LINK_CATS.map(cat=>{
+    const items = cat.links.filter(l=> !q || (l[0]+l[2]).toLowerCase().includes(q));
+    if(items.length===0) return '';
+    return '<div class="linkcat"><h3 class="kind-'+cat.kind+'">'+cat.title+'</h3><ul>'+
+      items.map(l=>'<li><a href="'+l[1]+'" target="_blank" rel="noopener">'+l[0]+'</a><span class="why">'+l[2]+'</span></li>').join('')+
+    '</ul></div>';
+  }).join('') || '<p style="color:var(--muted)">No matches.</p>';
+}
+document.getElementById('linksSearch').addEventListener('input', renderLinks);
+renderLinks();
+updateStats();
+</script>
+
+</body>
+</html>
