@@ -1,0 +1,52 @@
+<!--
+  Sample Sysmon configuration (simplified).
+  This is a minimal starting config for capturing process creation, network
+  connection, and DNS query events in the lab environment.
+
+  Install with:
+    sysmon64.exe -accepteula -i sysmonconfig-sample.xml
+
+  Note: for production environments, consider a more comprehensive,
+  community-maintained config (e.g. SwiftOnSecurity/sysmon-config).
+  This file is intended purely as a lab/educational starting point.
+-->
+<Sysmon schemaversion="4.90">
+  <EventFiltering>
+
+    <!-- Event ID 1: Process Creation -->
+    <RuleGroup name="" groupRelation="or">
+      <ProcessCreate onmatch="include">
+        <Image condition="end with">powershell.exe</Image>
+        <Image condition="end with">cmd.exe</Image>
+        <Image condition="end with">mshta.exe</Image>
+        <Image condition="end with">wscript.exe</Image>
+        <Image condition="end with">cscript.exe</Image>
+      </ProcessCreate>
+    </RuleGroup>
+
+    <!-- Event ID 3: Network Connection -->
+    <RuleGroup name="" groupRelation="or">
+      <NetworkConnect onmatch="include">
+        <Image condition="end with">powershell.exe</Image>
+        <Image condition="end with">cmd.exe</Image>
+      </NetworkConnect>
+    </RuleGroup>
+
+    <!-- Event ID 11: File Create (to track downloaded files) -->
+    <RuleGroup name="" groupRelation="or">
+      <FileCreate onmatch="include">
+        <TargetFilename condition="end with">.exe</TargetFilename>
+        <TargetFilename condition="end with">.ps1</TargetFilename>
+        <TargetFilename condition="end with">.bat</TargetFilename>
+      </FileCreate>
+    </RuleGroup>
+
+    <!-- Event ID 22: DNS Query -->
+    <RuleGroup name="" groupRelation="or">
+      <DnsQuery onmatch="exclude">
+        <QueryName condition="end with">.microsoft.com</QueryName>
+      </DnsQuery>
+    </RuleGroup>
+
+  </EventFiltering>
+</Sysmon>
