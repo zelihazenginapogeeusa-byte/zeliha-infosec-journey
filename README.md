@@ -1,23 +1,66 @@
-# Purple Team Mapping
+<p align="center">
+  <img src="banner.png" alt="Zeliha's InfoSec Journey — Red / Blue Cybersecurity Learning Hub" width="100%">
+</p>
 
-Most portfolios show either offensive work or defensive work. This folder exists to show both sides of the same coin: for a given attack technique, what does it look like from the **Red Team's** keyboard, and what does it look like from the **Blue Team's** SIEM — for the same ten minutes of activity.
+<p align="center">
+  <a href="https://github.com/zelihazenginapogeeusa-byte/zeliha-infosec-journey/stargazers"><img src="https://img.shields.io/github/stars/zelihazenginapogeeusa-byte/zeliha-infosec-journey?style=flat-square&color=f85149&label=Stars" alt="Stars"></a>
+  <a href="https://github.com/zelihazenginapogeeusa-byte/zeliha-infosec-journey/network/members"><img src="https://img.shields.io/github/forks/zelihazenginapogeeusa-byte/zeliha-infosec-journey?style=flat-square&color=4a9eff&label=Forks" alt="Forks"></a>
+  <a href="https://github.com/zelihazenginapogeeusa-byte/zeliha-infosec-journey/watchers"><img src="https://img.shields.io/github/watchers/zelihazenginapogeeusa-byte/zeliha-infosec-journey?style=flat-square&color=a78bfa&label=Watching" alt="Watchers"></a>
+  <a href="https://github.com/zelihazenginapogeeusa-byte/zeliha-infosec-journey/commits/cybersecurity-learning-hub"><img src="https://img.shields.io/github/last-commit/zelihazenginapogeeusa-byte/zeliha-infosec-journey?style=flat-square&color=8891a3&label=Last%20Commit" alt="Last Commit"></a>
+  <img src="https://img.shields.io/github/repo-size/zelihazenginapogeeusa-byte/zeliha-infosec-journey?style=flat-square&color=4ade80&label=Repo%20Size" alt="Repo Size">
+</p>
 
-That's the actual job of a purple team exercise: attackers and defenders comparing notes on the same technique so each side gets sharper. You don't need a title with "purple" in it to think this way — it's just what happens when you've spent time on both `Red-Team/` and `Blue-Team/` in the same repo.
+<p align="center">
+  <b>A personal, continuously-updated cybersecurity study repo</b><br>
+  Offensive-side notes for <b>eJPT</b> and defensive-side notes for <b>BTL1</b> — cheat sheets, an offline field toolkit, and a study roadmap.
+</p>
 
-## What's Here
+<p align="center">
+  <sub>Senior SOC Analyst &amp; Facilitator — expanding into offensive security through eJPT &amp; BTL1.</sub>
+</p>
 
-[`attack-detection-map.md`](./attack-detection-map.md) walks through ten techniques spanning the attack lifecycle — from initial reconnaissance to exfiltration. Each one is broken into three parts:
+<p align="center">
+  <a href="https://zelihazenginapogeeusa-byte.github.io/zeliha-infosec-journey/field-toolkit_2.html"><b>🧰 Open the Field Toolkit (live)</b></a> ·
+  <a href="ejpt-roadmap.md"><b>📄 Study Roadmap</b></a>
+</p>
 
-- **Red Team** — how the technique is actually executed: the tools, the commands, what the attacker is trying to accomplish and why this technique instead of another.
-- **Blue Team** — which log source captures it, the detection logic (SPL-style queries, Sysmon event IDs), and the specific indicators that separate this technique from normal activity.
-- **Analyst Response** — what an L1 SOC analyst should actually *do* the moment this alert fires: what to check first, what would make it a false positive, and when it's a "close the ticket" versus an "escalate to L2" situation.
+<p align="center">
+  <a href="https://www.linkedin.com/in/zeliha-zengin/"><img src="https://img.shields.io/badge/LinkedIn-0A66C2?style=flat-square&logo=linkedin&logoColor=white" alt="LinkedIn"></a>
+  <a href="https://medium.com/@zeliharich"><img src="https://img.shields.io/badge/Medium-12100E?style=flat-square&logo=medium&logoColor=white" alt="Medium"></a>
+</p>
 
-## Why This Exists
+---
 
-Interviewers on both sides of the table ask a version of the same question: *"walk me through what this looks like end to end."* A red-teamer who can describe the blue-team signature their technique leaves behind shows real operational maturity, not just tool proficiency. A blue-teamer who understands why an attacker chose a technique — not just which log field lights up — triages faster and with better judgment.
+## 📖 What's in here
 
-This document is meant to be read either direction: start from the attack and work down to the detection, or start from an alert and work back to what an attacker was actually doing.
+This repo collects everything gathered while studying for the **eJPT** (eLearnSecurity Junior Penetration Tester) and **BTL1** (Blue Team Level 1) certifications: practical, command-heavy cheat sheets — not theory dumps — each covering one tool or one concept, cross-referenced against its siblings.
 
-## A Note on Scope and Ethics
+|  | Folder | Focus |
+|---|---|---|
+| 🔴 | [`Red-Team/`](Red-Team/) | Recon, enumeration, exploitation, post-exploitation, reporting — eJPT-aligned |
+| 🔵 | [`Blue-Team/`](Blue-Team/) | Detection, triage, forensics, incident response — BTL1-aligned |
+| 🟣 | [`Purple-Team-Mapping/`](./Purple-Team-Mapping) | Attack ↔ detection cross-reference — ties Red-Team techniques to Blue-Team detections across ten kill-chain stages |
+| 🎯 | [`Interview-Prep/`](./Interview-Prep) | Interview Q&A — fundamentals, red team, blue team, behavioral, junior pentest — in flashcard format, plus an interactive study app |
+| 🧰 | [`field-toolkit_2.html`](https://zelihazenginapogeeusa-byte.github.io/zeliha-infosec-journey/field-toolkit_2.html) | Offline, single-file interactive reference — calculators + quick-lookup cards, no install needed (link opens the live version) |
+| 🗺️ | [`ejpt-roadmap.md`](ejpt-roadmap.md) | Study roadmap / progress tracker |
+| 📋 | [`playbook-index.md`](playbook-index.md) | Quick-access index of every scenario playbook — "which alert just fired, which playbook do I open" |
 
-Every technique below is described for educational and detection-engineering purposes. The commands and detection logic here mirror what's already documented in [`Blue-Team/soc-analyst-l1-home-lab/`](../Blue-Team/soc-analyst-l1-home-lab) and [`Red-Team/`](../Red-Team) — all of it built and tested against systems I own, inside an isolated lab network. None of this is a substitute for authorization: run these techniques only against systems you own or have explicit, documented permission to test.
+Both folders are organized into numbered sub-folders that roughly follow the order you'd actually work through them — recon before exploitation on the Red-Team side, alert-triage before deep forensics on the Blue-Team side. See each folder's own `README.md` for the full file index.
+
+---
+
+## 🧰 Try the field toolkit
+
+`field-toolkit_2.html` is a single, self-contained file — calculators (Base64, hash identifier, subnet/CIDR, Hydra command builder, reverse shell generator, and more) plus quick-reference cards for both red and blue team work, filterable by category. No server, no dependencies, no accounts, works fully offline.
+
+<p align="center">
+  <img src="toolkit-preview.png" alt="Field toolkit preview — calculators tab" width="85%">
+</p>
+
+**View it live** — GitHub Pages is already enabled on this repo's default branch (`cybersecurity-learning-hub`), so it's reachable right now at:
+
+
+
+
+
+
