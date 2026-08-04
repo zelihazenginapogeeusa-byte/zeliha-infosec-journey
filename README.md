@@ -39,6 +39,8 @@ This repo collects everything gathered while studying for the **eJPT** (eLearnSe
 |---|---|---|
 | 🔴 | [`Red-Team/`](Red-Team/) | Recon, enumeration, exploitation, post-exploitation, reporting — eJPT-aligned |
 | 🔵 | [`Blue-Team/`](Blue-Team/) | Detection, triage, forensics, incident response — BTL1-aligned |
+| 🟣 | [`Purple-Team-Mapping/`](./Purple-Team-Mapping) | Attack ↔ detection cross-reference — ties Red-Team techniques to Blue-Team detections across ten kill-chain stages |
+| 🎯 | [`Interview-Prep/`](./Interview-Prep) | Interview Q&A — fundamentals, red team, blue team, behavioral, junior pentest — in flashcard format, plus an interactive study app |
 | 🧰 | [`field-toolkit_2.html`](https://zelihazenginapogeeusa-byte.github.io/zeliha-infosec-journey/field-toolkit_2.html) | Offline, single-file interactive reference — calculators + quick-lookup cards, no install needed (link opens the live version) |
 | 🗺️ | [`ejpt-roadmap.md`](ejpt-roadmap.md) | Study roadmap / progress tracker |
 | 📋 | [`playbook-index.md`](playbook-index.md) | Quick-access index of every scenario playbook — "which alert just fired, which playbook do I open" |
