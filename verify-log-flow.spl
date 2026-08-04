@@ -1,0 +1,34 @@
+-- verify-log-flow.spl
+-- Verification queries to run inside Splunk Search & Reporting.
+-- This file isn't "imported" directly into Splunk — copy each query
+-- into the Search bar one at a time and run it.
+
+-- 1) Confirm Windows Event Logs are arriving
+index=windows
+
+-- 2) Confirm failed login attempts (Event ID 4625)
+index=windows EventCode=4625
+
+-- 3) Confirm Sysmon logs are arriving
+index=sysmon
+
+-- 4) Confirm a specific host is sending logs
+host=WIN10
+
+-- 5) Find the most active source IPs (for brute-force detection)
+index=windows EventCode=4625
+| stats count by src_ip, user
+| where count > 5
+| sort -count
+
+-- 6) List PowerShell executions (for phishing / PS abuse detection)
+index=sysmon EventID=1 Image="*powershell.exe"
+| table _time, host, User, CommandLine
+
+-- 7) Show a suspicious process tree (parent/child relationship)
+index=sysmon EventID=1 ParentImage="*cmd.exe" Image="*powershell.exe"
+| table _time, host, ParentImage, Image, CommandLine
+
+-- 8) Get a total alert / event summary
+index=windows OR index=sysmon
+| stats count by index, sourcetype
