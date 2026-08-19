@@ -43,6 +43,7 @@ This repo collects everything gathered while studying for the **eJPT** (eLearnSe
 | 🎯 | [`Interview-Prep/`](./Interview-Prep) | Interview Q&A — fundamentals, red team, blue team, behavioral, junior pentest — in flashcard format, plus an interactive study app |
 | 🧰 | [`field-toolkit_2.html`](https://zelihazenginapogeeusa-byte.github.io/zeliha-infosec-journey/field-toolkit_2.html) | Offline, single-file interactive reference — calculators + quick-lookup cards, no install needed (link opens the live version) |
 | 📘 | [`blue-team-study-notes_1.html`](https://zelihazenginapogeeusa-byte.github.io/zeliha-infosec-journey/Blue-Team/blue-team-study-notes_1.html) | Interactive BTL1 study reference — curriculum prioritized by importance, click-to-expand notes with real commands/workflows (Splunk SPL, Wireshark filters, Volatility, DeepBlueCLI, Autopsy, TheHive, report template) |
+| ⏱️ | [btl1-exam-tracker.html](https://htmlpreview.github.io/?https://github.com/zelihazenginapogeeusa-byte/zeliha-infosec-journey/blob/cybersecurity-learning-hub/Blue-Team/btl1-exam-tracker.html) | Interactive BTL1 exam companion — 24h timer + pacing, IOC table, timeline, host/network activity map (Wireshark-ready), MITRE ATT&CK checklist, confidence tracking, and auto-generated report draft (link opens the live version) |
 | 🗺️ | [`ejpt-roadmap.md`](ejpt-roadmap.md) | Study roadmap / progress tracker |
 | 📋 | [`playbook-index.md`](playbook-index.md) | Quick-access index of every scenario playbook — "which alert just fired, which playbook do I open" |
 
