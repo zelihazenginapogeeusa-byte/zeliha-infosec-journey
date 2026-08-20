@@ -1,4 +1,10 @@
 # Red Team Cheat Sheets
+## 🧰 Interactive Tools (open live, don't click the raw file)
+
+| Tool | Live Preview |
+|---|---|
+| ejpt-study-notes.html | [Open live ↗](https://htmlpreview.github.io/?https://github.com/zelihazenginapogeeusa-byte/zeliha-infosec-journey/blob/cybersecurity-learning-hub/Red-Team/ejpt-study-notes.html) |
+| ejpt-study-reference.html | [Open live ↗](https://htmlpreview.github.io/?https://github.com/zelihazenginapogeeusa-byte/zeliha-infosec-journey/blob/cybersecurity-learning-hub/Red-Team/ejpt-study-reference.html) |
 
 Offensive-side reference material, prepared primarily around the **eJPT** (eLearnSecurity Junior Penetration Tester) exam objectives — recon, enumeration, exploitation, post-exploitation, and reporting. Organized by phase, matching the Penetration Testing Lifecycle.
 
