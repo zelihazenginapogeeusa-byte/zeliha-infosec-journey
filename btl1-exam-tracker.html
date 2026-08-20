@@ -1,0 +1,1446 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BTL1 Exam Tracker</title>
+<style>
+  :root{
+    --bg:#121417; --panel:#1a1d23; --panel2:#0b0d10; --border:#2a2e37;
+    --text:#e6e8ec; --muted:#8891a1;
+    --crit:#fff176; --crit-text:#3a2f00;
+    --imp:#7fd8d0; --imp-text:#04302c;
+    --danger:#e5484d;
+  }
+  html[data-theme="light"]{
+    --bg:#f4f5f7; --panel:#ffffff; --panel2:#eef0f3; --border:#dde1e6;
+    --text:#1a1d23; --muted:#5a6270;
+    --crit:#fff176; --crit-text:#3a2f00;
+    --imp:#0f8f83; --imp-text:#ffffff;
+    --danger:#d92d3a;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; line-height:1.5;}
+  .wrap{max-width:1080px; margin:0 auto; padding:20px 18px 80px;}
+
+  header{position:sticky; top:0; z-index:20; background:var(--bg); padding:14px 0 12px; border-bottom:1px solid var(--border); margin-bottom:20px;}
+  .headrow{display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;}
+  .brand{display:flex; align-items:center; gap:10px;}
+  .brand h1{font-size:17px; margin:0; letter-spacing:.02em;}
+  .saved{font-size:11px; color:var(--imp); display:flex; align-items:center; gap:4px; opacity:0; transition:opacity .3s;}
+  .saved.show{opacity:1;}
+  .toolbar{display:flex; gap:8px; flex-wrap:wrap;}
+  button{
+    font:inherit; font-size:12.5px; font-weight:600; letter-spacing:.02em; cursor:pointer;
+    background:var(--panel); color:var(--text); border:1px solid var(--border); border-radius:7px;
+    padding:7px 12px; transition:background .15s, border-color .15s;
+  }
+  button:hover{border-color:var(--imp);}
+  button.primary{background:var(--imp); color:var(--imp-text); border-color:var(--imp);}
+  button.danger{color:var(--danger); border-color:var(--danger);}
+  button.danger:hover{background:var(--danger); color:#fff;}
+  button.icon{padding:7px 9px;}
+  input[type=file]{display:none;}
+
+  .timerbar{display:flex; align-items:center; gap:16px; flex-wrap:wrap; margin-top:12px; font-size:13px;}
+  .timerbar .stat{background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:8px 14px;}
+  .timerbar .stat b{display:block; font-size:18px; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;}
+  .timerbar .stat.warn b{color:var(--crit);}
+  .timerbar .stat.over b{color:var(--danger);}
+  .timerbar .stat.critical b{color:var(--danger); animation:pulseWarn 1.4s ease-in-out infinite;}
+  @keyframes pulseWarn{0%,100%{opacity:1;}50%{opacity:.5;}}
+  .timerbar input[type=number]{width:60px; background:var(--panel2); border:1px solid var(--border); color:var(--text); border-radius:6px; padding:5px 7px; font:inherit;}
+
+  .coveragebar{margin-top:10px; display:flex; align-items:center; gap:10px; font-size:11.5px; color:var(--muted); flex-wrap:wrap;}
+  .cov-track{flex:1; height:6px; background:var(--panel2); border:1px solid var(--border); border-radius:4px; overflow:hidden; min-width:120px; max-width:260px;}
+  .cov-fill{height:100%; background:var(--imp); width:0%; transition:width .25s ease;}
+
+  .undo-toast{position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:9px 10px 9px 16px; display:flex; align-items:center; gap:12px; box-shadow:0 6px 20px rgba(0,0,0,.35); z-index:50; font-size:13px;}
+
+  h2.section{font-size:15px; margin:32px 0 4px; padding-bottom:8px; border-bottom:2px solid var(--border); color:var(--text); display:flex; align-items:center; justify-content:space-between;}
+  .section-sub{color:var(--muted); font-size:12.5px; margin:0 0 12px;}
+
+  .card{background:var(--panel); border:1px solid var(--border); border-radius:10px; overflow:hidden;}
+
+  /* Questions */
+  .qrow{display:flex; align-items:flex-start; gap:10px; padding:10px 14px; border-bottom:1px solid var(--border);}
+  .qrow:last-child{border-bottom:none;}
+  .qrow input[type=checkbox]{margin-top:4px; width:16px; height:16px; accent-color:var(--imp); flex-shrink:0; cursor:pointer;}
+  .qrow .qlabel{width:130px; flex-shrink:0; font-weight:600; font-size:13px; background:transparent; border:none; color:var(--text); font:inherit;}
+  .qrow .qconf{flex-shrink:0; width:96px; background:var(--panel2); border:1px solid var(--border); border-radius:6px; padding:5px 6px; color:var(--text); font:inherit; font-size:11.5px;}
+  .qrow .qconf.conf-low{border-color:var(--danger); color:var(--danger);}
+  .qrow .qconf.conf-medium{border-color:var(--crit); color:var(--crit);}
+  .qrow .qconf.conf-high{border-color:var(--imp); color:var(--imp);}
+  .qrow .qnote{flex:1; background:var(--panel2); border:1px solid var(--border); border-radius:6px; padding:6px 9px; color:var(--text); font:inherit; font-size:13px; resize:vertical; min-height:34px;}
+  .qrow.done{opacity:.55;}
+  .qrow.done .qlabel{text-decoration:line-through;}
+  .qrow .del{flex-shrink:0;}
+
+  /* Tables */
+  table.dyn{width:100%; border-collapse:collapse; font-size:12.5px;}
+  table.dyn th{background:var(--panel2); color:var(--muted); text-align:left; padding:8px 10px; font-weight:600; border-bottom:1px solid var(--border);}
+  table.dyn td{padding:4px 6px; border-bottom:1px solid var(--border); vertical-align:top;}
+  table.dyn tr:last-child td{border-bottom:none;}
+  table.dyn input, table.dyn textarea{
+    width:100%; background:transparent; border:1px solid transparent; border-radius:5px; padding:5px 6px;
+    color:var(--text); font:inherit; font-size:12.5px; resize:vertical;
+  }
+  table.dyn input:hover, table.dyn textarea:hover, table.dyn input:focus, table.dyn textarea:focus{
+    background:var(--panel2); border-color:var(--border); outline:none;
+  }
+  .tbl-actions{padding:10px 14px; display:flex; justify-content:flex-end;}
+  .del-row{background:none; border:none; color:var(--muted); cursor:pointer; font-size:14px; padding:4px 6px;}
+  .del-row:hover{color:var(--danger);}
+
+  table.dyn select{
+    width:100%; background:transparent; border:1px solid transparent; border-radius:5px; padding:5px 4px;
+    color:var(--text); font:inherit; font-size:12.5px;
+  }
+  table.dyn select:hover, table.dyn select:focus{ background:var(--panel2); border-color:var(--border); outline:none; }
+  .flag-dot{display:block; width:11px; height:11px; border-radius:50%; margin:0 auto; background:var(--border); transition:background .15s;}
+  .flag-dot.high{background:var(--danger);}
+  .flag-dot.med{background:var(--crit);}
+  tr.status-confirmed td:nth-child(6) select{color:var(--danger); font-weight:700;}
+
+  /* ATT&CK grid */
+  .attck-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(230px,1fr)); gap:10px; padding:14px;}
+  .attck-item{display:flex; align-items:center; gap:8px; background:var(--panel2); border:1px solid var(--border); border-radius:7px; padding:8px 10px;}
+  .attck-item input[type=checkbox]{accent-color:var(--crit); width:15px; height:15px; flex-shrink:0; cursor:pointer;}
+  .attck-item .tname{font-size:12.5px; font-weight:600; flex:1;}
+  .attck-item input[type=text]{width:90px; background:transparent; border:1px solid var(--border); border-radius:5px; padding:4px 6px; color:var(--text); font:inherit; font-size:11.5px;}
+  .attck-item.on{border-color:var(--crit);}
+
+  /* Phases */
+  .phase-grid{display:flex; flex-wrap:wrap; gap:10px; padding:14px;}
+  .phase-item{background:var(--panel2); border:1px solid var(--border); border-radius:8px; padding:10px 14px; min-width:170px; flex:1;}
+  .phase-item .pname{font-weight:600; font-size:13px; margin-bottom:6px;}
+  .phase-item select{width:100%; background:var(--panel); border:1px solid var(--border); border-radius:6px; padding:6px 8px; color:var(--text); font:inherit; font-size:12.5px;}
+
+  textarea.scratch{width:100%; min-height:160px; background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:14px; color:var(--text); font:inherit; font-size:13px; resize:vertical;}
+
+  .addrow-bar{padding:10px 14px; border-top:1px solid var(--border);}
+  .addrow-bar button{width:100%;}
+
+  /* Quick Reference / Cheat Sheet */
+  .refwrap details{border-bottom:1px solid var(--border);}
+  .refwrap details:last-child{border-bottom:none;}
+  .refwrap summary{list-style:none; cursor:pointer; padding:10px 14px; font-size:13.5px; display:flex; align-items:center; gap:8px;}
+  .refwrap summary::-webkit-details-marker{display:none;}
+  .refwrap summary::before{content:"▸"; color:var(--muted); font-size:11px; transition:transform .15s ease; flex-shrink:0;}
+  .refwrap details[open] summary::before{transform:rotate(90deg);}
+  .refwrap mark{padding:1px 5px; border-radius:4px; font-weight:600;}
+  .refwrap mark.crit{background:var(--crit); color:var(--crit-text);}
+  .refwrap mark.imp{background:var(--imp); color:var(--imp-text);}
+  .refbody{margin:0 4px 14px 22px; padding:10px 14px; background:var(--panel2); border-radius:8px; font-size:12.5px; color:var(--muted); border-left:3px solid var(--border);}
+  .refbody p{margin:0 0 8px;}
+  .refbody p:last-child{margin-bottom:0;}
+  .refbody h4{font-size:11px; margin:10px 0 4px; color:var(--muted); text-transform:uppercase; letter-spacing:.03em;}
+  .refbody h4:first-child{margin-top:0;}
+  .refbody ul.bullets{margin:2px 0 8px; padding-left:16px; list-style:disc;}
+  .refbody ul.bullets li{margin:2px 0;}
+  .refbody ol.steps{margin:2px 0 8px; padding-left:18px; list-style:decimal;}
+  .refbody ol.steps li{margin:2px 0;}
+  .refbody pre{background:var(--panel); border:1px solid var(--border); border-radius:6px; padding:9px 11px; overflow-x:auto; font-size:11.5px; line-height:1.5; margin:6px 0 10px; color:var(--text); font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; white-space:pre;}
+  .refbody code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; background:var(--panel); padding:1px 5px; border-radius:4px; font-size:11.5px;}
+  .refbody table.ref-table{width:100%; border-collapse:collapse; font-size:11.5px; margin:6px 0 10px;}
+  .refbody table.ref-table th, .refbody table.ref-table td{border:1px solid var(--border); padding:5px 8px; text-align:left;}
+  .refbody table.ref-table th{background:var(--panel); color:var(--muted); font-weight:600;}
+
+  /* Toolbox */
+  .toolbox-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr)); gap:14px;}
+  .tool-card{padding:14px 16px;}
+  .tool-title{font-size:13px; margin:0 0 10px; letter-spacing:.01em;}
+  .tool-label{display:block; font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.03em; margin:0 0 4px;}
+  .tool-input{width:100%; background:var(--panel2); border:1px solid var(--border); border-radius:6px; padding:7px 9px; color:var(--text); font:inherit; font-size:12.5px; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;}
+  .tool-input:focus{outline:none; border-color:var(--imp);}
+  .tool-textarea{width:100%; background:var(--panel2); border:1px solid var(--border); border-radius:6px; padding:8px 9px; color:var(--text); font:inherit; font-size:12px; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; resize:vertical; margin:4px 0;}
+  .tool-textarea:focus{outline:none; border-color:var(--imp);}
+  .tool-textarea[readonly]{color:var(--muted);}
+  .tool-out{margin-top:6px; background:var(--panel2); border:1px solid var(--border); border-left:3px solid var(--imp); border-radius:6px; padding:8px 10px; font-size:12px; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; color:var(--text); min-height:16px; word-break:break-all;}
+  .tool-out .bad{color:var(--danger); font-family:inherit;}
+  .tool-note{font-size:11px; color:var(--muted); margin:8px 0 0;}
+  .tool-checkline{display:flex; align-items:flex-start; gap:6px; font-size:11.5px; color:var(--muted); margin:6px 0; cursor:pointer;}
+  .tool-checkline input{margin-top:2px; accent-color:var(--imp); cursor:pointer;}
+  .tool-btnrow{display:flex; gap:8px; margin:4px 0;}
+  .tool-btnrow button{flex:1;}
+  .tool-hexdec-row{display:flex; gap:12px;}
+
+  footer{margin-top:40px; font-size:11.5px; color:var(--muted); text-align:center;}
+
+  @media (max-width:640px){
+    .qrow{flex-wrap:wrap;}
+    .qrow .qlabel{width:100%;}
+    table.dyn{display:block; overflow-x:auto; white-space:nowrap;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="headrow">
+      <div class="brand">
+        <h1>🛡️ BTL1 EXAM TRACKER</h1>
+        <span class="saved" id="savedIndicator">✓ SAVED</span>
+      </div>
+      <div class="toolbar">
+        <button class="icon" id="themeToggle" title="Toggle light/dark">☀</button>
+        <button id="btnExportJson">JSON EXPORT</button>
+        <button id="btnExportMd">MD REPORT EXPORT</button>
+        <button id="btnImport">IMPORT</button>
+        <input type="file" id="fileImport" accept="application/json">
+        <button class="danger" id="btnReset">RESET</button>
+      </div>
+    </div>
+
+    <div class="timerbar">
+      <div class="stat" id="elapsedStat"><span>Elapsed</span><b id="elapsedVal">00:00:00</b></div>
+      <div class="stat" id="remainStat"><span>Remaining (of <span id="targetHoursLabel">24</span>h)</span><b id="remainVal">24:00:00</b></div>
+      <div class="stat" id="paceStat"><span>Pace (per open question)</span><b id="paceVal">—</b></div>
+      <div>
+        <button id="btnStartTimer" class="primary">Start Exam Clock</button>
+        <button id="btnClearTimer">Clear Clock</button>
+      </div>
+      <div>
+        Target hours: <input type="number" id="targetHours" value="24" min="1" max="48">
+      </div>
+    </div>
+
+    <div class="coveragebar">
+      <div class="cov-track"><div class="cov-fill" id="covFill"></div></div>
+      <span id="covLabel">0/20 questions answered · 0/6 phases done</span>
+    </div>
+  </header>
+
+  <p class="section-sub" style="margin-top:-8px;">Everything here autosaves to this browser (localStorage) as you type — nothing is sent anywhere. Use <b>JSON EXPORT</b> to back up your progress or move it to another device, and <b>MD REPORT EXPORT</b> at the end to generate a starting draft of your write-up from everything you tracked.</p>
+
+  <details class="card" style="margin-bottom:24px; padding:0;">
+    <summary style="cursor:pointer; padding:12px 16px; font-weight:600; font-size:13.5px; list-style:none;">ℹ️ How to use this tracker (click to expand)</summary>
+    <div style="padding:0 16px 16px; font-size:13px; color:var(--muted);">
+      <p style="margin:6px 0;">Built for the BTL1 practical, which runs as a single ~24-hour investigation with roughly 20 task-based questions — this tracker mirrors that shape instead of a multi-host pentest checklist.</p>
+      <ul style="margin:6px 0; padding-left:20px;">
+        <li><b>Everything is 100% local to your browser.</b> Nothing here touches a server — no login, no analytics, no data collection of any kind. That also means: it's tied to <i>this browser, on this device</i>. Switching browsers/computers won't carry your progress over unless you use JSON Export/Import.</li>
+        <li>Click <b>Start Exam Clock</b> the moment you begin — it'll track elapsed/remaining time even if you close the tab and come back (as long as it's the same browser).</li>
+        <li>Rename the Q1–Q20 labels to match your actual question numbers/titles if you want it to mirror your specific exam sheet.</li>
+        <li>The <b>Pace</b> stat updates once the clock is running — remaining time ÷ open (unchecked) questions, so you always know roughly how long you can spend on what's left. It turns yellow/red as time per question gets tight.</li>
+        <li>Each question has an optional <b>confidence</b> dropdown (Low/Medium/High) — a quick way to flag which answers you should double-check before submitting.</li>
+        <li>Deleted a row by mistake? An <b>Undo</b> button appears at the bottom of the screen for a few seconds after any delete (Questions, IOCs, Timeline, Activity Map).</li>
+        <li><b>Export JSON regularly</b> — clearing browser data, using incognito mode, or switching machines will wipe local storage. A JSON backup is the only way to recover your progress.</li>
+        <li><b>MD Report Export</b> pulls everything you've tracked into a draft write-up using the same structure as the report template in the Blue Team study notes — it's a starting point, not a finished report.</li>
+      </ul>
+      <p style="margin:6px 0;">Not affiliated with or endorsed by Security Blue Team — an independent study aid built by a fellow BTL1 candidate.</p>
+    </div>
+  </details>
+
+  <!-- QUESTIONS -->
+  <h2 class="section">Questions / Tasks</h2>
+  <p class="section-sub">Default is 20 rows to match the typical task-based question count — add or remove as needed. Use the note field to jot your answer or the evidence reference before final submission.</p>
+  <div class="card" id="questionsCard"></div>
+  <div class="addrow-bar"><button id="addQuestion">+ Add question</button></div>
+
+  <!-- IOC TABLE -->
+  <h2 class="section">IOC Table</h2>
+  <p class="section-sub">Same format as the report template — Type / Value / Source / Notes.</p>
+  <div class="card">
+    <table class="dyn" id="iocTable">
+      <thead><tr><th style="width:14%;">Type</th><th style="width:26%;">Value</th><th style="width:20%;">Source</th><th>Notes</th><th style="width:30px;"></th></tr></thead>
+      <tbody id="iocBody"></tbody>
+    </table>
+    <div class="tbl-actions"><button id="addIoc">+ Add IOC</button></div>
+  </div>
+
+  <!-- TIMELINE -->
+  <h2 class="section">Investigation Timeline</h2>
+  <p class="section-sub">Timestamp / Host / Artifact-Tool / Finding / ATT&amp;CK — update this every time you find something significant.</p>
+  <div class="card">
+    <table class="dyn" id="timelineTable">
+      <thead><tr><th style="width:12%;">Timestamp</th><th style="width:16%;">Host / Source</th><th style="width:16%;">Artifact / Tool</th><th>Finding</th><th style="width:16%;">ATT&amp;CK / Notes</th><th style="width:30px;"></th></tr></thead>
+      <tbody id="timelineBody"></tbody>
+    </table>
+    <div class="tbl-actions"><button id="addTimeline">+ Add event</button></div>
+  </div>
+
+  <!-- ACTIVITY MAP -->
+  <h2 class="section">Host / Network Activity Map</h2>
+  <p class="section-sub">Who talked to whom, and what kind of activity it was — this is the "which IP hit which host/user, is there C2, is RDP involved" table. The colored dot flags C2/exfil in red and RDP/lateral movement in orange so you can scan for the scary stuff fast. Picking an Activity Type auto-suggests a common ATT&amp;CK technique ID in the field next to it (only when that field is still empty) — it's a starting point, not a verdict, so confirm it against your actual evidence before you rely on it.</p>
+  <div class="card">
+    <div style="overflow-x:auto;">
+    <table class="dyn" id="activityTable" style="min-width:1050px;">
+      <thead><tr><th style="width:26px;"></th><th style="width:12%;">Source (IP/Host/User)</th><th style="width:12%;">Destination (IP/Host)</th><th style="width:14%;">Activity Type</th><th style="width:10%;">Protocol / Port</th><th style="width:12%;">Frame # / Filter</th><th style="width:9%;">ATT&amp;CK</th><th style="width:9%;">Status</th><th>Notes</th><th style="width:30px;"></th></tr></thead>
+      <tbody id="activityBody"></tbody>
+    </table>
+    </div>
+    <div class="tbl-actions"><button id="addActivity">+ Add activity</button></div>
+  </div>
+
+  <!-- ATT&CK -->
+  <h2 class="section">MITRE ATT&amp;CK Tactics Observed</h2>
+  <p class="section-sub">Check off each tactic as you find evidence for it, and note the technique ID if you have one — helps make sure your final mapping is complete.</p>
+  <div class="card"><div class="attck-grid" id="attckGrid"></div></div>
+
+  <!-- PHASES -->
+  <h2 class="section">Investigation Phase Status</h2>
+  <div class="card"><div class="phase-grid" id="phaseGrid"></div></div>
+
+  <!-- TOOLBOX -->
+  <h2 class="section">Toolbox — Quick Calculators</h2>
+  <p class="section-sub">Small utilities for the stuff that comes up constantly mid-investigation — nothing here is sent anywhere, all computed locally in the browser as you type.</p>
+  <div class="toolbox-grid">
+
+    <div class="card tool-card">
+      <h3 class="tool-title">Epoch / Unix Timestamp Converter</h3>
+      <label class="tool-label">Epoch value (seconds or milliseconds)</label>
+      <input type="text" id="toolEpochIn" class="tool-input" placeholder="e.g. 1700000000 or 1700000000000">
+      <div class="tool-out" id="toolEpochOut">—</div>
+      <label class="tool-label" style="margin-top:10px;">Or pick a date/time (your local timezone)</label>
+      <input type="datetime-local" id="toolDateIn" class="tool-input">
+      <div class="tool-out" id="toolDateOut">—</div>
+    </div>
+
+    <div class="card tool-card">
+      <h3 class="tool-title">Base64 Encode / Decode</h3>
+      <textarea id="toolB64In" class="tool-textarea" placeholder="Paste text or Base64 here…" rows="3"></textarea>
+      <label class="tool-checkline"><input type="checkbox" id="toolB64Utf16"> Decode as UTF-16LE (PowerShell <code>-EncodedCommand</code> — plain UTF-8 decode gives you null-byte garbage on these)</label>
+      <div class="tool-btnrow">
+        <button id="toolB64EncodeBtn">Encode →</button>
+        <button id="toolB64DecodeBtn">Decode →</button>
+        <button id="toolB64CopyBtn" class="icon" title="Copy output">⧉ Copy</button>
+      </div>
+      <textarea id="toolB64Out" class="tool-textarea" placeholder="Output…" rows="3" readonly></textarea>
+    </div>
+
+    <div class="card tool-card">
+      <h3 class="tool-title">Hash Identifier</h3>
+      <label class="tool-label">Paste a hash</label>
+      <input type="text" id="toolHashIn" class="tool-input" placeholder="e.g. 5f4dcc3b5aa765d61d8327deb882cf99">
+      <div class="tool-out" id="toolHashOut">—</div>
+      <p class="tool-note">Length/format alone can't always distinguish algorithms with identical output size (e.g. MD5 vs. NTLM are both 32 hex chars) — use the source/context to disambiguate, this just narrows the candidates.</p>
+    </div>
+
+    <div class="card tool-card">
+      <h3 class="tool-title">Hex ⇄ Decimal, and CIDR / Subnet Calculator</h3>
+      <div class="tool-hexdec-row">
+        <div style="flex:1;">
+          <label class="tool-label">Hex</label>
+          <input type="text" id="toolHexIn" class="tool-input" placeholder="0x1A or 1A">
+        </div>
+        <div style="flex:1;">
+          <label class="tool-label">Decimal</label>
+          <input type="text" id="toolDecIn" class="tool-input" placeholder="26">
+        </div>
+      </div>
+      <label class="tool-label" style="margin-top:12px;">CIDR (e.g. 10.0.0.0/24)</label>
+      <input type="text" id="toolCidrIn" class="tool-input" placeholder="10.0.0.0/24">
+      <div class="tool-out" id="toolCidrOut">—</div>
+    </div>
+
+  </div>
+
+  <!-- QUICK REFERENCE -->
+  <h2 class="section">Quick Reference / Cheat Sheet</h2>
+  <p class="section-sub">Condensed commands and workflows so you don't have to leave this tab. Full write-ups with more context live in the Blue Team Study Notes doc.</p>
+  <div class="card refwrap">
+
+    <details>
+      <summary><mark class="crit">Autopsy — quick workflow</mark></summary>
+      <div class="refbody">
+        <ol class="steps">
+          <li>New Case → Add Data Source (disk image / E01 / raw).</li>
+          <li>Select Ingest Modules — Recent Activity, File Type Identification, Hash Lookup (skip the heavy ones if time is tight).</li>
+          <li>Work mainly from Keyword Search, Timeline, and Extracted Content.</li>
+          <li>Right-click → Extract File(s) to pull evidence out.</li>
+        </ol>
+        <h4>Registry hives</h4>
+        <ul class="bullets">
+          <li><code>Windows\System32\config\</code> — SYSTEM, SOFTWARE, SAM, SECURITY, DEFAULT</li>
+          <li>User hives: <code>NTUSER.DAT</code>, <code>UsrClass.dat</code></li>
+          <li>Check Run keys, Services, UserAssist, ShimCache-related data</li>
+        </ul>
+        <p>Log the exact path + timestamp of anything you extract — cross-reference against Event Logs / Splunk.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary><mark class="crit">DeepBlueCLI — commands</mark></summary>
+      <div class="refbody">
+<pre># Exported EVTX file
+.\DeepBlue.ps1 .\Security.evtx
+.\DeepBlue.ps1 .\System.evtx
+
+# Bulk run across every EVTX + redirect to a file, then hunt the output
+.\DeepBlue.ps1 .\evtx\* > output.txt
+Select-String -Path output.txt -Pattern "sekurlsa|lsadump|Invoke-Mimikatz"
+Select-String -Path output.txt -Pattern "githubusercontent|DownloadString|IEX"
+
+# Live system (run as Administrator)
+.\DeepBlue.ps1 -log security
+.\DeepBlue.ps1 -log powershell
+.\DeepBlue.ps1 -log sysmon</pre>
+        <p>Flags: encoded PowerShell, account/group changes, service creation, log clearing, brute force, Mimikatz-style activity.</p>
+        <h4>Before trusting a "clean" result — was logging even on?</h4>
+        <p>A "no Mimikatz found" result means nothing if script-block logging was disabled. Check first:</p>
+<pre>Get-WinEvent -Path .\evtx\file.evtx |
+  Where-Object {$_.ProviderName -like "*PowerShell*"} |
+  Group-Object Id | Sort-Object Count -Descending</pre>
+        <p>4104 count = 0 → script block logging was off, a blind spot. Note the gap in your answer instead of claiming a clean result.</p>
+        <h4>Mimikatz strings worth searching for directly</h4>
+        <p><code>sekurlsa::</code> (LSASS dump) · <code>lsadump::</code> (LSA secrets/DCSync) · <code>kerberos::</code> (Golden/Silver/PTT) · <code>privilege::debug</code> (required for LSASS access) · <code>token::elevate</code> · <code>Invoke-Mimikatz</code> (PowerSploit wrapper)</p>
+      </div>
+    </details>
+
+    <details>
+      <summary><mark class="crit">Phishing — investigation workflow</mark></summary>
+      <div class="refbody">
+        <h4>1. Defang first</h4>
+        <p><code>http</code> → <code>hxxp</code>, <code>.</code> → <code>[.]</code> before any lookup or paste.</p>
+        <h4>Viewing the raw header in eM Client</h4>
+        <ol class="steps">
+          <li>Open the email in eM Client</li>
+          <li>Menu → <b>View / Options / Message Details</b> — look for "show source" or "message source"</li>
+          <li>The source view contains the full header block: sender, recipients, routing path, timestamps, Authentication-Results</li>
+          <li>Copy the whole header block out and work from that, rather than eyeballing it in the source pane</li>
+        </ol>
+        <h4>2. Headers</h4>
+        <ul class="bullets">
+          <li>Trace the <code>Received:</code> chain bottom→top for the true originating IP</li>
+          <li>Compare From / Return-Path / Reply-To / Sender for mismatches</li>
+          <li>Check SPF / DKIM / DMARC results</li>
+        </ul>
+        <h4>Where to find the origin IP — check in this order</h4>
+        <ol class="steps">
+          <li><code>X-Sender-IP</code> (Microsoft EOP standard)</li>
+          <li><code>X-Originating-IP</code> (alternate vendor name for the same thing)</li>
+          <li><code>Received:</code> chain — the <b>bottom</b> hop is closest to the real sender</li>
+          <li><code>Authentication-Results</code> — sometimes carries an IP under <code>spf=</code></li>
+          <li>Last resort: <code>Return-Path</code> domain → look up its MX record and match</li>
+        </ol>
+        <h4>Reading Authentication-Results</h4>
+        <table class="ref-table">
+          <tr><th>Result</th><th>Meaning</th></tr>
+          <tr><td><code>spf=pass dkim=pass dmarc=pass</code></td><td>Envelope is legit — still verify the content, a real account can be compromised</td></tr>
+          <tr><td><code>spf=pass dkim=fail dmarc=fail</code></td><td>Authorized sender, but the message was tampered with or replayed</td></tr>
+          <tr><td><code>spf=fail</code></td><td>Sending IP isn't authorized for that domain — likely spoofed</td></tr>
+          <tr><td><code>dmarc=pass</code> but <code>header.from</code> ≠ envelope <code>from</code></td><td>Domain alignment failure — check for a lookalike domain</td></tr>
+        </table>
+        <p><b>SPF pass ≠ legitimate.</b> A compromised real mailbox passes SPF/DKIM/DMARC perfectly because it genuinely is the authorized account — authentication proves the pipe is real, not that the sender's intent is.</p>
+        <h4>3. Body &amp; URLs</h4>
+        <ul class="bullets">
+          <li>Identify the pretext (invoice, lockout, delivery, IT/HR helpdesk, urgency)</li>
+          <li>Visible link text vs. actual hyperlink; expand shortened URLs</li>
+          <li>Check VirusTotal / urlscan.io / AbuseIPDB / Hybrid Analysis / MXToolbox</li>
+        </ul>
+        <h4>4. Attachments</h4>
+        <p>Hash (MD5/SHA1/SHA256) → submit to VirusTotal or a sandbox.</p>
+        <h4>5. IOC table shape</h4>
+        <table class="ref-table">
+          <tr><th>Type</th><th>Value</th><th>Source</th><th>Notes</th></tr>
+          <tr><td>Sender IP</td><td>x.x.x.x</td><td>Received header</td><td>…</td></tr>
+          <tr><td>Domain</td><td>evil[.]com</td><td>From / URL</td><td>…</td></tr>
+          <tr><td>File hash</td><td>abc123…</td><td>Attachment</td><td>SHA256 preferred</td></tr>
+        </table>
+        <p>Map to MITRE ATT&amp;CK Initial Access – Phishing (T1566), then log the same IOCs into the IOC Table above.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary><mark class="crit">Splunk / SPL — quick reference</mark></summary>
+      <div class="refbody">
+        <p>Always confirm <code>index=</code> and <code>sourcetype=</code> first — the wrong one means you silently miss evidence, not that there's none.</p>
+        <h4>Fields worth checking first</h4>
+        <table class="ref-table">
+          <tr><th>Field</th><th>Why check it</th></tr>
+          <tr><td><code>_time</code></td><td>Builds your timeline / narrows to the incident window</td></tr>
+          <tr><td><code>source</code></td><td>The exact file/data feed the event came from — lets you trace an event back to its raw origin</td></tr>
+          <tr><td><code>sourcetype</code></td><td>Format Splunk assigned to the data (e.g. <code>WinEventLog:Security</code>, <code>sysmon</code>) — tells you which other field names to expect next</td></tr>
+          <tr><td><code>host</code> / <code>ComputerName</code></td><td>The machine that generated the event — scopes your search, and helps spot lateral movement (same account on hosts it doesn't normally touch)</td></tr>
+          <tr><td><code>EventCode</code> / <code>EventID</code></td><td>What kind of event happened (4624, 4688, 4625…)</td></tr>
+          <tr><td><code>Account_Name</code> / <code>user</code></td><td>Who — flags unexpected, service, or terminated accounts</td></tr>
+          <tr><td><code>Logon_Type</code></td><td>How the logon happened — 2 = interactive, 3 = network, 10 = RDP. A Type 10/3 from somewhere unexpected is far more suspicious than a Type 2 at the console</td></tr>
+          <tr><td><code>SubjectUserName</code></td><td>The account that <i>performed</i> the action — pairs with TargetUserName below; critical when a compromised account acts on a different target account</td></tr>
+          <tr><td><code>src_ip</code> / <code>dest_ip</code></td><td>Where from/to — external IPs, or lateral movement between internal hosts</td></tr>
+          <tr><td><code>src_port</code> / <code>dest_port</code></td><td>Unusual high ports or common C2 ports (4444, 8080, 8443) are worth a second look, especially paired with an odd destination</td></tr>
+          <tr><td><code>Image</code> / <code>CommandLine</code></td><td>What actually ran — LOLBins, encoded PowerShell, download cradles</td></tr>
+          <tr><td><code>ParentImage</code></td><td>Mismatched parent→child is one of the strongest signals (e.g. Word spawning PowerShell)</td></tr>
+          <tr><td><code>ProcessId</code> / <code>ParentProcessId</code></td><td>PID/PPID — pins down exactly which process did what when the same executable name shows up more than once</td></tr>
+          <tr><td><code>CurrentDirectory</code></td><td>Where the process was launched from — flags an install/execution location like <code>%AppData%</code> or <code>Temp</code> instead of Program Files</td></tr>
+          <tr><td><code>OriginalFileName</code></td><td>The PE's real filename from its metadata (Sysmon) — catches a renamed binary, e.g. <code>mimikatz.exe</code> renamed to <code>svchost.exe</code> but metadata still says otherwise</td></tr>
+          <tr><td><code>Product</code> / <code>Company</code> / <code>FileVersion</code> / <code>Description</code></td><td>PE metadata (Sysmon) — the fastest way to answer "what software (and version) was used," straight from the binary itself</td></tr>
+          <tr><td><code>Hashes</code></td><td>MD5/SHA256 attached to the process/file event (Sysmon) — your fastest path to matching against known-bad IOCs</td></tr>
+          <tr><td><code>signature</code></td><td>Name of the alert/rule that fired (AV, IDS, correlation search) — usually your fastest starting point to pivot into manual analysis</td></tr>
+          <tr><td><code>TargetUserName</code></td><td>Who was acted on — 4720/4732 = account created / added to a privileged group</td></tr>
+          <tr><td><code>TargetFileName</code></td><td>Full path of a file created/deleted/modified (Sysmon 11 FileCreate / 23 FileDelete) — where you catch a dropped payload or deleted evidence</td></tr>
+          <tr><td><code>TargetObject</code></td><td>The registry key/value being modified (Sysmon 12/13/14) — where you catch persistence being set up, e.g. a new Run key or service entry</td></tr>
+          <tr><td><code>Service_Name</code> / <code>Service_File_Name</code></td><td>Service install events (4697/7045) — a common persistence mechanism; check the binary path for anything outside System32</td></tr>
+          <tr><td><code>Logon_ID</code></td><td>Ties every event from the same logon session together — traces exactly what one suspicious session did end-to-end, useful for spotting unusual admin/lateral-movement activity</td></tr>
+        </table>
+        <h4>Logon_Type — full list</h4>
+        <table class="ref-table">
+          <tr><th>Type</th><th>Meaning</th><th>Context</th></tr>
+          <tr><td>2</td><td>Interactive</td><td>Console keyboard / VM console</td></tr>
+          <tr><td>3</td><td>Network</td><td>SMB share, IPC, remote service — target-side pass-the-hash lands here</td></tr>
+          <tr><td>4</td><td>Batch</td><td>Scheduled task</td></tr>
+          <tr><td>5</td><td>Service</td><td>Service account at service start</td></tr>
+          <tr><td>7</td><td>Unlock</td><td>Screen unlock</td></tr>
+          <tr><td>8</td><td>NetworkCleartext</td><td>Cleartext password over the network (e.g. IIS basic auth)</td></tr>
+          <tr><td>9</td><td>NewCredentials</td><td>RunAs /netonly — source-side sign of pass-the-hash (e.g. Mimikatz <code>sekurlsa::pth</code>)</td></tr>
+          <tr><td>10</td><td>RemoteInteractive</td><td>RDP</td></tr>
+          <tr><td>11</td><td>CachedInteractive</td><td>Cached credentials (offline laptop logon)</td></tr>
+        </table>
+        <h4>Two traps that quietly cost you the most time</h4>
+        <ul class="bullets">
+          <li><code>| sort _time</code> silently caps at 10,000 rows — on a big index you lose data with no warning. Use <code>| sort 0 _time</code> (the <code>0</code> removes the cap) or <code>| reverse</code> instead.</li>
+          <li>The same value can sit under a different field name depending on <code>sourcetype</code> — an IP might be <code>DestinationIp</code> in Sysmon, <code>dest_ip</code> in one TA, <code>dstip</code> in another. If a field search comes back empty, fall back to a raw-string search and check where it actually lives: <code>index=* "1.2.3.4" | stats count by sourcetype</code>.</li>
+        </ul>
+        <h4>Go-to queries</h4>
+<pre># Failed logons
+index=* EventCode=4625
+| stats count by Account_Name, src_ip, ComputerName
+| sort -count
+
+# Suspicious process creation
+index=* (EventCode=4688 OR EventCode=1)
+| search CommandLine="*powershell*" OR CommandLine="*-enc*" OR CommandLine="*IEX*" OR CommandLine="*DownloadString*"
+| table _time, ComputerName, User, ParentImage, Image, CommandLine
+| sort -_time
+
+# Decode a base64 command line
+| rex field=CommandLine "-enc\s+(?&lt;encoded&gt;[A-Za-z0-9+/=]+)"
+| eval decoded=base64decode(encoded)
+
+# Quick aggregation
+| stats count by src_ip, dest_ip, dest_port
+| top limit=20 Account_Name
+| timechart span=1h count by src_ip
+
+# Collapse to uniques / group into sessions
+| dedup Image
+| transaction host User maxspan=5m
+
+# tstats — if the environment has CIM data models set up, this is
+# dramatically faster than index=... | search since it queries the
+# accelerated data model summary instead of raw events
+| tstats count from datamodel=Endpoint.Registry where Registry.registry_path="*\\CurrentVersion\\Run*" by Registry.registry_path, Registry.dest</pre>
+        <p>Flow: broad time window → filter by EventCode/host → pivot with <code>stats</code>/<code>table</code> → tighten the time range once a lead appears. Full field reference (incl. Subject vs. Target fields) is in the Blue Team Study Notes doc.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary><mark class="crit">Stuck? Pivot ladder + 60-second reset</mark></summary>
+      <div class="refbody">
+        <p>When a query dead-ends, work down this ladder instead of re-typing the same search — each level is harder for an attacker to evade than the one below it.</p>
+        <ol class="steps">
+          <li><b>Event Code / event type</b> — you know the kind of activity (logon, process creation, file write)</li>
+          <li><b>Parent process / context</b> — you know what spawned what</li>
+          <li><b>Behavioral string</b> — you know the technique (a specific function call, a flag pattern), not just the tool name</li>
+          <li><b>Tool-name string</b> — last resort, breaks the moment something's renamed</li>
+          <li><b>Time-window pivot</b> — expand around one confirmed event on the same host/user to catch the rest of the chain</li>
+        </ol>
+        <h4>No hits? Work through this before giving up</h4>
+        <ul class="bullets">
+          <li>Re-read the question — did you actually filter for every named entity in it?</li>
+          <li>Drop your most specific filter — you may have over-narrowed</li>
+          <li>Switch event family: 4624↔4648, Sysmon 1↔4688, 4104↔4103</li>
+          <li>Fall back to a raw-string search — the field name may differ by sourcetype (see the trap above)</li>
+          <li>Switch tool entirely — Splunk dry? Try DeepBlueCLI, Autopsy, or the raw EVTX/PCAP directly</li>
+          <li>Switch evidence type — no process artifact? Check Sysmon 11 (file create) or 12–14 (registry) instead</li>
+          <li>Mark it and move on — a later answer often hands you the anchor you were missing</li>
+        </ul>
+        <p><b>No hits is a signal, not a failure</b> — it usually means the wrong EID, field name, or assumption, not that the evidence doesn't exist.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary><mark class="crit">Attack-pattern quick lookup</mark></summary>
+      <div class="refbody">
+        <p>See the left column in your evidence → think the right column. Not exhaustive, just the fastest matches.</p>
+        <table class="ref-table">
+          <tr><th>You see this</th><th>Likely technique / where to look next</th></tr>
+          <tr><td>4104 script block with <code>[Reflection.Assembly]::Load</code> + base64, or Sysmon 11 dropping <code>*_users.json</code>/<code>*_computers.json</code>/a <code>*_BloodHound.zip</code></td><td>BloodHound/SharpHound AD enumeration — reflective loading is the giveaway; a pure-PowerShell variant (<code>Get-NetUser</code>, <code>Get-DomainUser</code>, no reflection) points to PowerView instead</td></tr>
+          <tr><td>Non-standard binary as a child of <code>services.exe</code>, path has spaces and no quotes</td><td>Unquoted service path privesc — sort the process list alphabetically by <code>Image</code>, don't rely on a "suspicious" heuristic</td></tr>
+          <tr><td><code>sekurlsa::</code>, <code>lsadump::</code>, <code>privilege::debug</code> in a command line or script block</td><td>Mimikatz — LSASS/LSA credential dumping</td></tr>
+          <tr><td><code>/krbtgt:</code>, <code>/sids:</code>, <code>kerberos::golden</code></td><td>Golden/Silver ticket forgery — these params don't appear in legitimate admin tooling</td></tr>
+          <tr><td>One user requesting service tickets for many different SPNs, RC4 encryption</td><td>Kerberoasting — EventCode 4769 with weak encryption type</td></tr>
+          <tr><td>4648 where the subject and target account differ</td><td>Pass-the-hash, source side</td></tr>
+          <tr><td>4624 with Logon_Type 9, or a Type 3 logon from an unexpected source</td><td>Pass-the-hash, target side</td></tr>
+          <tr><td><code>wmiprvse.exe</code> spawning <code>cmd.exe</code>/<code>powershell.exe</code></td><td>WMI-based lateral movement</td></tr>
+          <tr><td>Service named <code>PSEXESVC</code>, or a renamed psexec binary outside System32</td><td>PsExec lateral movement (renaming is a common masquerade)</td></tr>
+          <tr><td>Sysmon 12/13 with <code>TargetObject</code> under a <code>...\CurrentVersion\Run</code> key</td><td>Registry Run-key persistence</td></tr>
+          <tr><td>4720 followed by 4732 on the same account, especially with a lookalike username</td><td>Backdoor account creation + privilege grant</td></tr>
+          <tr><td>Regular-interval Sysmon 3 connections to the same external IP</td><td>C2 beaconing — <code>stats count by DestinationIp</code> + <code>timechart</code> to confirm the cadence</td></tr>
+          <tr><td>Long, random-looking subdomains, high query frequency to one parent domain</td><td>DNS tunneling / DNS-based C2 — Sysmon 22 <code>QueryName</code></td></tr>
+          <tr><td><code>rundll32</code>, <code>regsvr32</code>, <code>mshta</code>, <code>certutil</code>, <code>bitsadmin</code> run from an unusual parent</td><td>LOLBin abuse — living-off-the-land execution/download</td></tr>
+          <tr><td>1102 (Security) or 104 (System)</td><td>Log clearing — anti-forensics, a red flag on its own</td></tr>
+        </table>
+      </div>
+    </details>
+
+    <details>
+      <summary><mark class="crit">Information → log source quick index</mark></summary>
+      <div class="refbody">
+        <p>Complement to the table above: that one starts from evidence you already found, this one starts from the piece of information you're after. Left column = what you need to know, right column = where it lives.</p>
+        <table class="ref-table">
+          <tr><th>Information</th><th>Where to check</th></tr>
+          <tr><td>Logon activity — who, when, and how (interactive / network / RDP / service)</td><td>Security 4624 (success) / 4625 (fail) / 4634 (logoff) — <code>Logon_Type</code> field for the "how"; Splunk: <code>EventCode=4624 Logon_Type</code></td></tr>
+          <tr><td>Failed logons / brute-force pattern</td><td>Security 4625; Splunk <code>stats count by src_ip, Account_Name</code> to spot spray vs. targeted</td></tr>
+          <tr><td>Process execution — exact binary + full command line</td><td>Security 4688 (needs CLI-auditing enabled — check first) or Sysmon EID 1 (<code>Image</code>, <code>CommandLine</code> — always has command-line logging)</td></tr>
+          <tr><td>Parent-child process relationship (what spawned what)</td><td>Sysmon EID 1 — <code>ParentImage</code> / <code>ParentCommandLine</code>; DeepBlueCLI flags unusual parent/child pairs automatically</td></tr>
+          <tr><td>File created, modified, moved, or deleted</td><td>Sysmon EID 11 (create); Autopsy Recent Documents, Recycle Bin, and file-system timeline (MFT/$LogFile) for the disk-image side</td></tr>
+          <tr><td>Registry-based persistence</td><td>Sysmon EID 12/13/14 — <code>TargetObject</code> under a Run/RunOnce or service key</td></tr>
+          <tr><td>Service installation</td><td>Security 4697 (System log) / 7045; cross-check the binary path against the Attack-pattern table's unquoted-path row</td></tr>
+          <tr><td>Account creation / privileged-group membership change</td><td>Security 4720 (created) / 4732 (added to group) — watch for the pair landing close together</td></tr>
+          <tr><td>Outbound network connections</td><td>Sysmon EID 3; Wireshark Statistics → Conversations / Endpoints for volume and cadence</td></tr>
+          <tr><td>DNS queries, incl. tunneling indicators</td><td>Sysmon EID 22 (<code>QueryName</code>); Wireshark <code>dns</code> filter — long/random subdomains, high query rate to one parent domain</td></tr>
+          <tr><td>Lateral movement activity</td><td>Security 4624 Type 3/10 across hosts; <code>wmiprvse.exe</code> spawning a shell (Sysmon 1); service named <code>PSEXESVC</code></td></tr>
+          <tr><td>Credential dumping / LSASS access</td><td>Sysmon EID 10 (ProcessAccess) targeting <code>lsass.exe</code>; DeepBlueCLI's Mimikatz string list; command line containing <code>sekurlsa::</code>/<code>lsadump::</code></td></tr>
+          <tr><td>Kerberos ticket requests / abuse</td><td>Security 4769 — many SPNs from one user with RC4 encryption = Kerberoasting; <code>/krbtgt:</code> or <code>kerberos::golden</code> in a command line = forged ticket</td></tr>
+          <tr><td>Log tampering or clearing</td><td>Security 1102 / System 104 — treat as a red flag even with no other context</td></tr>
+          <tr><td>Software identity behind a file that ran (name, version, publisher)</td><td>Sysmon EID 1 — <code>Product</code> / <code>Company</code> / <code>FileVersion</code> / <code>Description</code> / <code>Hashes</code>; Autopsy Extension Mismatch and Interesting Files for the disk-image side</td></tr>
+          <tr><td>USB or external device connections</td><td>Autopsy "USB Device Attached" artifact (also cross-check Recent Documents for an LNK pointing at a drive letter that isn't C:)</td></tr>
+          <tr><td>Evidence a program was run by the user (execution artifacts)</td><td>Autopsy Run Programs / Prefetch / Shell Bags; Security 4688 as the live-system equivalent</td></tr>
+          <tr><td>User's search or browsing history</td><td>Autopsy Web History / Web Search / Form Autofill / Web Cache artifacts</td></tr>
+          <tr><td>Phishing email's true origin IP</td><td>Raw email header — bottom-most <code>Received:</code> line, cross-checked against the <code>Authentication-Results</code> row in the Phishing card above</td></tr>
+          <tr><td>Data exfiltration indicators</td><td>Sysmon EID 3 with an unusually large outbound transfer; Wireshark FTP/HTTP PUT traffic; high-volume DNS queries (see tunneling above)</td></tr>
+          <tr><td>Scheduled task creation (persistence)</td><td>Security 4698; Sysmon EID 1 with <code>schtasks.exe</code> in the command line</td></tr>
+        </table>
+      </div>
+    </details>
+
+    <details>
+      <summary><mark class="crit">Windows Event IDs</mark></summary>
+      <div class="refbody">
+        <ul class="bullets">
+          <li><b>4624</b> — Successful logon (Type 2 = interactive, 3 = network, 10 = RDP, 9 = NewCredentials/RunAs — often the source-side sign of pass-the-hash)</li>
+          <li><b>4625</b> — Failed logon (brute-force patterns)</li>
+          <li><b>4648</b> — Logon with explicit credentials — the source-side signal for pass-the-hash; suspicious when Subject and Target accounts differ</li>
+          <li><b>4672</b> — Special/admin privileges assigned at logon</li>
+          <li><b>4688</b> — Process creation (with command-line auditing)</li>
+          <li><b>4697 / 7045</b> — Service installed</li>
+          <li><b>4720 / 4732</b> — Account created / added to privileged group</li>
+          <li><b>4769</b> — Kerberos service ticket requested — many requests from one user across many SPNs (esp. with RC4) = Kerberoasting</li>
+          <li><b>4776</b> — NTLM authentication attempted</li>
+          <li><b>1102 / 104</b> — Audit log cleared (Security / System) — anti-forensics red flag</li>
+        </ul>
+      </div>
+    </details>
+
+    <details>
+      <summary><mark class="crit">Wireshark — workflow &amp; FTP cookbook</mark></summary>
+      <div class="refbody">
+        <p>⚠️ <b>Set this first, every session:</b> View → Time Display Format → Date and Time of Day. Wireshark defaults to relative time — any "what time did X happen" question is unanswerable until you change this.</p>
+        <h4>Where to look before you write a single filter</h4>
+        <ol class="steps">
+          <li>Statistics → Protocol Hierarchy — what's actually in the capture</li>
+          <li>Statistics → Conversations — top talkers; sort by bytes for exfil, by packets for scans</li>
+          <li>Statistics → Endpoints — per-host traffic volume</li>
+          <li>Right-click → Follow → TCP/HTTP/TLS Stream — full session reconstruction</li>
+          <li>File → Export Objects → HTTP/SMB/IMF/TFTP — pull the actual files out</li>
+          <li>Statistics → Expert Information — anomalies Wireshark already flagged for you</li>
+        </ol>
+        <p><b>Files transferred over non-HTTP won't show up in Export → HTTP</b> — check the SMB, IMF (email), and TFTP submenus too. HTTPS content can't be exported without the session key.</p>
+        <h4>FTP investigation cookbook</h4>
+        <ol class="steps">
+          <li>Filter <code>ftp</code> to isolate the command channel</li>
+          <li>Scan for <code>USER</code>, <code>PASS</code>, <code>RETR</code>, <code>STOR</code>, <code>LIST</code></li>
+          <li>Follow TCP Stream on any <code>230</code> (login OK) response for the full session</li>
+          <li>Brute force? Count <code>PASS</code> attempts from one source</li>
+          <li>Exfil? Find <code>RETR</code>, then trace the separate data-channel connection</li>
+          <li>Hash any retrieved file via Export → then <code>sha256sum</code></li>
+        </ol>
+        <table class="ref-table">
+          <tr><th>FTP code</th><th>Meaning</th></tr>
+          <tr><td>220</td><td>Service ready (banner)</td></tr>
+          <tr><td>230</td><td>User logged in</td></tr>
+          <tr><td>331</td><td>Username OK, password needed</td></tr>
+          <tr><td><b>530</b></td><td><b>Login incorrect / not logged in</b></td></tr>
+          <tr><td>150</td><td>File status OK, opening data connection</td></tr>
+          <tr><td>226</td><td>Transfer complete</td></tr>
+        </table>
+      </div>
+    </details>
+
+    <details>
+      <summary><mark class="crit">Sysmon Event IDs</mark></summary>
+      <div class="refbody">
+        <ul class="bullets">
+          <li><b>Event 1</b> — Process creation (full command line + parent + hashes)</li>
+          <li><b>Event 3</b> — Network connection</li>
+          <li><b>Event 7 / 11</b> — Image load / File create</li>
+          <li><b>Event 8 / 10</b> — CreateRemoteThread / ProcessAccess (injection, credential dumping off <code>lsass.exe</code> — watch for GrantedAccess <code>0x1010</code>/<code>0x1410</code>)</li>
+          <li><b>Event 12 / 13 / 14</b> — Registry create/modify/rename (persistence via Run keys)</li>
+          <li><b>Event 22</b> — DNS query</li>
+          <li><b>PowerShell 4104</b> — Script block logging (4103 = module logging, weaker signal)</li>
+        </ul>
+      </div>
+    </details>
+
+    <details>
+      <summary><mark class="crit">MITRE IDs &amp; hashing — quick lookup</mark></summary>
+      <div class="refbody">
+        <h4>ATT&amp;CK ID prefixes</h4>
+        <ul class="bullets">
+          <li><b>TA0000</b> — Tactic (e.g. TA0001 Initial Access)</li>
+          <li><b>T0000</b> — Technique (e.g. T1110 Brute Force) — use the <b>.000</b> sub-technique when one fits, e.g. <code>T1110.003</code> for password spraying, not the bare parent ID</li>
+          <li><b>S0000</b> — Software (e.g. S0002 Mimikatz)</li>
+          <li><b>G0000</b> — Threat group (e.g. G0007 APT28)</li>
+        </ul>
+        <h4>High-yield IDs worth recognizing on sight</h4>
+        <table class="ref-table">
+          <tr><th>Tool</th><th>Software ID</th></tr>
+          <tr><td>Mimikatz</td><td>S0002</td></tr>
+          <tr><td>PowerSploit (PowerView / PowerUp)</td><td>S0194</td></tr>
+          <tr><td>BloodHound</td><td>S0521</td></tr>
+          <tr><td>Cobalt Strike</td><td>S0154</td></tr>
+          <tr><td>Rubeus</td><td>S1071</td></tr>
+          <tr><td>Empire</td><td>S0363</td></tr>
+        </table>
+        <table class="ref-table">
+          <tr><th>Activity</th><th>Technique</th></tr>
+          <tr><td>Password Spraying</td><td>T1110.003</td></tr>
+          <tr><td>LSASS memory dump / SAM / NTDS extraction</td><td>T1003.001 / .002 / .003</td></tr>
+          <tr><td>DCSync</td><td>T1003.006</td></tr>
+          <tr><td>Domain Account Discovery</td><td>T1087.002</td></tr>
+          <tr><td>Scheduled Task persistence</td><td>T1053.005</td></tr>
+          <tr><td>Pass-the-Hash / Pass-the-Ticket</td><td>T1550.002 / .003</td></tr>
+          <tr><td>Golden / Silver / Kerberoasting</td><td>T1558.001 / .002 / .003</td></tr>
+          <tr><td>Spearphishing Attachment / Link</td><td>T1566.001 / .002</td></tr>
+        </table>
+        <h4>Hashing, by platform</h4>
+        <table class="ref-table">
+          <tr><th>Platform</th><th>Command</th></tr>
+          <tr><td>Linux</td><td><code>sha256sum file</code> / <code>md5sum file</code></td></tr>
+          <tr><td>macOS</td><td><code>shasum -a 256 file</code></td></tr>
+          <tr><td>PowerShell</td><td><code>Get-FileHash file</code> (SHA256 default; add <code>-Algorithm MD5</code> for MD5)</td></tr>
+          <tr><td>CMD</td><td><code>certutil -hashfile file SHA256</code></td></tr>
+        </table>
+        <p><b>The <code>echo -n</code> gotcha:</b> <code>echo "test" | md5sum</code> hashes the string plus a trailing newline — wrong hash. Use <code>echo -n "test" | md5sum</code> or <code>printf "test" | md5sum</code> instead.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary><mark class="crit">Final 60 minutes — verify ritual</mark></summary>
+      <div class="refbody">
+        <p>Run this on every single answer, top to bottom, before you submit:</p>
+        <ul class="bullets">
+          <li>Does the answer match the exact format asked for — hash type, date format, IP, filename, MITRE ID?</li>
+          <li>No typos — hashes, filenames, IPs, domains copy-pasted, never retyped</li>
+          <li>Timestamps in the right format and the right timezone</li>
+          <li>Sub-techniques used where one applies (<code>T1110.003</code>, not the bare <code>T1110</code>)</li>
+          <li>Every question attempted — a partial answer beats a skipped one</li>
+          <li>No leftover scratch text sitting in an answer field</li>
+          <li>Capitalization matches the source, not your memory of it</li>
+        </ul>
+        <p><b>The smell test:</b> for anything that came easily, ask "did I verify this, or just pattern-match it?" — if the latter, do one more corroborating pivot. For anything that came hard, re-read the question one final time and check the format again. Once every box is checked once, stop — a defended answer beats an endlessly re-polished one.</p>
+      </div>
+    </details>
+
+  </div>
+
+  <!-- SCRATCH -->
+  <h2 class="section">Scratchpad</h2>
+  <textarea class="scratch" id="scratch" placeholder="Anything that doesn't fit elsewhere — hypotheses, things to double back on, commands you keep needing..."></textarea>
+
+  <footer>Runs entirely in your browser. Clearing site data / browser cache will erase saved progress — export JSON regularly if this matters to you.<br>Independent BTL1 study aid, not affiliated with Security Blue Team. Part of <a href="https://github.com/zelihazenginapogeeusa-byte/zeliha-infosec-journey" target="_blank" style="color:var(--imp);">zeliha-infosec-journey</a>.</footer>
+</div>
+
+<div class="undo-toast" id="undoToast" style="display:none;">
+  <span id="undoMsg">Row removed.</span>
+  <button id="undoBtn" class="primary">Undo</button>
+</div>
+
+<script>
+(function(){
+  const STORAGE_KEY = 'btl1-exam-tracker-v1';
+  const TACTICS = ["Initial Access","Execution","Persistence","Privilege Escalation","Defense Evasion","Credential Access","Discovery","Lateral Movement","Collection","Command and Control","Exfiltration","Impact"];
+  const PHASES = ["Phishing Analysis","Threat Intelligence","SIEM / Log Analysis","Digital Forensics","Incident Response","Reporting"];
+  const PHASE_STATES = ["Not started","In progress","Done"];
+  const ACTIVITY_TYPES = ["","RDP","C2 Beacon","Lateral Movement (SMB)","Lateral Movement (WinRM/PsExec)","Phishing Delivery","Credential Access","Data Exfiltration","DNS Tunneling","Persistence","Recon / Scanning","Other"];
+  const ACTIVITY_SEVERITY = {"C2 Beacon":"high","Data Exfiltration":"high","RDP":"med","Lateral Movement (SMB)":"med","Lateral Movement (WinRM/PsExec)":"med","DNS Tunneling":"med"};
+  const ACTIVITY_STATUS = ["Suspected","Confirmed"];
+  const ACTIVITY_TECHNIQUE_HINT = {
+    "RDP": "T1021.001",
+    "C2 Beacon": "T1071",
+    "Lateral Movement (SMB)": "T1021.002",
+    "Lateral Movement (WinRM/PsExec)": "T1021.006",
+    "Phishing Delivery": "T1566",
+    "Credential Access": "T1003",
+    "Data Exfiltration": "T1041",
+    "DNS Tunneling": "T1071.004",
+    "Persistence": "T1547",
+    "Recon / Scanning": "T1046"
+  };
+
+  const CONFIDENCE_LEVELS = ["", "Low", "Medium", "High"];
+
+  function defaultState(){
+    const questions = [];
+    for(let i=1;i<=20;i++) questions.push({id:'q'+i, label:'Q'+i, done:false, note:'', confidence:''});
+    const attck = {};
+    TACTICS.forEach(t => attck[t] = {observed:false, technique:''});
+    const phases = {};
+    PHASES.forEach(p => phases[p] = "Not started");
+    return {
+      startTime: null,
+      targetHours: 24,
+      questions: questions,
+      iocs: [ {type:'', value:'', source:'', notes:''} ],
+      timeline: [ {time:'', host:'', tool:'', finding:'', attck:''} ],
+      activity: [ {source:'', destination:'', type:'', protocol:'', frameRef:'', technique:'', status:'Suspected', notes:''} ],
+      attck: attck,
+      phases: phases,
+      scratch: '',
+      theme: 'dark'
+    };
+  }
+
+  let state = load();
+
+  function load(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return defaultState();
+      const parsed = JSON.parse(raw);
+      const d = defaultState();
+      return Object.assign(d, parsed);
+    }catch(e){ return defaultState(); }
+  }
+
+  let saveTimer = null;
+  function save(){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    const el = document.getElementById('savedIndicator');
+    el.classList.add('show');
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(()=> el.classList.remove('show'), 1200);
+  }
+  function scheduleSave(){ clearTimeout(scheduleSave._t); scheduleSave._t = setTimeout(save, 250); }
+
+  // ---------- THEME ----------
+  function applyTheme(){
+    document.documentElement.setAttribute('data-theme', state.theme);
+    document.getElementById('themeToggle').textContent = state.theme === 'dark' ? '☀' : '🌙';
+  }
+  document.getElementById('themeToggle').addEventListener('click', ()=>{
+    state.theme = state.theme === 'dark' ? 'light' : 'dark';
+    applyTheme(); scheduleSave();
+  });
+
+  // ---------- QUESTIONS ----------
+  function renderQuestions(){
+    const card = document.getElementById('questionsCard');
+    card.innerHTML = '';
+    state.questions.forEach((q, idx) => {
+      if(q.confidence === undefined) q.confidence = '';
+      const row = document.createElement('div');
+      row.className = 'qrow' + (q.done ? ' done' : '');
+      const confOpts = CONFIDENCE_LEVELS.map(c => `<option value="${c}" ${q.confidence===c?'selected':''}>${c || 'Confidence…'}</option>`).join('');
+      row.innerHTML = `
+        <input type="checkbox" ${q.done?'checked':''}>
+        <input class="qlabel" type="text" value="${escapeAttr(q.label)}">
+        <select class="qconf${q.confidence ? ' conf-'+q.confidence.toLowerCase() : ''}" title="How confident are you in this answer?">${confOpts}</select>
+        <textarea class="qnote" rows="1" placeholder="Answer / evidence reference...">${escapeHtml(q.note)}</textarea>
+        <button class="del-row" title="Remove">✕</button>
+      `;
+      const [cb, labelInput, confSelect, noteInput, delBtn] = row.querySelectorAll('input[type=checkbox], input.qlabel, select.qconf, textarea.qnote, button.del-row');
+      cb.addEventListener('change', ()=>{ q.done = cb.checked; row.classList.toggle('done', q.done); scheduleSave(); renderCoverage(); });
+      labelInput.addEventListener('input', ()=>{ q.label = labelInput.value; scheduleSave(); });
+      confSelect.addEventListener('change', ()=>{
+        q.confidence = confSelect.value;
+        confSelect.className = 'qconf' + (q.confidence ? ' conf-'+q.confidence.toLowerCase() : '');
+        scheduleSave();
+      });
+      noteInput.addEventListener('input', ()=>{ q.note = noteInput.value; scheduleSave(); });
+      delBtn.addEventListener('click', ()=>{
+        const removed = state.questions.splice(idx,1)[0];
+        renderQuestions(); scheduleSave(); renderCoverage();
+        showUndo('Question', ()=>{
+          state.questions.splice(Math.min(idx, state.questions.length), 0, removed);
+          renderQuestions(); scheduleSave(); renderCoverage();
+        });
+      });
+      card.appendChild(row);
+    });
+  }
+  document.getElementById('addQuestion').addEventListener('click', ()=>{
+    state.questions.push({id:'q'+Date.now(), label:'Q'+(state.questions.length+1), done:false, note:'', confidence:''});
+    renderQuestions(); scheduleSave(); renderCoverage();
+  });
+
+  // ---------- GENERIC DYN TABLE (IOC + Timeline) ----------
+  function renderDynTable(tbodyId, rows, cols, addFn){
+    const tbody = document.getElementById(tbodyId);
+    tbody.innerHTML = '';
+    rows.forEach((row, idx) => {
+      const tr = document.createElement('tr');
+      cols.forEach(col => {
+        const td = document.createElement('td');
+        const input = document.createElement(col.multiline ? 'textarea' : 'input');
+        if(!col.multiline) input.type = 'text';
+        else { input.rows = 1; }
+        input.value = row[col.key] || '';
+        input.placeholder = col.placeholder || '';
+        input.addEventListener('input', ()=>{ row[col.key] = input.value; scheduleSave(); });
+        td.appendChild(input);
+        tr.appendChild(td);
+      });
+      const tdDel = document.createElement('td');
+      const delBtn = document.createElement('button');
+      delBtn.className = 'del-row'; delBtn.textContent = '✕'; delBtn.title = 'Remove row';
+      delBtn.addEventListener('click', ()=>{
+        const removed = rows.splice(idx,1)[0];
+        addFn.render(); scheduleSave();
+        showUndo('Row', ()=>{ rows.splice(Math.min(idx, rows.length), 0, removed); addFn.render(); scheduleSave(); });
+      });
+      tdDel.appendChild(delBtn);
+      tr.appendChild(tdDel);
+      tbody.appendChild(tr);
+    });
+  }
+
+  const iocCols = [
+    {key:'type', placeholder:'e.g. File hash'},
+    {key:'value', placeholder:'value'},
+    {key:'source', placeholder:'where found'},
+    {key:'notes', placeholder:'notes', multiline:true},
+  ];
+  const iocRenderer = { render: ()=> renderDynTable('iocBody', state.iocs, iocCols, iocRenderer) };
+  document.getElementById('addIoc').addEventListener('click', ()=>{
+    state.iocs.push({type:'', value:'', source:'', notes:''});
+    iocRenderer.render(); scheduleSave();
+  });
+
+  const timelineCols = [
+    {key:'time', placeholder:'HH:MM:SS'},
+    {key:'host', placeholder:'host / source'},
+    {key:'tool', placeholder:'artifact / tool'},
+    {key:'finding', placeholder:'what you found', multiline:true},
+    {key:'attck', placeholder:'ATT&CK / notes'},
+  ];
+  const timelineRenderer = { render: ()=> renderDynTable('timelineBody', state.timeline, timelineCols, timelineRenderer) };
+  document.getElementById('addTimeline').addEventListener('click', ()=>{
+    state.timeline.push({time:'', host:'', tool:'', finding:'', attck:''});
+    timelineRenderer.render(); scheduleSave();
+  });
+
+  // ---------- ACTIVITY MAP (source/dest/type/technique/status, with severity dot) ----------
+  function renderActivity(){
+    const tbody = document.getElementById('activityBody');
+    tbody.innerHTML = '';
+    state.activity.forEach((row, idx) => {
+      const tr = document.createElement('tr');
+      tr.className = row.status === 'Confirmed' ? 'status-confirmed' : '';
+
+      const tdDot = document.createElement('td');
+      const dot = document.createElement('span');
+      dot.className = 'flag-dot' + (ACTIVITY_SEVERITY[row.type] ? ' ' + ACTIVITY_SEVERITY[row.type] : '');
+      dot.title = row.type || 'no activity type set';
+      tdDot.appendChild(dot);
+      tr.appendChild(tdDot);
+
+      function textCell(key, placeholder){
+        const td = document.createElement('td');
+        const input = document.createElement('input');
+        input.type = 'text'; input.value = row[key] || ''; input.placeholder = placeholder || '';
+        input.addEventListener('input', ()=>{ row[key] = input.value; scheduleSave(); });
+        td.appendChild(input);
+        return td;
+      }
+      tr.appendChild(textCell('source', 'e.g. 10.0.0.5 / DESKTOP01 / jdoe'));
+      tr.appendChild(textCell('destination', 'e.g. 185.x.x.x / SRV02'));
+
+      let techniqueInput = null;
+      const tdType = document.createElement('td');
+      const selType = document.createElement('select');
+      ACTIVITY_TYPES.forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = t; opt.textContent = t || '— select —';
+        if(row.type === t) opt.selected = true;
+        selType.appendChild(opt);
+      });
+      selType.addEventListener('change', ()=>{
+        row.type = selType.value;
+        dot.className = 'flag-dot' + (ACTIVITY_SEVERITY[row.type] ? ' ' + ACTIVITY_SEVERITY[row.type] : '');
+        dot.title = row.type || 'no activity type set';
+        const hint = ACTIVITY_TECHNIQUE_HINT[row.type];
+        if(techniqueInput){
+          techniqueInput.placeholder = hint ? `e.g. ${hint}` : 'T####';
+          // Only auto-fill as a starting suggestion — never overwrite something you already typed.
+          if(hint && !row.technique){
+            row.technique = hint;
+            techniqueInput.value = hint;
+          }
+        }
+        scheduleSave();
+      });
+      tdType.appendChild(selType);
+      tr.appendChild(tdType);
+
+      tr.appendChild(textCell('protocol', 'e.g. TCP/443, DNS'));
+      tr.appendChild(textCell('frameRef', 'e.g. Frame 1024 / tcp.stream==5'));
+      const tdTechnique = textCell('technique', ACTIVITY_TECHNIQUE_HINT[row.type] ? `e.g. ${ACTIVITY_TECHNIQUE_HINT[row.type]}` : 'T####');
+      techniqueInput = tdTechnique.querySelector('input');
+      techniqueInput.title = 'Auto-suggested from Activity Type — always double-check against the actual evidence before relying on it.';
+      tr.appendChild(tdTechnique);
+
+      const tdStatus = document.createElement('td');
+      const selStatus = document.createElement('select');
+      ACTIVITY_STATUS.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s; opt.textContent = s;
+        if(row.status === s) opt.selected = true;
+        selStatus.appendChild(opt);
+      });
+      selStatus.addEventListener('change', ()=>{
+        row.status = selStatus.value;
+        tr.className = row.status === 'Confirmed' ? 'status-confirmed' : '';
+        scheduleSave();
+      });
+      tdStatus.appendChild(selStatus);
+      tr.appendChild(tdStatus);
+
+      tr.appendChild(textCell('notes', 'notes'));
+
+      const tdDel = document.createElement('td');
+      const delBtn = document.createElement('button');
+      delBtn.className = 'del-row'; delBtn.textContent = '✕'; delBtn.title = 'Remove row';
+      delBtn.addEventListener('click', ()=>{
+        const removed = state.activity.splice(idx,1)[0];
+        renderActivity(); scheduleSave();
+        showUndo('Activity row', ()=>{ state.activity.splice(Math.min(idx, state.activity.length), 0, removed); renderActivity(); scheduleSave(); });
+      });
+      tdDel.appendChild(delBtn);
+      tr.appendChild(tdDel);
+
+      tbody.appendChild(tr);
+    });
+  }
+  document.getElementById('addActivity').addEventListener('click', ()=>{
+    state.activity.push({source:'', destination:'', type:'', protocol:'', frameRef:'', technique:'', status:'Suspected', notes:''});
+    renderActivity(); scheduleSave();
+  });
+
+  // ---------- ATT&CK ----------
+  function renderAttck(){
+    const grid = document.getElementById('attckGrid');
+    grid.innerHTML = '';
+    TACTICS.forEach(t => {
+      const entry = state.attck[t];
+      const item = document.createElement('div');
+      item.className = 'attck-item' + (entry.observed ? ' on' : '');
+      item.innerHTML = `
+        <input type="checkbox" ${entry.observed?'checked':''}>
+        <span class="tname">${t}</span>
+        <input type="text" placeholder="T####" value="${escapeAttr(entry.technique)}">
+      `;
+      const [cb, techInput] = item.querySelectorAll('input[type=checkbox], input[type=text]');
+      cb.addEventListener('change', ()=>{ entry.observed = cb.checked; item.classList.toggle('on', entry.observed); scheduleSave(); });
+      techInput.addEventListener('input', ()=>{ entry.technique = techInput.value; scheduleSave(); });
+      grid.appendChild(item);
+    });
+  }
+
+  // ---------- PHASES ----------
+  function renderPhases(){
+    const grid = document.getElementById('phaseGrid');
+    grid.innerHTML = '';
+    PHASES.forEach(p => {
+      const item = document.createElement('div');
+      item.className = 'phase-item';
+      const opts = PHASE_STATES.map(s => `<option value="${s}" ${state.phases[p]===s?'selected':''}>${s}</option>`).join('');
+      item.innerHTML = `<div class="pname">${p}</div><select>${opts}</select>`;
+      item.querySelector('select').addEventListener('change', (e)=>{ state.phases[p] = e.target.value; scheduleSave(); renderCoverage(); });
+      grid.appendChild(item);
+    });
+  }
+
+  // ---------- COVERAGE ----------
+  function renderCoverage(){
+    const totalQ = state.questions.length;
+    const doneQ = state.questions.filter(q => q.done).length;
+    const totalP = PHASES.length;
+    const doneP = PHASES.filter(p => state.phases[p] === 'Done').length;
+    const pct = totalQ ? Math.round((doneQ/totalQ)*100) : 0;
+    document.getElementById('covFill').style.width = pct + '%';
+    document.getElementById('covLabel').textContent = `${doneQ}/${totalQ} questions answered (${pct}%) · ${doneP}/${totalP} phases done`;
+  }
+
+  // ---------- UNDO ----------
+  let undoAction = null;
+  let undoTimer = null;
+  function showUndo(label, restoreFn){
+    undoAction = restoreFn;
+    document.getElementById('undoMsg').textContent = label + ' removed.';
+    const toast = document.getElementById('undoToast');
+    toast.style.display = 'flex';
+    clearTimeout(undoTimer);
+    undoTimer = setTimeout(()=>{ toast.style.display = 'none'; undoAction = null; }, 6000);
+  }
+  document.getElementById('undoBtn').addEventListener('click', ()=>{
+    if(undoAction) undoAction();
+    document.getElementById('undoToast').style.display = 'none';
+    clearTimeout(undoTimer);
+    undoAction = null;
+  });
+
+  // ---------- SCRATCH ----------
+  const scratchEl = document.getElementById('scratch');
+  scratchEl.value = state.scratch || '';
+  scratchEl.addEventListener('input', ()=>{ state.scratch = scratchEl.value; scheduleSave(); });
+
+  // ---------- TIMER ----------
+  const targetHoursInput = document.getElementById('targetHours');
+  targetHoursInput.value = state.targetHours;
+  targetHoursInput.addEventListener('input', ()=>{
+    state.targetHours = parseFloat(targetHoursInput.value) || 24;
+    document.getElementById('targetHoursLabel').textContent = state.targetHours;
+    scheduleSave();
+  });
+  document.getElementById('targetHoursLabel').textContent = state.targetHours;
+
+  document.getElementById('btnStartTimer').addEventListener('click', ()=>{
+    state.startTime = Date.now();
+    scheduleSave();
+  });
+  document.getElementById('btnClearTimer').addEventListener('click', ()=>{
+    state.startTime = null;
+    document.getElementById('elapsedVal').textContent = '00:00:00';
+    document.getElementById('remainVal').textContent = pad2(state.targetHours) + ':00:00';
+    scheduleSave();
+  });
+
+  function pad2(n){ return String(Math.floor(n)).padStart(2,'0'); }
+  function fmtHMS(totalSeconds){
+    const neg = totalSeconds < 0;
+    totalSeconds = Math.abs(Math.round(totalSeconds));
+    const h = Math.floor(totalSeconds/3600);
+    const m = Math.floor((totalSeconds%3600)/60);
+    const s = totalSeconds%60;
+    return (neg?'-':'') + String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  }
+  function tickTimer(){
+    const paceVal = document.getElementById('paceVal');
+    const paceStat = document.getElementById('paceStat');
+    if(!state.startTime){
+      paceVal.textContent = '—';
+      paceStat.classList.remove('warn','critical');
+      return;
+    }
+    const elapsedSec = (Date.now() - state.startTime)/1000;
+    const remainSec = state.targetHours*3600 - elapsedSec;
+    document.getElementById('elapsedVal').textContent = fmtHMS(elapsedSec);
+    document.getElementById('remainVal').textContent = fmtHMS(remainSec);
+    const remainStat = document.getElementById('remainStat');
+    remainStat.classList.toggle('warn', remainSec > 30*60 && remainSec < 3*3600);
+    remainStat.classList.toggle('critical', remainSec > 0 && remainSec <= 30*60);
+    remainStat.classList.toggle('over', remainSec <= 0);
+
+    const openQuestions = state.questions.filter(q => !q.done).length;
+    if(openQuestions === 0){
+      paceVal.textContent = '✓ all done';
+      paceStat.classList.remove('warn','critical');
+    } else if(remainSec <= 0){
+      paceVal.textContent = '0m / q';
+      paceStat.classList.add('critical');
+    } else {
+      const minsPerQ = (remainSec/60) / openQuestions;
+      paceVal.textContent = (minsPerQ >= 100 ? Math.round(minsPerQ) : minsPerQ.toFixed(1)) + 'm / q';
+      paceStat.classList.toggle('warn', minsPerQ < 30 && minsPerQ >= 10);
+      paceStat.classList.toggle('critical', minsPerQ < 10);
+    }
+  }
+  setInterval(tickTimer, 1000);
+
+  // ---------- EXPORT / IMPORT ----------
+  function download(filename, content, mime){
+    const blob = new Blob([content], {type: mime});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  document.getElementById('btnExportJson').addEventListener('click', ()=>{
+    download('btl1-exam-tracker-backup.json', JSON.stringify(state, null, 2), 'application/json');
+  });
+
+  document.getElementById('btnImport').addEventListener('click', ()=> document.getElementById('fileImport').click());
+  document.getElementById('fileImport').addEventListener('change', (e)=>{
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      try{
+        const parsed = JSON.parse(reader.result);
+        state = Object.assign(defaultState(), parsed);
+        renderAll();
+        save();
+      }catch(err){ alert('Could not read that file — is it a JSON export from this tracker?'); }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  });
+
+  document.getElementById('btnReset').addEventListener('click', ()=>{
+    if(!confirm('Reset all tracked data? This cannot be undone (export JSON first if you want a backup).')) return;
+    state = defaultState();
+    renderAll();
+    save();
+  });
+
+  function mdEscape(s){ return (s||'').toString().replace(/\|/g,'\\|'); }
+
+  document.getElementById('btnExportMd').addEventListener('click', ()=>{
+    const lines = [];
+    lines.push('# BTL1 Investigation Report — Draft');
+    lines.push('');
+    lines.push('*Auto-generated from the exam tracker — fill in the summary and recommended actions before submitting.*');
+    lines.push('');
+    lines.push('## Summary');
+    lines.push('');
+    lines.push('_[one or two sentences: what happened, verdict, severity]_');
+    lines.push('');
+    lines.push('## Questions / Tasks');
+    lines.push('');
+    state.questions.forEach(q => {
+      const confTag = q.confidence ? ` _(confidence: ${mdEscape(q.confidence)})_` : '';
+      lines.push(`- [${q.done ? 'x' : ' '}] **${mdEscape(q.label)}**${confTag} — ${mdEscape(q.note) || '_no note_'}`);
+    });
+    lines.push('');
+    lines.push('## Findings / Timeline');
+    lines.push('');
+    lines.push('| Timestamp | Host / Source | Artifact / Tool | Finding | ATT&CK / Notes |');
+    lines.push('|---|---|---|---|---|');
+    state.timeline.forEach(t => {
+      lines.push(`| ${mdEscape(t.time)} | ${mdEscape(t.host)} | ${mdEscape(t.tool)} | ${mdEscape(t.finding)} | ${mdEscape(t.attck)} |`);
+    });
+    lines.push('');
+    lines.push('## IOCs');
+    lines.push('');
+    lines.push('| Type | Value | Source | Notes |');
+    lines.push('|---|---|---|---|');
+    state.iocs.forEach(i => {
+      lines.push(`| ${mdEscape(i.type)} | ${mdEscape(i.value)} | ${mdEscape(i.source)} | ${mdEscape(i.notes)} |`);
+    });
+    lines.push('');
+    lines.push('## Host / Network Activity Map');
+    lines.push('');
+    lines.push('| Source | Destination | Activity Type | Protocol/Port | Frame # / Filter | ATT&CK | Status | Notes |');
+    lines.push('|---|---|---|---|---|---|---|---|');
+    state.activity.forEach(a => {
+      lines.push(`| ${mdEscape(a.source)} | ${mdEscape(a.destination)} | ${mdEscape(a.type)} | ${mdEscape(a.protocol)} | ${mdEscape(a.frameRef)} | ${mdEscape(a.technique)} | ${mdEscape(a.status)} | ${mdEscape(a.notes)} |`);
+    });
+    lines.push('');
+    lines.push('## MITRE ATT&CK Mapping');
+    lines.push('');
+    TACTICS.forEach(t => {
+      const e = state.attck[t];
+      if(e.observed) lines.push(`- **${t}**${e.technique ? ' — ' + mdEscape(e.technique) : ''}`);
+    });
+    lines.push('');
+    lines.push('## Investigation Phase Status');
+    lines.push('');
+    PHASES.forEach(p => lines.push(`- ${p}: **${state.phases[p]}**`));
+    lines.push('');
+    lines.push('## Recommended Actions');
+    lines.push('');
+    lines.push('_[block domains/IPs/hashes, disable accounts, isolate hosts, etc.]_');
+    lines.push('');
+    lines.push('## Scratch Notes');
+    lines.push('');
+    lines.push(state.scratch || '_none_');
+    lines.push('');
+    download('btl1-investigation-report-draft.md', lines.join('\n'), 'text/markdown');
+  });
+
+  // ---------- HELPERS ----------
+  function escapeHtml(s){ return (s||'').toString().replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+  function escapeAttr(s){ return (s||'').toString().replace(/"/g, '&quot;'); }
+
+  // ---------- TOOLBOX ----------
+  function initToolbox(){
+
+    // -- Epoch / Unix timestamp converter --
+    const epochIn = document.getElementById('toolEpochIn');
+    const epochOut = document.getElementById('toolEpochOut');
+    epochIn.addEventListener('input', ()=>{
+      const raw = epochIn.value.trim();
+      if(!raw){ epochOut.textContent = '—'; return; }
+      const num = Number(raw);
+      if(!Number.isFinite(num)){ epochOut.innerHTML = '<span class="bad">Not a valid number.</span>'; return; }
+      // Heuristic: 13+ digit magnitude is almost certainly milliseconds, not seconds
+      const ms = Math.abs(num) >= 1e12 ? num : num * 1000;
+      const d = new Date(ms);
+      if(isNaN(d.getTime())){ epochOut.innerHTML = '<span class="bad">Out of range.</span>'; return; }
+      epochOut.innerHTML = `UTC: ${d.toISOString().replace('T',' ').replace('Z',' UTC')}<br>Local: ${d.toLocaleString()}`;
+    });
+
+    const dateIn = document.getElementById('toolDateIn');
+    const dateOut = document.getElementById('toolDateOut');
+    dateIn.addEventListener('input', ()=>{
+      if(!dateIn.value){ dateOut.textContent = '—'; return; }
+      const d = new Date(dateIn.value);
+      if(isNaN(d.getTime())){ dateOut.innerHTML = '<span class="bad">Invalid date.</span>'; return; }
+      const epochSec = Math.floor(d.getTime() / 1000);
+      dateOut.innerHTML = `Epoch (seconds): ${epochSec}<br>Epoch (ms): ${d.getTime()}`;
+    });
+
+    // -- Base64 encode / decode --
+    const b64In = document.getElementById('toolB64In');
+    const b64Out = document.getElementById('toolB64Out');
+    const b64Utf16 = document.getElementById('toolB64Utf16');
+    document.getElementById('toolB64EncodeBtn').addEventListener('click', ()=>{
+      try{
+        b64Out.value = btoa(unescape(encodeURIComponent(b64In.value)));
+      }catch(e){
+        b64Out.value = 'Could not encode input.';
+      }
+    });
+    document.getElementById('toolB64DecodeBtn').addEventListener('click', ()=>{
+      const raw = b64In.value.trim();
+      try{
+        const binary = atob(raw);
+        if(b64Utf16.checked){
+          // PowerShell -EncodedCommand: Base64 of UTF-16LE bytes
+          let out = '';
+          for(let i = 0; i + 1 < binary.length; i += 2){
+            out += String.fromCharCode(binary.charCodeAt(i) | (binary.charCodeAt(i+1) << 8));
+          }
+          b64Out.value = out;
+        } else {
+          b64Out.value = decodeURIComponent(escape(binary));
+        }
+      }catch(e){
+        b64Out.value = 'Could not decode — not valid Base64, or wrong encoding option checked.';
+      }
+    });
+    document.getElementById('toolB64CopyBtn').addEventListener('click', (e)=>{
+      const btn = e.currentTarget;
+      const original = btn.textContent;
+      navigator.clipboard.writeText(b64Out.value).then(()=>{
+        btn.textContent = '✓ Copied';
+        setTimeout(()=>{ btn.textContent = original; }, 1200);
+      }).catch(()=>{});
+    });
+
+    // -- Hash identifier --
+    const hashIn = document.getElementById('toolHashIn');
+    const hashOut = document.getElementById('toolHashOut');
+    const HASH_PATTERNS = [
+      [/^\$2[aby]\$/, 'bcrypt'],
+      [/^\$6\$/, 'sha512crypt (Linux /etc/shadow — modern default)'],
+      [/^\$5\$/, 'sha256crypt (Linux /etc/shadow)'],
+      [/^\$1\$/, 'md5crypt (older Linux /etc/shadow)'],
+      [/^\$y\$/, 'yescrypt (Linux /etc/shadow — newer distros)'],
+      [/^\$argon2/, 'Argon2'],
+      [/^[a-f0-9]{32}$/i, '32 hex chars → MD5, or NTLM (identical format — SAM/NTDS dump = NTLM, standalone file hash = MD5)'],
+      [/^[a-f0-9]{40}$/i, '40 hex chars → SHA-1'],
+      [/^[a-f0-9]{56}$/i, '56 hex chars → SHA-224'],
+      [/^[a-f0-9]{64}$/i, '64 hex chars → SHA-256'],
+      [/^[a-f0-9]{96}$/i, '96 hex chars → SHA-384'],
+      [/^[a-f0-9]{128}$/i, '128 hex chars → SHA-512'],
+    ];
+    hashIn.addEventListener('input', ()=>{
+      const raw = hashIn.value.trim();
+      if(!raw){ hashOut.textContent = '—'; return; }
+      const match = HASH_PATTERNS.find(([re]) => re.test(raw));
+      if(match){
+        hashOut.textContent = match[1];
+      } else {
+        hashOut.innerHTML = `No confident match (length: ${raw.length} chars). Doesn't fit a common hash format — could be salted/keyed, an encoding of something else, or truncated.`;
+      }
+    });
+
+    // -- Hex <-> Decimal --
+    const hexIn = document.getElementById('toolHexIn');
+    const decIn = document.getElementById('toolDecIn');
+    hexIn.addEventListener('input', ()=>{
+      const cleaned = hexIn.value.trim().replace(/^0x/i, '');
+      if(!cleaned){ decIn.value = ''; return; }
+      if(!/^[0-9a-f]+$/i.test(cleaned)){ return; }
+      decIn.value = parseInt(cleaned, 16).toString(10);
+    });
+    decIn.addEventListener('input', ()=>{
+      const cleaned = decIn.value.trim();
+      if(!cleaned){ hexIn.value = ''; return; }
+      if(!/^-?\d+$/.test(cleaned)){ return; }
+      hexIn.value = '0x' + Math.abs(parseInt(cleaned, 10)).toString(16).toUpperCase();
+    });
+
+    // -- CIDR / Subnet calculator --
+    const cidrIn = document.getElementById('toolCidrIn');
+    const cidrOut = document.getElementById('toolCidrOut');
+    function ipToInt(ip){
+      const parts = ip.split('.');
+      if(parts.length !== 4) return null;
+      let n = 0;
+      for(const p of parts){
+        const v = Number(p);
+        if(!Number.isInteger(v) || v < 0 || v > 255) return null;
+        n = (n << 8) | v;
+      }
+      return n >>> 0;
+    }
+    function intToIp(n){
+      return [(n>>>24)&255, (n>>>16)&255, (n>>>8)&255, n&255].join('.');
+    }
+    function classifyIp(n){
+      if((n >>> 24) === 10) return 'Private (RFC1918, 10.0.0.0/8)';
+      if((n >>> 24) === 127) return 'Loopback (127.0.0.0/8)';
+      const b = (n>>>16)&0xFFFF;
+      if((n>>>16) >= 0xAC10 && (n>>>16) <= 0xAC1F) return 'Private (RFC1918, 172.16.0.0/12)';
+      if((n>>>16) === 0xC0A8) return 'Private (RFC1918, 192.168.0.0/16)';
+      if((n>>>16) === 0xA9FE) return 'Link-local (169.254.0.0/16, APIPA)';
+      if((n>>>28) === 0xE) return 'Multicast (224.0.0.0/4)';
+      return 'Public / routable';
+    }
+    cidrIn.addEventListener('input', ()=>{
+      const raw = cidrIn.value.trim();
+      if(!raw){ cidrOut.textContent = '—'; return; }
+      const m = raw.match(/^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\/(\d{1,2})$/);
+      if(!m){ cidrOut.innerHTML = '<span class="bad">Format: a.b.c.d/n</span>'; return; }
+      const ip = ipToInt(m[1]);
+      const prefix = Number(m[2]);
+      if(ip === null || prefix < 0 || prefix > 32){ cidrOut.innerHTML = '<span class="bad">Invalid IP or prefix.</span>'; return; }
+      const mask = prefix === 0 ? 0 : (0xFFFFFFFF << (32 - prefix)) >>> 0;
+      const network = (ip & mask) >>> 0;
+      const broadcast = (network | (~mask >>> 0)) >>> 0;
+      let firstUsable, lastUsable, usableCount;
+      if(prefix >= 31){
+        firstUsable = network; lastUsable = broadcast;
+        usableCount = prefix === 32 ? 1 : 2;
+      } else {
+        firstUsable = network + 1; lastUsable = broadcast - 1;
+        usableCount = Math.pow(2, 32 - prefix) - 2;
+      }
+      cidrOut.innerHTML = [
+        `Netmask: ${intToIp(mask)}`,
+        `Network: ${intToIp(network)}`,
+        `Broadcast: ${intToIp(broadcast)}`,
+        `Usable range: ${intToIp(firstUsable)} – ${intToIp(lastUsable)} (${usableCount} host${usableCount===1?'':'s'})`,
+        `Type: ${classifyIp(ip)}`
+      ].join('<br>');
+    });
+  }
+
+  function renderAll(){
+    applyTheme();
+    renderQuestions();
+    iocRenderer.render();
+    timelineRenderer.render();
+    renderActivity();
+    renderAttck();
+    renderPhases();
+    renderCoverage();
+    scratchEl.value = state.scratch || '';
+    targetHoursInput.value = state.targetHours;
+    document.getElementById('targetHoursLabel').textContent = state.targetHours;
+    tickTimer();
+  }
+
+  renderAll();
+  initToolbox();
+})();
+</script>
+</body>
+</html>
