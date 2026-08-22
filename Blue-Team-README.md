@@ -9,6 +9,7 @@
 > **Prerequisite for the phishing lab:** install eM Client first (free, no account required for the lab) —
 > * [eM Client Download (Windows)](https://www.emclient.com/download)
 > * [eM Client Download (Mac)](https://www.emclient.com/download-mac)
+
 Defensive-side reference material, prepared primarily around the **BTL1** (Blue Team Level 1) exam objectives — detection, triage, forensics, and incident response. Organized by function: alert-facing SOC/SIEM work vs. deeper DFIR/threat-intel work.
 
 ---
