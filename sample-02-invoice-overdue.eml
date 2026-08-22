@@ -1,0 +1,33 @@
+Return-Path: <accounts@aldergate-freight-billing.com>
+Received: from smtp-out-14.aldergate-freight-billing.com (smtp-out-14.aldergate-freight-billing.com [192.0.2.201])
+	by mx.northbridge-solutions.com (Postfix) with ESMTPS id 9C2E1F44A
+	for <ap@northbridge-solutions.com>; Wed, 12 Aug 2026 14:03:29 +0000 (UTC)
+Received: from webmailer.aldergate-freight-billing.com ([192.0.2.87])
+	by smtp-out-14.aldergate-freight-billing.com with ESMTP id D3A11B2
+	for <ap@northbridge-solutions.com>; Wed, 12 Aug 2026 14:03:11 +0000 (UTC)
+Authentication-Results: mx.northbridge-solutions.com;
+	spf=pass (sender IP is 192.0.2.201) smtp.mailfrom=aldergate-freight-billing.com;
+	dkim=fail (body hash did not verify) header.d=aldergate-freight.com;
+	dmarc=fail (p=none sp=none dis=none) header.from=aldergate-freight.com
+From: "Aldergate Freight — Accounts Receivable" <billing@aldergate-freight.com>
+Reply-To: ar-dept@aldergate-freight-billing.com
+To: ap@northbridge-solutions.com
+Subject: Invoice #AF-88213 is now 15 days overdue — please remit
+Date: Wed, 12 Aug 2026 14:03:00 +0000
+Message-ID: <7e2d9a10-1c44-4f88-9b0e-3a6d5c2e91f7@aldergate-freight-billing.com>
+MIME-Version: 1.0
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+
+<html>
+<body style="font-family:Arial,sans-serif;font-size:14px;color:#222;">
+<p>Hello,</p>
+<p>This is a follow-up regarding <b>Invoice #AF-88213</b> for freight services rendered in July, which is now <b>15 days past due</b>. Our records show a balance of <b>$4,215.00</b> outstanding.</p>
+<p>To avoid a late fee and possible hold on your next shipment, please review the attached statement and remit payment using our updated banking details, effective this billing cycle:</p>
+<p><a href="http://192.0.2.87/statements/AF-88213-updated-remit.php">Aldergate_Invoice_AF-88213_Statement.pdf</a></p>
+<p>Note: our remittance account changed as of this month — please disregard any previous account numbers on file and confirm the new routing details in the linked statement before processing payment.</p>
+<p>Regards,<br>
+Aldergate Freight Co.<br>
+Accounts Receivable Department</p>
+</body>
+</html>
