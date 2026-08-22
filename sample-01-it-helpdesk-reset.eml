@@ -1,0 +1,32 @@
+Return-Path: <bounce@secure-login-verify.xyz>
+Received: from mail-relay-09.secure-login-verify.xyz (mail-relay-09.secure-login-verify.xyz [203.0.113.44])
+	by mx.northbridge-solutions.com (Postfix) with ESMTPS id 7F3A2C1B0
+	for <j.reyes@northbridge-solutions.com>; Mon, 17 Aug 2026 09:12:03 +0000 (UTC)
+Received: from [198.51.100.17] (unknown [198.51.100.17])
+	by mail-relay-09.secure-login-verify.xyz (Postfix) with ESMTP id 4B1D0A3
+	for <j.reyes@northbridge-solutions.com>; Mon, 17 Aug 2026 09:11:47 +0000 (UTC)
+Authentication-Results: mx.northbridge-solutions.com;
+	spf=fail (sender IP is 203.0.113.44) smtp.mailfrom=secure-login-verify.xyz;
+	dkim=none (message not signed);
+	dmarc=fail (p=reject sp=reject dis=none) header.from=northbridge-solutions.com
+From: "Northbridge IT Helpdesk" <helpdesk@northbridge-solutions.com>
+Reply-To: itsupport-noreply@secure-login-verify.xyz
+To: j.reyes@northbridge-solutions.com
+Subject: [Action Required] Your password expires in 24 hours
+Date: Mon, 17 Aug 2026 09:12:00 +0000
+Message-ID: <a1f7c3e0-4b9d-4e21-9c6a-2f8e0d1a55b1@secure-login-verify.xyz>
+MIME-Version: 1.0
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+
+<html>
+<body style="font-family:Arial,sans-serif;font-size:14px;color:#222;">
+<p>Dear J. Reyes,</p>
+<p>Our records show that your Northbridge network password will <b>expire in 24 hours</b>. To avoid losing access to your mailbox and shared drives, please verify your credentials immediately using the secure link below.</p>
+<p><a href="http://198.51.100.17/nb-portal/verify.php?uid=jreyes&amp;token=8f2a1c">https://northbridge-solutions.com/it/password-reset</a></p>
+<p>Failure to verify within 24 hours will result in your account being locked and a service ticket being required to restore access.</p>
+<p>Thank you,<br>
+Northbridge IT Helpdesk<br>
+Service Desk Ext. 4420</p>
+</body>
+</html>
