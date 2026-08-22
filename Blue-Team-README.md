@@ -5,7 +5,7 @@
 |---|---|
 | blue-team-study-notes_1.html | [Open live ↗](https://htmlpreview.github.io/?https://github.com/zelihazenginapogeeusa-byte/zeliha-infosec-journey/blob/cybersecurity-learning-hub/Blue-Team/blue-team-study-notes_1.html) |
 | btl1-exam-tracker.html | [Open live ↗](https://htmlpreview.github.io/?https://github.com/zelihazenginapogeeusa-byte/zeliha-infosec-journey/blob/cybersecurity-learning-hub/Blue-Team/btl1-exam-tracker.html) |
-| `phishing-eml-lab/phishing-eml-lab-emclient.html` | Original phishing header-forensics lab (eM Client) | [Open live ↗](https://htmlpreview.github.io/?https://github.com/zelihazenginapogeeusa-byte/zeliha-infosec-journey/blob/cybersecurity-learning-hub/Blue-Team/phishing-eml-lab/phishing-eml-lab-emclient.html) |
+| phishing-eml-lab/phishing-eml-lab-emclient.html | [Open live ↗](https://htmlpreview.github.io/?https://github.com/zelihazenginapogeeusa-byte/zeliha-infosec-journey/blob/cybersecurity-learning-hub/Blue-Team/phishing-eml-lab/phishing-eml-lab-emclient.html) |
 > **Prerequisite for the phishing lab:** install eM Client first (free, no account required for the lab) —
 > * [eM Client Download (Windows)](https://www.emclient.com/download)
 > * [eM Client Download (Mac)](https://www.emclient.com/download-mac)
