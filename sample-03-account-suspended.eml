@@ -1,0 +1,36 @@
+Return-Path: <no-reply@cloudvaultpro-alerts.net>
+Received: from mta-relay-3.cloudvaultpro-alerts.net (mta-relay-3.cloudvaultpro-alerts.net [203.0.113.98])
+	by mx.northbridge-solutions.com (Postfix) with ESMTPS id 1A5F0D9C2
+	for <j.reyes@northbridge-solutions.com>; Fri, 07 Aug 2026 22:47:56 +0000 (UTC)
+Received: from [198.51.100.203] (host-198-51-100-203.dyn-unknown.net [198.51.100.203])
+	by mta-relay-3.cloudvaultpro-alerts.net with ESMTP id F02B7E1
+	for <j.reyes@northbridge-solutions.com>; Fri, 07 Aug 2026 22:47:31 +0000 (UTC)
+Authentication-Results: mx.northbridge-solutions.com;
+	spf=softfail (sender IP is 203.0.113.98) smtp.mailfrom=cloudvaultpro-alerts.net;
+	dkim=none (message not signed);
+	dmarc=fail (p=quarantine sp=quarantine dis=none) header.from=cloudvaultpro.com
+From: "CloudVaultPro Security" <security@cloudvaultpro.com>
+Reply-To: no-reply@cloudvaultpro-alerts.net
+To: j.reyes@northbridge-solutions.com
+Subject: URGENT: Unusual sign-in blocked — verify your account within 12 hours
+Date: Fri, 07 Aug 2026 22:47:00 +0000
+Message-ID: <c44e1a2f-90bd-4a71-8e5c-1d7f3b9a02e6@cloudvaultpro-alerts.net>
+MIME-Version: 1.0
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+
+<html>
+<body style="font-family:Arial,sans-serif;font-size:14px;color:#222;">
+<p>Hi J. Reyes,</p>
+<p>We blocked a sign-in attempt to your CloudVaultPro account from an unrecognized device and location:</p>
+<p style="background:#f4f4f4;padding:10px;border-left:3px solid #c0392b;">
+Location: Bucharest, Romania<br>
+Device: Windows — Chrome<br>
+Time: Aug 7, 2026, 10:47 PM UTC
+</p>
+<p>If this wasn't you, your account may be at risk. <b>You must verify your identity within 12 hours</b> or your account and all synced files will be automatically suspended for your protection.</p>
+<p><a href="http://198.51.100.203/cvp-verify/session.php?ref=jreyes-nb">https://cloudvaultpro.com/account/verify-identity</a></p>
+<p>If you do not recognize this activity, verifying immediately also helps us secure your account against further attempts.</p>
+<p>— The CloudVaultPro Security Team</p>
+</body>
+</html>
