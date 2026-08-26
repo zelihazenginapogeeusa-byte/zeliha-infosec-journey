@@ -1,0 +1,1184 @@
+<title>OSINT Field Toolkit</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+<style>
+  :root {
+    --bg: #f5f2ea;
+    --surface: #ffffff;
+    --surface-hover: #f7f3e7;
+    --ink: #221f1a;
+    --ink-muted: #635c50;
+    --ink-faint: #948b7a;
+    --border: #e2dbc8;
+    --border-strong: #cdc2a6;
+    --shadow: 0 1px 2px rgba(34, 31, 26, 0.06);
+    --focus: #1f7d72;
+    --scrim: rgba(34, 31, 26, 0.32);
+
+    --c-email: #b8720c;
+    --c-ip: #1f7d72;
+    --c-url: #b3341f;
+    --c-phish: #356b30;
+    --c-threat: #5b3fa0;
+    --c-social: #9c3572;
+    --c-image: #2159a6;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #14181d;
+      --surface: #1c2127;
+      --surface-hover: #242a31;
+      --ink: #e8e3d6;
+      --ink-muted: #a79f8f;
+      --ink-faint: #746b5c;
+      --border: #2c323a;
+      --border-strong: #3a424c;
+      --shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+      --focus: #52c2b6;
+      --scrim: rgba(0, 0, 0, 0.55);
+
+      --c-email: #e2a83f;
+      --c-ip: #52c2b6;
+      --c-url: #e2624a;
+      --c-phish: #6fb85f;
+      --c-threat: #9c85e0;
+      --c-social: #d874ae;
+      --c-image: #6ba8ef;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #14181d;
+    --surface: #1c2127;
+    --surface-hover: #242a31;
+    --ink: #e8e3d6;
+    --ink-muted: #a79f8f;
+    --ink-faint: #746b5c;
+    --border: #2c323a;
+    --border-strong: #3a424c;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+    --focus: #52c2b6;
+    --scrim: rgba(0, 0, 0, 0.55);
+
+    --c-email: #e2a83f;
+    --c-ip: #52c2b6;
+    --c-url: #e2624a;
+    --c-phish: #6fb85f;
+    --c-threat: #9c85e0;
+    --c-social: #d874ae;
+    --c-image: #6ba8ef;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: inherit; }
+
+  .wrap {
+    max-width: 66rem;
+    margin: 0 auto;
+    padding: 3.5rem 1.5rem 4rem;
+  }
+
+  .masthead {
+    margin-bottom: 2rem;
+  }
+
+  .eyebrow {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--c-ip);
+    margin: 0 0 0.9rem;
+  }
+
+  h1 {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-weight: 600;
+    font-size: clamp(1.9rem, 4vw, 2.5rem);
+    letter-spacing: -0.01em;
+    margin: 0 0 0.9rem;
+    text-wrap: balance;
+  }
+
+  .dek {
+    max-width: 46rem;
+    color: var(--ink-muted);
+    font-size: 1.02rem;
+    margin: 0 0 1.6rem;
+  }
+
+  .dek code {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.88em;
+    background: var(--surface-hover);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 0.05em 0.4em;
+    color: var(--ink);
+  }
+
+  .hint {
+    font-size: 0.86rem;
+    color: var(--ink-faint);
+    margin: -0.9rem 0 1.3rem;
+  }
+
+  .search-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    max-width: 26rem;
+    margin-bottom: 1.1rem;
+  }
+
+  .search-row svg {
+    flex: none;
+    color: var(--ink-faint);
+  }
+
+  #search {
+    width: 100%;
+    font: inherit;
+    font-size: 0.95rem;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 6px;
+    padding: 0.6rem 0.85rem;
+  }
+
+  #search::placeholder { color: var(--ink-faint); }
+
+  #search:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 1px;
+  }
+
+  .jumpnav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .jumpnav a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.76rem;
+    font-weight: 500;
+    text-decoration: none;
+    color: var(--dot);
+    background: color-mix(in srgb, var(--dot) 20%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--dot) 45%, var(--border));
+    border-radius: 999px;
+    padding: 0.32rem 0.75rem 0.32rem 0.6rem;
+  }
+
+  .jumpnav a:hover { background: color-mix(in srgb, var(--dot) 34%, var(--surface)); }
+
+  .jumpnav a:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  .dot {
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 50%;
+    background: var(--dot);
+    flex: none;
+  }
+
+  .category {
+    margin-bottom: 2rem;
+    scroll-margin-top: 1.5rem;
+    background: color-mix(in srgb, var(--dot) 16%, var(--bg));
+    border: 1px solid color-mix(in srgb, var(--dot) 32%, var(--border));
+    border-radius: 14px;
+    padding: 1.35rem 1.35rem 1.6rem;
+  }
+
+  .category-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    border-bottom: 3px solid var(--dot);
+    padding-bottom: 0.6rem;
+    margin-bottom: 0.35rem;
+  }
+
+  .category-head h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--dot);
+    margin: 0;
+  }
+
+  .phase-tag {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    color: var(--dot);
+    white-space: nowrap;
+  }
+
+  .category-note {
+    color: var(--ink-muted);
+    font-size: 0.92rem;
+    margin: 0.7rem 0 1.4rem;
+    max-width: 42rem;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(15.5rem, 1fr));
+    gap: 0.85rem;
+  }
+
+  .tool {
+    display: block;
+    width: 100%;
+    text-align: left;
+    font: inherit;
+    cursor: pointer;
+    text-decoration: none;
+    background: color-mix(in srgb, var(--dot) 9%, var(--surface));
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--dot);
+    border-radius: 8px;
+    padding: 1rem 1.1rem;
+    box-shadow: var(--shadow);
+    transition: background 0.15s ease, transform 0.15s ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tool { transition: none; }
+  }
+
+  .tool:hover {
+    background: color-mix(in srgb, var(--dot) 20%, var(--surface));
+    transform: translateY(-1px);
+  }
+
+  .tool:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  .tool-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .tool-name {
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--ink);
+  }
+
+  .go {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.72rem;
+    color: var(--dot);
+    white-space: nowrap;
+  }
+
+  .tool-desc {
+    color: var(--ink-muted);
+    font-size: 0.88rem;
+    margin: 0.4rem 0 0.55rem;
+  }
+
+  .tool-domain {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.76rem;
+    color: var(--ink-faint);
+  }
+
+  .empty-state {
+    display: none;
+    color: var(--ink-muted);
+    font-size: 0.95rem;
+    padding: 1rem 0;
+  }
+
+  .empty-state.show { display: block; }
+
+  footer {
+    border-top: 1px solid var(--border-strong);
+    padding-top: 1.5rem;
+    margin-top: 1rem;
+    color: var(--ink-muted);
+    font-size: 0.88rem;
+  }
+
+  footer a {
+    color: var(--c-ip);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  footer a:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  /* Detail panel */
+  .scrim {
+    position: fixed;
+    inset: 0;
+    background: var(--scrim);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    z-index: 20;
+  }
+
+  .scrim.open { opacity: 1; pointer-events: auto; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .scrim, .panel { transition: none; }
+  }
+
+  .panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100%;
+    width: min(24rem, 100%);
+    background: var(--surface);
+    border-left: 1px solid var(--border-strong);
+    box-shadow: -8px 0 24px rgba(0, 0, 0, 0.16);
+    transform: translateX(100%);
+    transition: transform 0.22s ease;
+    z-index: 21;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+  .panel.open { transform: translateX(0); }
+
+  .panel-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 1.5rem 1.5rem 1rem;
+    border-top: 4px solid var(--dot);
+  }
+
+  .panel-cat {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--dot);
+    margin: 0 0 0.4rem;
+  }
+
+  .panel-name {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--dot);
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  .panel-close {
+    flex: none;
+    width: 2rem;
+    height: 2rem;
+    display: grid;
+    place-items: center;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--ink-muted);
+    cursor: pointer;
+    font-size: 1.1rem;
+    line-height: 1;
+  }
+
+  .panel-close:hover { background: var(--surface-hover); color: var(--ink); }
+
+  .panel-close:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  .panel-visit {
+    margin: 0 1.5rem 1.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    background: var(--dot);
+    color: var(--surface);
+    font-weight: 600;
+    font-size: 0.92rem;
+    text-decoration: none;
+    border-radius: 6px;
+    padding: 0.65rem 1rem;
+  }
+
+  .panel-visit:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+  }
+
+  .panel-body {
+    padding: 0 1.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .panel-field h3 {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0 0 0.4rem;
+  }
+
+  .panel-field p {
+    margin: 0;
+    font-size: 0.92rem;
+    color: var(--ink);
+  }
+
+  .panel-field.opsec p {
+    color: var(--ink-muted);
+    background: var(--surface-hover);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.7rem 0.85rem;
+  }
+
+  .panel-domain {
+    padding: 0 1.5rem 1.25rem;
+    margin-top: -0.5rem;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.78rem;
+    color: var(--ink-faint);
+  }
+</style>
+
+<div class="wrap">
+  <header class="masthead">
+    <p class="eyebrow">SOC field reference</p>
+    <h1>OSINT Field Toolkit</h1>
+    <p class="dek">
+      The tools I actually reach for once a phishing sample lands in front of me — tracing the
+      sender and domain, pivoting on IPs and infrastructure, detonating suspicious links and
+      attachments safely, checking phishing-specific feeds and breach data, and running down a
+      threat actor's footprint. Built around <code>Phase 5 — URL Analysis</code> and
+      <code>Phase 6 — IOC Extraction</code>, expanded to cover the full recon sweep.
+    </p>
+    <div class="search-row">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <circle cx="6.7" cy="6.7" r="4.7" stroke="currentColor" stroke-width="1.4" />
+        <line x1="10.1" y1="10.1" x2="14.5" y2="14.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+      </svg>
+      <input type="text" id="search" placeholder="Filter tools — e.g. &quot;IP&quot;, &quot;header&quot;, &quot;breach&quot;" autocomplete="off" />
+    </div>
+    <nav class="jumpnav" aria-label="Jump to category">
+      <a href="#email" style="--dot: var(--c-email);"><span class="dot"></span>Email &amp; Domain</a>
+      <a href="#ip" style="--dot: var(--c-ip);"><span class="dot"></span>IP &amp; Infrastructure</a>
+      <a href="#url" style="--dot: var(--c-url);"><span class="dot"></span>URL &amp; File Analysis</a>
+      <a href="#phish" style="--dot: var(--c-phish);"><span class="dot"></span>Phishing Intel</a>
+      <a href="#threat" style="--dot: var(--c-threat);"><span class="dot"></span>Threat &amp; Breach</a>
+      <a href="#social" style="--dot: var(--c-social);"><span class="dot"></span>Social &amp; Identity</a>
+      <a href="#image" style="--dot: var(--c-image);"><span class="dot"></span>Image &amp; Metadata</a>
+    </nav>
+  </header>
+
+  <p class="hint">Click any tool for usage notes, input/output, and an OPSEC reminder before you query it.</p>
+
+  <section class="category" data-category="email" id="email" style="--dot: var(--c-email);">
+    <div class="category-head">
+      <h2><span class="dot"></span>Email &amp; Domain Investigation</h2>
+      <span class="phase-tag">Phase 5 · Phase 6</span>
+    </div>
+    <p class="category-note">
+      Trace the sender, the sending domain, and the header path before touching a single link.
+    </p>
+    <div class="grid">
+      <button class="tool" type="button" data-url="https://lookup.icann.org/" data-domain="lookup.icann.org"
+        data-usage="First stop on a new sending domain — confirms who registered it and when."
+        data-io="Domain name → registrar, creation date, registrant org (if not privacy-shielded)"
+        data-opsec="Public lookup, no account needed — safe to query freely, nothing is logged against you.">
+        <div class="tool-top"><span class="tool-name">ICANN WHOIS Lookup</span><span class="go">details →</span></div>
+        <p class="tool-desc">Registration and registrar data for a sending or spoofed domain — age, registrar, and status.</p>
+        <p class="tool-domain">lookup.icann.org</p>
+      </button>
+      <button class="tool" type="button" data-url="https://mxtoolbox.com/" data-domain="mxtoolbox.com"
+        data-usage="Confirm whether SPF/DKIM/DMARC actually failed, and check if the domain is already blacklisted."
+        data-io="Domain or IP → DNS records, auth results, blacklist status"
+        data-opsec="Free-tier lookups are anonymous; no account needed for basic checks.">
+        <div class="tool-top"><span class="tool-name">MXToolbox</span><span class="go">details →</span></div>
+        <p class="tool-desc">MX records, SPF/DKIM/DMARC lookups, and blacklist checks for the sending domain.</p>
+        <p class="tool-domain">mxtoolbox.com</p>
+      </button>
+      <button class="tool" type="button" data-url="https://toolbox.googleapps.com/apps/messageheader/" data-domain="toolbox.googleapps.com"
+        data-usage="Paste raw headers here first, before parsing Received: lines by hand."
+        data-io="Raw email headers (text) → visual relay path and auth summary"
+        data-opsec="Runs client-side in your browser — headers aren't stored or shared with anyone.">
+        <div class="tool-top"><span class="tool-name">Message Header Analyzer</span><span class="go">details →</span></div>
+        <p class="tool-desc">Pastes raw headers and maps the full relay path — where SPF/DKIM/DMARC actually broke down.</p>
+        <p class="tool-domain">toolbox.googleapps.com</p>
+      </button>
+      <button class="tool" type="button" data-url="https://dnsdumpster.com/" data-domain="dnsdumpster.com"
+        data-usage="Map out subdomains once you suspect the attacker owns more than one lookalike domain."
+        data-io="Domain name → DNS records, subdomains, hosting map"
+        data-opsec="Free lookups are anonymous, but results are cached publicly — avoid on anything sensitive.">
+        <div class="tool-top"><span class="tool-name">DNSDumpster</span><span class="go">details →</span></div>
+        <p class="tool-desc">Maps a domain's DNS records and subdomains — useful for scoping lookalike infrastructure.</p>
+        <p class="tool-domain">dnsdumpster.com</p>
+      </button>
+      <button class="tool" type="button" data-url="https://emailrep.io/" data-domain="emailrep.io"
+        data-usage="Quick reputation gut-check on the sender address before deeper digging."
+        data-io="Email address → reputation score, account-age signals, known-malicious flags"
+        data-opsec="Queries are logged by the vendor; fine for triage, avoid on anything needing strict confidentiality.">
+        <div class="tool-top"><span class="tool-name">EmailRep</span><span class="go">details →</span></div>
+        <p class="tool-desc">Reputation lookup for a sender address — account age, exposure, and known malicious activity.</p>
+        <p class="tool-domain">emailrep.io</p>
+      </button>
+      <button class="tool" type="button" data-url="https://haveibeenpwned.com/" data-domain="haveibeenpwned.com"
+        data-usage="Check if the target address appears in known breaches — helps explain how it was harvested."
+        data-io="Email address → list of breaches it appeared in, and when"
+        data-opsec="Searches are logged — never look up a colleague's or third party's personal address without authorization.">
+        <div class="tool-top"><span class="tool-name">Have I Been Pwned</span><span class="go">details →</span></div>
+        <p class="tool-desc">Checks whether the target address has appeared in known breaches — helps gauge how it was harvested.</p>
+        <p class="tool-domain">haveibeenpwned.com</p>
+      </button>
+      <button class="tool" type="button" data-url="https://securitytrails.com/" data-domain="securitytrails.com"
+        data-usage="Pull historical DNS/WHOIS to catch infrastructure reused across older campaigns."
+        data-io="Domain or IP → historical DNS records, WHOIS history"
+        data-opsec="Free tier requires an account; queries are tied to it.">
+        <div class="tool-top"><span class="tool-name">SecurityTrails</span><span class="go">details →</span></div>
+        <p class="tool-desc">Historical DNS and WHOIS records — spot infrastructure reuse across older phishing campaigns.</p>
+        <p class="tool-domain">securitytrails.com</p>
+      </button>
+    </div>
+  </section>
+
+  <section class="category" data-category="ip" id="ip" style="--dot: var(--c-ip);">
+    <div class="category-head">
+      <h2><span class="dot"></span>IP &amp; Infrastructure</h2>
+      <span class="phase-tag">Phase 5 · Phase 6</span>
+    </div>
+    <p class="category-note">
+      Once a link or attachment resolves to an IP, this is where I check who owns it, what's running on it, and what it's been used for.
+    </p>
+    <div class="grid">
+      <button class="tool" type="button" data-url="https://www.virustotal.com/" data-domain="virustotal.com"
+        data-usage="Run any URL, file hash, or IP the moment you have one — the fastest multi-engine gut check."
+        data-io="URL / file / hash / IP → detection verdicts from 70+ engines"
+        data-opsec="Submitted files and URLs can become visible to other researchers and vendors — never upload anything with real user data.">
+        <div class="tool-top"><span class="tool-name">VirusTotal</span><span class="go">details →</span></div>
+        <p class="tool-desc">Runs a URL, file, or IP against dozens of AV and threat-intel engines at once.</p>
+        <p class="tool-domain">virustotal.com</p>
+      </button>
+      <button class="tool" type="button" data-url="https://www.abuseipdb.com/" data-domain="abuseipdb.com"
+        data-usage="Confirm whether the hosting IP has a track record before you escalate."
+        data-io="IP address → abuse reports, confidence score, report categories"
+        data-opsec="Lookups are anonymous on the free tier; reporting an IP yourself is public.">
+        <div class="tool-top"><span class="tool-name">AbuseIPDB</span><span class="go">details →</span></div>
+        <p class="tool-desc">Community-reported abuse history for an IP — spam, brute force, phishing hosting.</p>
+        <p class="tool-domain">abuseipdb.com</p>
+      </button>
+      <button class="tool" type="button" data-url="https://www.shodan.io/" data-domain="shodan.io"
+        data-usage="See what's actually exposed on the host once you have the IP — scopes the attacker's full setup."
+        data-io="IP or search query → open ports, banners, exposed services"
+        data-opsec="Free searches are limited and tied to your account; avoid running it against internal/production targets.">
+        <div class="tool-top"><span class="tool-name">Shodan</span><span class="go">details →</span></div>
+        <p class="tool-desc">Shows what's actually running on a host — open ports, banners, and exposed services.</p>
+        <p class="tool-domain">shodan.io</p>
+      </button>
+      <button class="tool" type="button" data-url="https://search.censys.io/" data-domain="search.censys.io"
+        data-usage="Cross-check Shodan's view — Censys often catches certificates Shodan misses."
+        data-io="IP, domain, or certificate → hosts, services, TLS certificate data"
+        data-opsec="Free tier requires an account; searches are tied to it.">
+        <div class="tool-top"><span class="tool-name">Censys</span><span class="go">details →</span></div>
+        <p class="tool-desc">Certificate and host-level detail — often surfaces the real hosting behind a redirector.</p>
+        <p class="tool-domain">search.censys.io</p>
+      </button>
+      <button class="tool" type="button" data-url="https://viz.greynoise.io/" data-domain="viz.greynoise.io"
+        data-usage="Before chasing an IP, confirm it isn't just internet background scanning noise."
+        data-io="IP address → scanner classification (benign / malicious / unknown)"
+        data-opsec="Community lookups are anonymous and don't require an account for basic checks.">
+        <div class="tool-top"><span class="tool-name">GreyNoise</span><span class="go">details →</span></div>
+        <p class="tool-desc">Flags whether an IP is mass-scanning the internet — filters noise out of a real lead quickly.</p>
+        <p class="tool-domain">viz.greynoise.io</p>
+      </button>
+      <button class="tool" type="button" data-url="https://www.criminalip.io/" data-domain="criminalip.io"
+        data-usage="Second-opinion risk score on an IP or domain alongside AbuseIPDB."
+        data-io="IP or domain → risk score, linked malware/phishing detections"
+        data-opsec="Free tier needs an account; a daily lookup quota applies.">
+        <div class="tool-top"><span class="tool-name">Criminal IP</span><span class="go">details →</span></div>
+        <p class="tool-desc">IP and domain risk scoring with linked phishing and malware detections.</p>
+        <p class="tool-domain">criminalip.io</p>
+      </button>
+      <button class="tool" type="button" data-url="https://ipinfo.io/" data-domain="ipinfo.io"
+        data-usage="Fast first read on an IP — where it sits and who hosts it — before deeper pivoting."
+        data-io="IP address → geolocation, ASN, hosting provider"
+        data-opsec="Basic lookups are anonymous and unlimited on the free tier.">
+        <div class="tool-top"><span class="tool-name">IPinfo</span><span class="go">details →</span></div>
+        <p class="tool-desc">Fast geolocation, ASN, and hosting-provider lookup — good for a first-pass triage read.</p>
+        <p class="tool-domain">ipinfo.io</p>
+      </button>
+      <button class="tool" type="button" data-url="https://bgp.he.net/" data-domain="bgp.he.net"
+        data-usage="Trace the ASN once you suspect the attacker is reusing infrastructure across campaigns."
+        data-io="IP or ASN → announced routes, peer ASNs, IP ranges owned"
+        data-opsec="Fully public routing data — no account or login required.">
+        <div class="tool-top"><span class="tool-name">Hurricane Electric BGP Toolkit</span><span class="go">details →</span></div>
+        <p class="tool-desc">Traces an IP's ASN and announced routes — useful for chaining pivots across shared infrastructure.</p>
+        <p class="tool-domain">bgp.he.net</p>
+      </button>
+      <button class="tool" type="button" data-url="https://www.ipvoid.com/" data-domain="ipvoid.com"
+        data-usage="One-click blacklist sweep across dozens of engines when you just need a yes/no."
+        data-io="IP address → blacklist status across 90+ engines"
+        data-opsec="Free, anonymous lookups — no account required.">
+        <div class="tool-top"><span class="tool-name">IPVoid</span><span class="go">details →</span></div>
+        <p class="tool-desc">Runs an IP across dozens of blacklist engines at once — a fast blacklist-status summary.</p>
+        <p class="tool-domain">ipvoid.com</p>
+      </button>
+      <button class="tool" type="button" data-url="https://talosintelligence.com/" data-domain="talosintelligence.com"
+        data-usage="Cross-check Cisco's independent reputation score, especially on stubborn edge cases."
+        data-io="IP or domain → reputation score, spam/malware history"
+        data-opsec="Free, anonymous lookup — no account required.">
+        <div class="tool-top"><span class="tool-name">Talos Intelligence</span><span class="go">details →</span></div>
+        <p class="tool-desc">Cisco's reputation lookup for an IP or domain, plus a live global spam/malware map.</p>
+        <p class="tool-domain">talosintelligence.com</p>
+      </button>
+      <button class="tool" type="button" data-url="https://crt.sh/" data-domain="crt.sh"
+        data-usage="Pull certificate transparency logs to catch every lookalike subdomain issued under the same cert."
+        data-io="Domain name → all publicly logged certificates and subdomains"
+        data-opsec="Fully public data; the query itself isn't logged against you.">
+        <div class="tool-top"><span class="tool-name">crt.sh</span><span class="go">details →</span></div>
+        <p class="tool-desc">Searches certificate transparency logs — surfaces lookalike subdomains registered under the same cert.</p>
+        <p class="tool-domain">crt.sh</p>
+      </button>
+    </div>
+  </section>
+
+  <section class="category" data-category="url" id="url" style="--dot: var(--c-url);">
+    <div class="category-head">
+      <h2><span class="dot"></span>URL &amp; File Analysis</h2>
+      <span class="phase-tag">Phase 5</span>
+    </div>
+    <p class="category-note">
+      For when a link or attachment needs to run somewhere that isn't your own machine.
+    </p>
+    <div class="grid">
+      <button class="tool" type="button" data-url="https://urlscan.io/" data-domain="urlscan.io"
+        data-usage="Detonate a suspicious link before you or a user opens it manually."
+        data-io="URL → live screenshot, network requests, redirect chain, DOM"
+        data-opsec="Public scans are visible to anyone — use private scan mode if the URL contains sensitive tokens.">
+        <div class="tool-top"><span class="tool-name">urlscan.io</span><span class="go">details →</span></div>
+        <p class="tool-desc">Sandboxes a URL and returns the full page load — screenshot, requests, redirects, and DOM.</p>
+        <p class="tool-domain">urlscan.io</p>
+      </button>
+      <button class="tool" type="button" data-url="https://any.run/" data-domain="any.run"
+        data-usage="Watch a suspicious attachment execute step by step when a static report isn't enough."
+        data-io="File or URL → live interactive sandbox session, IOC report"
+        data-opsec="Free-tier submissions are public by default — check the visibility setting before uploading anything sensitive.">
+        <div class="tool-top"><span class="tool-name">ANY.RUN</span><span class="go">details →</span></div>
+        <p class="tool-desc">Interactive malware sandbox — watch a suspicious attachment execute in real time.</p>
+        <p class="tool-domain">any.run</p>
+      </button>
+      <button class="tool" type="button" data-url="https://www.hybrid-analysis.com/" data-domain="hybrid-analysis.com"
+        data-usage="Get a fast automated verdict on a file without watching it run yourself."
+        data-io="File or URL → behavioral report, IOC list, threat score"
+        data-opsec="Requires a free account; submissions may be shared with the CrowdStrike intelligence community.">
+        <div class="tool-top"><span class="tool-name">Hybrid Analysis</span><span class="go">details →</span></div>
+        <p class="tool-desc">Free automated sandbox for files and URLs, backed by CrowdStrike Falcon detections.</p>
+        <p class="tool-domain">hybrid-analysis.com</p>
+      </button>
+      <button class="tool" type="button" data-url="https://gchq.github.io/CyberChef/" data-domain="gchq.github.io/CyberChef"
+        data-usage="Decode an obfuscated payload — base64, hex, or a chain of encodings — before it makes sense."
+        data-io="Encoded text or file → decoded, transformed output"
+        data-opsec="Runs entirely in your browser — nothing you paste in is sent anywhere.">
+        <div class="tool-top"><span class="tool-name">CyberChef</span><span class="go">details →</span></div>
+        <p class="tool-desc">Decodes and de-obfuscates the payload — base64, URL encoding, and chained transforms in one recipe.</p>
+        <p class="tool-domain">gchq.github.io/CyberChef</p>
+      </button>
+      <button class="tool" type="button" data-url="https://www.joesandbox.com/" data-domain="joesandbox.com"
+        data-usage="Pull a deep behavioral report when ANY.RUN or Hybrid Analysis isn't conclusive."
+        data-io="File or URL → detailed behavior report, signatures, IOCs"
+        data-opsec="Free-tier submissions are public — avoid uploading anything containing real data.">
+        <div class="tool-top"><span class="tool-name">Joe Sandbox</span><span class="go">details →</span></div>
+        <p class="tool-desc">Deep behavioral analysis for files and URLs, with a detailed signature and IOC report.</p>
+        <p class="tool-domain">joesandbox.com</p>
+      </button>
+      <button class="tool" type="button" data-url="https://tria.ge/" data-domain="tria.ge"
+        data-usage="Get a second automated sandbox opinion fast, especially on commodity malware families."
+        data-io="File or URL → automated sandbox report, IOC extraction"
+        data-opsec="Public submissions are visible to other users of the platform.">
+        <div class="tool-top"><span class="tool-name">Triage</span><span class="go">details →</span></div>
+        <p class="tool-desc">Fast automated malware sandbox — good second opinion alongside ANY.RUN or Hybrid Analysis.</p>
+        <p class="tool-domain">tria.ge</p>
+      </button>
+      <button class="tool" type="button" data-url="https://web.archive.org/" data-domain="web.archive.org"
+        data-usage="Check what a phishing page looked like before it was taken down or altered."
+        data-io="URL → archived historical snapshots, if any were crawled"
+        data-opsec="Fully public archive, no account needed — but archiving a page yourself may tip off the operator.">
+        <div class="tool-top"><span class="tool-name">Wayback Machine</span><span class="go">details →</span></div>
+        <p class="tool-desc">Views earlier snapshots of a phishing page — sometimes shows a version before it was taken down.</p>
+        <p class="tool-domain">web.archive.org</p>
+      </button>
+      <button class="tool" type="button" data-url="https://dfir.blog/unfurl/" data-domain="dfir.blog/unfurl"
+        data-usage="Use on a long, encoded, or tracking-parameter-heavy phishing link to see exactly what each part does."
+        data-io="URL or QR code → structural breakdown of each parameter, encoding, and redirect"
+        data-opsec="Runs in your browser — the URL itself isn't submitted anywhere external.">
+        <div class="tool-top"><span class="tool-name">Unfurl</span><span class="go">details →</span></div>
+        <p class="tool-desc">Visual URL and QR-code parser built by a DFIR researcher — breaks a long or obfuscated URL into its structural parts.</p>
+        <p class="tool-domain">dfir.blog/unfurl</p>
+      </button>
+      <button class="tool" type="button" data-url="https://radar.cloudflare.com/scan" data-domain="radar.cloudflare.com"
+        data-usage="Second opinion alongside urlscan.io, especially for sites already sitting behind Cloudflare."
+        data-io="URL → screenshot, request log, TLS and security verdict"
+        data-opsec="Public scans are visible to anyone by default.">
+        <div class="tool-top"><span class="tool-name">Cloudflare Radar URL Scanner</span><span class="go">details →</span></div>
+        <p class="tool-desc">Cloudflare's own URL sandbox and scanner — screenshot, requests, and a security verdict.</p>
+        <p class="tool-domain">radar.cloudflare.com</p>
+      </button>
+      <button class="tool" type="button" data-url="https://bazaar.abuse.ch/" data-domain="bazaar.abuse.ch"
+        data-usage="Check if the attachment's hash has already been seen and tagged by the community."
+        data-io="File hash → sample metadata, family tag, first-seen date, YARA matches"
+        data-opsec="Free, anonymous lookups; downloading actual samples requires care — never on a production machine.">
+        <div class="tool-top"><span class="tool-name">MalwareBazaar</span><span class="go">details →</span></div>
+        <p class="tool-desc">abuse.ch's public repository of shared malware samples, searchable by hash, tag, or signature.</p>
+        <p class="tool-domain">bazaar.abuse.ch</p>
+      </button>
+    </div>
+  </section>
+
+  <section class="category" data-category="phish" id="phish" style="--dot: var(--c-phish);">
+    <div class="category-head">
+      <h2><span class="dot"></span>Phishing Intelligence &amp; Reporting</h2>
+      <span class="phase-tag">Phase 5 · Phase 6</span>
+    </div>
+    <p class="category-note">
+      Feeds and scanners built specifically around phishing URLs — check if it's already known, and where to report it.
+    </p>
+    <div class="grid">
+      <button class="tool" type="button" data-url="https://phishtank.com/" data-domain="phishtank.com"
+        data-usage="Check if a URL is already a known, community-verified phish before you write it up yourself."
+        data-io="URL → known-phish status, submission and verification history"
+        data-opsec="Free, anonymous lookups; submitting a URL yourself is public.">
+        <div class="tool-top"><span class="tool-name">PhishTank</span><span class="go">details →</span></div>
+        <p class="tool-desc">Community-verified database of known phishing URLs — check a link or submit a new one.</p>
+        <p class="tool-domain">phishtank.com</p>
+      </button>
+      <button class="tool" type="button" data-url="https://openphish.com/" data-domain="openphish.com"
+        data-usage="Cross-check against a live, auto-verified phishing feed for very recent campaigns."
+        data-io="URL → presence on the real-time phishing feed"
+        data-opsec="Public feed; free-tier lookups don't require an account.">
+        <div class="tool-top"><span class="tool-name">OpenPhish</span><span class="go">details →</span></div>
+        <p class="tool-desc">Real-time feed of actively phishing URLs, auto-verified without human review.</p>
+        <p class="tool-domain">openphish.com</p>
+      </button>
+      <button class="tool" type="button" data-url="https://checkphish.bolster.ai/" data-domain="checkphish.bolster.ai"
+        data-usage="Get a screenshot plus a verdict fast, without opening the link yourself."
+        data-io="URL → screenshot, brand-impersonation and phishing verdict"
+        data-opsec="Free, anonymous scans — no account required.">
+        <div class="tool-top"><span class="tool-name">CheckPhish</span><span class="go">details →</span></div>
+        <p class="tool-desc">Free scanner that screenshots a URL and flags phishing, scam, or brand-impersonation pages.</p>
+        <p class="tool-domain">checkphish.bolster.ai</p>
+      </button>
+      <button class="tool" type="button" data-url="https://phish.report/analysis" data-domain="phish.report"
+        data-usage="Once you've confirmed it's phishing, use this to find exactly who to report it to."
+        data-io="URL → hosting provider, registrar, and abuse contact details"
+        data-opsec="Free tool, no account required for a basic lookup.">
+        <div class="tool-top"><span class="tool-name">phish.report</span><span class="go">details →</span></div>
+        <p class="tool-desc">Identifies the host and registrar behind a phishing page and drafts the takedown report.</p>
+        <p class="tool-domain">phish.report</p>
+      </button>
+      <button class="tool" type="button" data-url="https://transparencyreport.google.com/safe-browsing/search" data-domain="transparencyreport.google.com"
+        data-usage="Confirm whether Google has already flagged the domain — useful context for your report."
+        data-io="URL or domain → Safe Browsing status and flag history"
+        data-opsec="Public, anonymous lookup — no account required.">
+        <div class="tool-top"><span class="tool-name">Google Safe Browsing</span><span class="go">details →</span></div>
+        <p class="tool-desc">Checks whether Google has already flagged the site as unsafe, and since when.</p>
+        <p class="tool-domain">transparencyreport.google.com</p>
+      </button>
+      <button class="tool" type="button" data-url="https://www.urlvoid.com/" data-domain="urlvoid.com"
+        data-usage="Fast multi-engine second opinion on a domain when VirusTotal alone isn't conclusive."
+        data-io="Domain name → blacklist and reputation status across 30+ engines"
+        data-opsec="Free, anonymous lookups — no account required.">
+        <div class="tool-top"><span class="tool-name">URLVoid</span><span class="go">details →</span></div>
+        <p class="tool-desc">Runs a domain across dozens of blacklist and reputation engines at once, similar to IPVoid but for URLs.</p>
+        <p class="tool-domain">urlvoid.com</p>
+      </button>
+    </div>
+  </section>
+
+  <section class="category" data-category="threat" id="threat" style="--dot: var(--c-threat);">
+    <div class="category-head">
+      <h2><span class="dot"></span>Threat &amp; Breach Intelligence</h2>
+      <span class="phase-tag">Phase 6 · Attribution</span>
+    </div>
+    <p class="category-note">
+      Wider context once you have an IOC in hand — where it's been seen before and how it fits the bigger picture.
+    </p>
+    <div class="grid">
+      <button class="tool" type="button" data-url="https://intelx.io/" data-domain="intelx.io"
+        data-usage="Search leaked data and dark-web sources once an email or domain needs deeper history."
+        data-io="Email, domain, or hash → leaked records, archived pages, dark-web mentions"
+        data-opsec="Free tier requires an account; searches are logged against it.">
+        <div class="tool-top"><span class="tool-name">Intelligence X</span><span class="go">details →</span></div>
+        <p class="tool-desc">Searches leaked datasets, the dark web, and historical web archives by email, domain, or hash.</p>
+        <p class="tool-domain">intelx.io</p>
+      </button>
+      <button class="tool" type="button" data-url="https://cybergordon.com/" data-domain="cybergordon.com"
+        data-usage="Run one IOC across dozens of engines at once instead of checking each site manually."
+        data-io="IP, domain, hash, or email → aggregated results from many reputation engines"
+        data-opsec="Free, no account required for a single lookup.">
+        <div class="tool-top"><span class="tool-name">CyberGordon</span><span class="go">details →</span></div>
+        <p class="tool-desc">Runs one IOC — IP, domain, hash, or email — across dozens of reputation engines in a single pass.</p>
+        <p class="tool-domain">cybergordon.com</p>
+      </button>
+      <button class="tool" type="button" data-url="https://attack.mitre.org/" data-domain="attack.mitre.org"
+        data-usage="Map the phishing technique to its ATT&CK ID for your report or ticket."
+        data-io="Technique or actor name → tactic, technique ID, and related TTPs"
+        data-opsec="Fully public reference site — no account or login involved.">
+        <div class="tool-top"><span class="tool-name">MITRE ATT&amp;CK</span><span class="go">details →</span></div>
+        <p class="tool-desc">Maps the phishing technique back to its ATT&amp;CK ID and the rest of the adversary's likely playbook.</p>
+        <p class="tool-domain">attack.mitre.org</p>
+      </button>
+      <button class="tool" type="button" data-url="https://www.bitcoinwhoswho.com/" data-domain="bitcoinwhoswho.com"
+        data-usage="Trace a wallet address on a BEC or crypto-phishing case for prior scam reports."
+        data-io="Bitcoin address → transaction history, scam reports, tags"
+        data-opsec="Public blockchain data; the lookup itself isn't logged against you.">
+        <div class="tool-top"><span class="tool-name">BitcoinWhosWho</span><span class="go">details →</span></div>
+        <p class="tool-desc">Looks up a Bitcoin wallet's transaction history and scam reports — useful on BEC and crypto-phishing cases.</p>
+        <p class="tool-domain">bitcoinwhoswho.com</p>
+      </button>
+      <button class="tool" type="button" data-url="https://d3fend.mitre.org/" data-domain="d3fend.mitre.org"
+        data-usage="Once you've mapped the phishing technique in ATT&CK, check here for the matching detection or mitigation control."
+        data-io="ATT&CK technique ID → matching defensive techniques and countermeasures"
+        data-opsec="Fully public reference site — no account or login involved.">
+        <div class="tool-top"><span class="tool-name">MITRE D3FEND</span><span class="go">details →</span></div>
+        <p class="tool-desc">Catalog of defensive countermeasures mapped against ATT&amp;CK techniques — the "what do we do about it" counterpart.</p>
+        <p class="tool-domain">d3fend.mitre.org</p>
+      </button>
+      <button class="tool" type="button" data-url="https://nvd.nist.gov/" data-domain="nvd.nist.gov"
+        data-usage="Check this when the attachment or link tries to exploit a specific known vulnerability rather than just relying on user deception."
+        data-io="CVE ID or product name → vulnerability details, CVSS score, references"
+        data-opsec="Fully public data — no account required.">
+        <div class="tool-top"><span class="tool-name">NVD (National Vulnerability Database)</span><span class="go">details →</span></div>
+        <p class="tool-desc">The U.S. government's official CVE database — severity scoring and affected products for any known vulnerability.</p>
+        <p class="tool-domain">nvd.nist.gov</p>
+      </button>
+      <button class="tool" type="button" data-url="https://lolbas-project.github.io/" data-domain="lolbas-project.github.io"
+        data-usage="Check this when a phishing payload spawns a signed Windows binary you don't immediately recognize as suspicious."
+        data-io="Binary name → known abuse techniques, detection ideas, ATT&CK mapping"
+        data-opsec="Fully public project — no account or login involved.">
+        <div class="tool-top"><span class="tool-name">LOLBAS</span><span class="go">details →</span></div>
+        <p class="tool-desc">Catalog of legitimate Windows binaries that can be abused to download, execute, or hide malicious activity.</p>
+        <p class="tool-domain">lolbas-project.github.io</p>
+      </button>
+      <button class="tool" type="button" data-url="https://gtfobins.github.io/" data-domain="gtfobins.github.io"
+        data-usage="Check this alongside LOLBAS when the payload or post-exploitation step targets a Linux/Unix host."
+        data-io="Binary name → known abuse techniques (shell, file read/write, privilege escalation)"
+        data-opsec="Fully public project — no account or login involved.">
+        <div class="tool-top"><span class="tool-name">GTFOBins</span><span class="go">details →</span></div>
+        <p class="tool-desc">The Linux/Unix counterpart to LOLBAS — legitimate binaries that can be abused to bypass restrictions.</p>
+        <p class="tool-domain">gtfobins.github.io</p>
+      </button>
+      <button class="tool" type="button" data-url="https://otx.alienvault.com/browse/global/pulses" data-domain="otx.alienvault.com"
+        data-usage="Search an IOC here to see if it's already tied to a known campaign, with the rest of that campaign's indicators."
+        data-io="IP, domain, hash, or URL → related pulses, campaign context, associated IOCs"
+        data-opsec="Free account required; searches are tied to it.">
+        <div class="tool-top"><span class="tool-name">AlienVault OTX</span><span class="go">details →</span></div>
+        <p class="tool-desc">Open threat-intel sharing platform — community-submitted "pulses" bundling IOCs tied to a specific campaign or actor.</p>
+        <p class="tool-domain">otx.alienvault.com</p>
+      </button>
+      <button class="tool" type="button" data-url="https://www.threatminer.org/" data-domain="threatminer.org"
+        data-usage="Use once you have a confirmed malicious domain or hash and want everything else connected to it."
+        data-io="Domain, IP, or hash → passive DNS history, related samples, linked reports"
+        data-opsec="Free, anonymous lookups — no account required.">
+        <div class="tool-top"><span class="tool-name">ThreatMiner</span><span class="go">details →</span></div>
+        <p class="tool-desc">Pivots a single IOC across passive DNS, malware samples, and related reports in one search.</p>
+        <p class="tool-domain">threatminer.org</p>
+      </button>
+      <button class="tool" type="button" data-url="https://www.exploit-db.com/" data-domain="exploit-db.com"
+        data-usage="Check here once NVD confirms a CVE, to see if a working exploit is publicly available."
+        data-io="CVE ID or product name → matching public exploit code, if any exists"
+        data-opsec="Fully public archive — no account required.">
+        <div class="tool-top"><span class="tool-name">Exploit-DB</span><span class="go">details →</span></div>
+        <p class="tool-desc">Archive of public proof-of-concept exploits, searchable by CVE or product.</p>
+        <p class="tool-domain">exploit-db.com</p>
+      </button>
+      <button class="tool" type="button" data-url="https://exchange.xforce.ibmcloud.com/" data-domain="exchange.xforce.ibmcloud.com"
+        data-usage="Second-opinion reputation check, particularly useful when the target is enterprise/large-org infrastructure."
+        data-io="IP, URL, hash, or CVE → risk score and related threat collections"
+        data-opsec="Free tier requires an IBMid account; searches are tied to it.">
+        <div class="tool-top"><span class="tool-name">IBM X-Force Exchange</span><span class="go">details →</span></div>
+        <p class="tool-desc">IBM's threat-intelligence platform — IP/URL reputation plus vulnerability and malware collections.</p>
+        <p class="tool-domain">exchange.xforce.ibmcloud.com</p>
+      </button>
+      <button class="tool" type="button" data-url="https://feodotracker.abuse.ch/" data-domain="feodotracker.abuse.ch"
+        data-usage="Cross-check a suspicious IP against known active C2 infrastructure, particularly for banking-trojan-style payloads."
+        data-io="IP address → active/inactive C2 status, associated malware family"
+        data-opsec="Fully public data — no account required.">
+        <div class="tool-top"><span class="tool-name">Feodo Tracker</span><span class="go">details →</span></div>
+        <p class="tool-desc">abuse.ch's tracker for active botnet command-and-control (C2) servers.</p>
+        <p class="tool-domain">feodotracker.abuse.ch</p>
+      </button>
+    </div>
+  </section>
+
+  <section class="category" data-category="social" id="social" style="--dot: var(--c-social);">
+    <div class="category-head">
+      <h2><span class="dot"></span>Social &amp; Identity OSINT</h2>
+      <span class="phase-tag">Attribution</span>
+    </div>
+    <p class="category-note">
+      When an IOC points to a person, not just infrastructure — running down a handle or name across the web.
+    </p>
+    <div class="grid">
+      <button class="tool" type="button" data-url="https://whatsmyname.app/" data-domain="whatsmyname.app"
+        data-usage="First pass on a handle — check 700+ sites at once before manually checking a handful."
+        data-io="Username → list of sites where that exact username exists"
+        data-opsec="Runs client-side in your browser; the target sites see the lookup requests, not you directly.">
+        <div class="tool-top"><span class="tool-name">WhatsMyName</span><span class="go">details →</span></div>
+        <p class="tool-desc">Checks a username against 700+ sites at once — the fastest first pass on a handle.</p>
+        <p class="tool-domain">whatsmyname.app</p>
+      </button>
+      <button class="tool" type="button" data-url="https://github.com/sherlock-project/sherlock" data-domain="github.com/sherlock-project"
+        data-usage="Run locally when you want the same username sweep without relying on a hosted web version."
+        data-io="Username (CLI input) → list of matching profile URLs"
+        data-opsec="Runs on your own machine — your IP reaches each target site directly, so consider a VPN for sensitive cases.">
+        <div class="tool-top"><span class="tool-name">Sherlock</span><span class="go">details →</span></div>
+        <p class="tool-desc">Open-source command-line tool that hunts a username across social platforms — the maintained project behind most username-search clones.</p>
+        <p class="tool-domain">github.com/sherlock-project</p>
+      </button>
+      <button class="tool" type="button" data-url="https://namechk.com/" data-domain="namechk.com"
+        data-usage="Spot a squatted or lookalike handle registered to impersonate a brand or person."
+        data-io="Username → availability across social platforms and domains"
+        data-opsec="Free, anonymous checks — no account required.">
+        <div class="tool-top"><span class="tool-name">Namechk</span><span class="go">details →</span></div>
+        <p class="tool-desc">Checks username and domain availability side by side — useful for spotting a squatted lookalike handle.</p>
+        <p class="tool-domain">namechk.com</p>
+      </button>
+      <button class="tool" type="button" data-url="https://www.social-searcher.com/" data-domain="social-searcher.com"
+        data-usage="Search live public posts and mentions when you need real-time chatter, not just a profile match."
+        data-io="Keyword, hashtag, or username → matching public posts across platforms"
+        data-opsec="Free-tier searches are anonymous but rate-limited.">
+        <div class="tool-top"><span class="tool-name">Social Searcher</span><span class="go">details →</span></div>
+        <p class="tool-desc">Free real-time search across public social posts and mentions by keyword, hashtag, or user.</p>
+        <p class="tool-domain">social-searcher.com</p>
+      </button>
+      <button class="tool" type="button" data-url="https://www.whitepages.com/" data-domain="whitepages.com"
+        data-usage="Tie a name to an address or phone history once attribution goes beyond a handle."
+        data-io="Name, phone, or address → linked public records"
+        data-opsec="U.S. data only; results come from aggregated public records — verify before acting on them.">
+        <div class="tool-top"><span class="tool-name">Whitepages</span><span class="go">details →</span></div>
+        <p class="tool-desc">U.S. people-search — name, address, and phone history tied to a target identity.</p>
+        <p class="tool-domain">whitepages.com</p>
+      </button>
+      <button class="tool" type="button" data-url="https://www.searchpeoplefree.com/" data-domain="searchpeoplefree.com"
+        data-usage="Second data point alongside Whitepages to corroborate or fill gaps."
+        data-io="Name, phone, or address → linked public records"
+        data-opsec="Free but ad-supported; treat results as leads to verify, not confirmed facts.">
+        <div class="tool-top"><span class="tool-name">SearchPeopleFree</span><span class="go">details →</span></div>
+        <p class="tool-desc">Free public-record aggregator — a second data point alongside Whitepages.</p>
+        <p class="tool-domain">searchpeoplefree.com</p>
+      </button>
+      <button class="tool" type="button" data-url="https://pimeyes.com/en" data-domain="pimeyes.com"
+        data-usage="Check whether a profile photo is a real person, a stock image, or stolen from elsewhere."
+        data-io="Face photo → other places that same face appears online"
+        data-opsec="Searching a real person's face raises privacy considerations — use only for legitimate investigation, never to track a private individual.">
+        <div class="tool-top"><span class="tool-name">PimEyes</span><span class="go">details →</span></div>
+        <p class="tool-desc">Facial-recognition reverse image search — checks whether a profile photo is a stolen or stock image.</p>
+        <p class="tool-domain">pimeyes.com</p>
+      </button>
+    </div>
+  </section>
+
+  <section class="category" data-category="image" id="image" style="--dot: var(--c-image);">
+    <div class="category-head">
+      <h2><span class="dot"></span>Image &amp; Metadata Analysis</h2>
+      <span class="phase-tag">Phase 6</span>
+    </div>
+    <p class="category-note">
+      Verifying a logo, a screenshot, or a file's origin — where a picture has been before and what it's hiding.
+    </p>
+    <div class="grid">
+      <button class="tool" type="button" data-url="https://www.tineye.com/" data-domain="tineye.com"
+        data-usage="Trace where a suspicious logo or screenshot first appeared online."
+        data-io="Image → earliest known appearances and matching copies"
+        data-opsec="Free, anonymous searches — no account required.">
+        <div class="tool-top"><span class="tool-name">TinEye</span><span class="go">details →</span></div>
+        <p class="tool-desc">Reverse image search built for tracing where an image first appeared online.</p>
+        <p class="tool-domain">tineye.com</p>
+      </button>
+      <button class="tool" type="button" data-url="https://images.google.com/" data-domain="images.google.com"
+        data-usage="Fast first check on a brand logo or image with the widest possible index."
+        data-io="Image or image URL → visually similar and matching results"
+        data-opsec="Searches may be tied to your Google account if signed in — use a logged-out window for sensitive cases.">
+        <div class="tool-top"><span class="tool-name">Google Images</span><span class="go">details →</span></div>
+        <p class="tool-desc">Reverse image search with the widest index — good for a fast first check on a logo or brand asset.</p>
+        <p class="tool-domain">images.google.com</p>
+      </button>
+      <button class="tool" type="button" data-url="https://yandex.com/images/" data-domain="yandex.com/images"
+        data-usage="Run when Google and TinEye come up empty — different index, different hits."
+        data-io="Image → visually similar results, often stronger on faces"
+        data-opsec="Free, works without an account for basic search.">
+        <div class="tool-top"><span class="tool-name">Yandex Images</span><span class="go">details →</span></div>
+        <p class="tool-desc">Often surfaces matches Google and TinEye miss, particularly for faces and non-Western sources.</p>
+        <p class="tool-domain">yandex.com/images</p>
+      </button>
+      <button class="tool" type="button" data-url="https://www.metadata2go.com/" data-domain="metadata2go.com"
+        data-usage="Pull EXIF data from an attached image or document to check for GPS, device, or author clues."
+        data-io="Image or document file → embedded metadata (GPS, device, author, timestamps)"
+        data-opsec="Uploads the file to a third-party server — never use it on real sensitive data; test with dummy files first.">
+        <div class="tool-top"><span class="tool-name">Metadata2Go</span><span class="go">details →</span></div>
+        <p class="tool-desc">Pulls EXIF and file metadata from an image or document — camera, GPS, author, and edit history.</p>
+        <p class="tool-domain">metadata2go.com</p>
+      </button>
+    </div>
+  </section>
+
+  <p class="empty-state" id="empty">No tools match that filter.</p>
+
+  <footer>
+    Built alongside the <a href="https://github.com/zelihazenginapogeeusa-byte/zeliha-infosec-journey/blob/cybersecurity-learning-hub/Blue-Team-README.md" target="_blank" rel="noopener noreferrer">eM Client phishing lab</a> — relevant to both BTL1 and eJPT investigation workflows.
+  </footer>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<aside class="panel" id="panel" role="dialog" aria-modal="true" aria-labelledby="panel-name" style="--dot: var(--c-ip);">
+  <div class="panel-head">
+    <div>
+      <p class="panel-cat" id="panel-cat">Category</p>
+      <h2 class="panel-name" id="panel-name">Tool name</h2>
+    </div>
+    <button class="panel-close" id="panel-close" type="button" aria-label="Close">×</button>
+  </div>
+  <p class="panel-domain" id="panel-domain">domain.example</p>
+  <a class="panel-visit" id="panel-visit" href="#" target="_blank" rel="noopener noreferrer">Open tool ↗</a>
+  <div class="panel-body">
+    <div class="panel-field">
+      <h3>Description</h3>
+      <p id="panel-desc"></p>
+    </div>
+    <div class="panel-field">
+      <h3>When to use it</h3>
+      <p id="panel-usage"></p>
+    </div>
+    <div class="panel-field">
+      <h3>Input → Output</h3>
+      <p id="panel-io"></p>
+    </div>
+    <div class="panel-field opsec">
+      <h3>OPSEC note</h3>
+      <p id="panel-opsec"></p>
+    </div>
+  </div>
+</aside>
+
+<script>
+  (function () {
+    var input = document.getElementById("search");
+    var categories = Array.prototype.slice.call(document.querySelectorAll(".category"));
+    var empty = document.getElementById("empty");
+
+    input.addEventListener("input", function () {
+      var q = input.value.trim().toLowerCase();
+      var anyVisible = false;
+
+      categories.forEach(function (cat) {
+        var catTools = cat.querySelectorAll(".tool");
+        var catHasMatch = false;
+
+        catTools.forEach(function (tool) {
+          var text = tool.textContent.toLowerCase();
+          var match = q === "" || text.indexOf(q) !== -1;
+          tool.style.display = match ? "" : "none";
+          if (match) { catHasMatch = true; anyVisible = true; }
+        });
+
+        cat.style.display = catHasMatch ? "" : "none";
+      });
+
+      empty.classList.toggle("show", !anyVisible);
+    });
+  })();
+
+  (function () {
+    var panel = document.getElementById("panel");
+    var scrim = document.getElementById("scrim");
+    var closeBtn = document.getElementById("panel-close");
+    var lastFocused = null;
+
+    function openPanel(tool) {
+      var cat = tool.closest(".category");
+      var catName = cat.querySelector(".category-head h2").textContent.trim();
+      var dot = getComputedStyle(tool).borderLeftColor;
+
+      panel.style.setProperty("--dot", dot);
+      document.getElementById("panel-cat").textContent = catName;
+      document.getElementById("panel-name").textContent = tool.querySelector(".tool-name").textContent;
+      document.getElementById("panel-domain").textContent = tool.getAttribute("data-domain") || "";
+      document.getElementById("panel-desc").textContent = tool.querySelector(".tool-desc").textContent;
+      document.getElementById("panel-usage").textContent = tool.getAttribute("data-usage") || "";
+      document.getElementById("panel-io").textContent = tool.getAttribute("data-io") || "";
+      document.getElementById("panel-opsec").textContent = tool.getAttribute("data-opsec") || "";
+      document.getElementById("panel-visit").href = tool.getAttribute("data-url") || "#";
+
+      lastFocused = tool;
+      panel.classList.add("open");
+      scrim.classList.add("open");
+      closeBtn.focus();
+    }
+
+    function closePanel() {
+      panel.classList.remove("open");
+      scrim.classList.remove("open");
+      if (lastFocused) lastFocused.focus();
+    }
+
+    document.querySelectorAll(".tool").forEach(function (tool) {
+      tool.addEventListener("click", function () { openPanel(tool); });
+    });
+
+    closeBtn.addEventListener("click", closePanel);
+    scrim.addEventListener("click", closePanel);
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && panel.classList.contains("open")) closePanel();
+    });
+  })();
+</script>
