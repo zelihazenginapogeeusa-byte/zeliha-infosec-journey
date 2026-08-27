@@ -1,0 +1,1353 @@
+<title>Wireshark Field Guide</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+<style>
+  :root {
+    --bg: #f5f2ea;
+    --surface: #ffffff;
+    --surface-hover: #f7f3e7;
+    --ink: #221f1a;
+    --ink-muted: #635c50;
+    --ink-faint: #948b7a;
+    --border: #e2dbc8;
+    --border-strong: #cdc2a6;
+    --shadow: 0 1px 2px rgba(34, 31, 26, 0.06);
+    --focus: #1f7d72;
+    --scrim: rgba(34, 31, 26, 0.32);
+    --code-bg: #221f1a;
+    --code-ink: #e8e3d6;
+
+    --c-filters: #8a6d0c;
+    --c-flags: #b3341f;
+    --c-iptransport: #1e5aa8;
+    --c-creds: #a02040;
+    --c-http: #1f7d72;
+    --c-dns: #356b30;
+    --c-tls: #7a3f9e;
+    --c-arp: #9c3572;
+    --c-icmp: #8a4a1f;
+    --c-tools: #3f6b7a;
+    --c-stats: #5c6b1f;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #14181d;
+      --surface: #1c2127;
+      --surface-hover: #242a31;
+      --ink: #e8e3d6;
+      --ink-muted: #a79f8f;
+      --ink-faint: #746b5c;
+      --border: #2c323a;
+      --border-strong: #3a424c;
+      --shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+      --focus: #52c2b6;
+      --scrim: rgba(0, 0, 0, 0.55);
+      --code-bg: #0e1114;
+      --code-ink: #d8e8e4;
+
+      --c-filters: #d9b34a;
+      --c-flags: #e2624a;
+      --c-iptransport: #6ba8ef;
+      --c-creds: #e0658f;
+      --c-http: #52c2b6;
+      --c-dns: #6fb85f;
+      --c-tls: #b28ce0;
+      --c-arp: #d874ae;
+      --c-icmp: #cf8a52;
+      --c-tools: #6fa8ba;
+      --c-stats: #b0c467;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #14181d;
+    --surface: #1c2127;
+    --surface-hover: #242a31;
+    --ink: #e8e3d6;
+    --ink-muted: #a79f8f;
+    --ink-faint: #746b5c;
+    --border: #2c323a;
+    --border-strong: #3a424c;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+    --focus: #52c2b6;
+    --scrim: rgba(0, 0, 0, 0.55);
+    --code-bg: #0e1114;
+    --code-ink: #d8e8e4;
+
+    --c-filters: #d9b34a;
+    --c-flags: #e2624a;
+    --c-iptransport: #6ba8ef;
+    --c-creds: #e0658f;
+    --c-http: #52c2b6;
+    --c-dns: #6fb85f;
+    --c-tls: #b28ce0;
+    --c-arp: #d874ae;
+    --c-icmp: #cf8a52;
+    --c-tools: #6fa8ba;
+    --c-stats: #b0c467;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: inherit; }
+  code { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+
+  .wrap {
+    max-width: 68rem;
+    margin: 0 auto;
+    padding: 3.5rem 1.5rem 4rem;
+  }
+
+  .masthead { margin-bottom: 2rem; }
+
+  .eyebrow {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--c-iptransport);
+    margin: 0 0 0.9rem;
+  }
+
+  h1 {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-weight: 600;
+    font-size: clamp(1.9rem, 4vw, 2.5rem);
+    letter-spacing: -0.01em;
+    margin: 0 0 0.9rem;
+    text-wrap: balance;
+  }
+
+  .dek {
+    max-width: 46rem;
+    color: var(--ink-muted);
+    font-size: 1.02rem;
+    margin: 0 0 1.6rem;
+  }
+
+  .dek code {
+    font-size: 0.88em;
+    background: var(--surface-hover);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 0.05em 0.4em;
+    color: var(--ink);
+  }
+
+  .search-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    max-width: 26rem;
+    margin-bottom: 1.1rem;
+  }
+
+  .search-row svg { flex: none; color: var(--ink-faint); }
+
+  #search {
+    width: 100%;
+    font: inherit;
+    font-size: 0.95rem;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 6px;
+    padding: 0.6rem 0.85rem;
+  }
+
+  #search::placeholder { color: var(--ink-faint); }
+  #search:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+
+  .jumpnav { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+  .jumpnav button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font: inherit;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.76rem;
+    font-weight: 500;
+    text-decoration: none;
+    color: var(--dot);
+    background: color-mix(in srgb, var(--dot) 20%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--dot) 45%, var(--border));
+    border-radius: 999px;
+    padding: 0.32rem 0.75rem 0.32rem 0.6rem;
+    cursor: pointer;
+  }
+
+  .jumpnav button:hover { background: color-mix(in srgb, var(--dot) 34%, var(--surface)); }
+  .jumpnav button:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  .dot {
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 50%;
+    background: var(--dot);
+    flex: none;
+  }
+
+  .hint { font-size: 0.86rem; color: var(--ink-faint); margin: -0.9rem 0 1.3rem; }
+
+  .category {
+    margin-bottom: 2rem;
+    scroll-margin-top: 1.5rem;
+    background: color-mix(in srgb, var(--dot) 16%, var(--bg));
+    border: 1px solid color-mix(in srgb, var(--dot) 32%, var(--border));
+    border-radius: 14px;
+    padding: 1.35rem 1.35rem 1.6rem;
+  }
+
+  .category-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    border-bottom: 3px solid var(--dot);
+    padding-bottom: 0.6rem;
+    margin-bottom: 0.35rem;
+  }
+
+  .category-head h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--dot);
+    margin: 0;
+  }
+
+  .phase-tag {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    color: var(--dot);
+    white-space: nowrap;
+  }
+
+  .category-note {
+    color: var(--ink-muted);
+    font-size: 0.92rem;
+    margin: 0.7rem 0 1rem;
+    max-width: 44rem;
+  }
+
+  .category-spl {
+    display: block;
+    background: var(--code-bg);
+    color: var(--code-ink);
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.8rem;
+    border-radius: 8px;
+    padding: 0.8rem 1rem;
+    margin: 0 0 1.4rem;
+    overflow-x: auto;
+    white-space: pre;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+    gap: 0.85rem;
+  }
+
+  .tool {
+    display: block;
+    width: 100%;
+    text-align: left;
+    font: inherit;
+    cursor: pointer;
+    text-decoration: none;
+    background: color-mix(in srgb, var(--dot) 9%, var(--surface));
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--dot);
+    border-radius: 8px;
+    padding: 1rem 1.1rem;
+    box-shadow: var(--shadow);
+    transition: background 0.15s ease, transform 0.15s ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) { .tool { transition: none; } }
+
+  .tool:hover {
+    background: color-mix(in srgb, var(--dot) 20%, var(--surface));
+    transform: translateY(-1px);
+  }
+
+  .tool:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  .tool-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .tool-name {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-weight: 600;
+    font-size: 0.98rem;
+    color: var(--ink);
+  }
+
+  .go {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.72rem;
+    color: var(--dot);
+    white-space: nowrap;
+  }
+
+  .tool-desc {
+    color: var(--ink-muted);
+    font-size: 0.88rem;
+    margin: 0.4rem 0 0.55rem;
+  }
+
+  .ioc-badge {
+    display: inline-block;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 4px;
+    padding: 0.15rem 0.45rem;
+  }
+
+  .empty-state {
+    display: none;
+    color: var(--ink-muted);
+    font-size: 0.95rem;
+    padding: 1rem 0;
+  }
+
+  .empty-state.show { display: block; }
+
+  footer {
+    border-top: 1px solid var(--border-strong);
+    padding-top: 1.5rem;
+    margin-top: 1rem;
+    color: var(--ink-muted);
+    font-size: 0.88rem;
+  }
+
+  footer a {
+    color: var(--c-http);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  footer a:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  /* Detail panel */
+  .scrim {
+    position: fixed;
+    inset: 0;
+    background: var(--scrim);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    z-index: 20;
+  }
+
+  .scrim.open { opacity: 1; pointer-events: auto; }
+
+  @media (prefers-reduced-motion: reduce) { .scrim, .panel { transition: none; } }
+
+  .panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100%;
+    width: min(26rem, 100%);
+    background: var(--surface);
+    border-left: 1px solid var(--border-strong);
+    box-shadow: -8px 0 24px rgba(0, 0, 0, 0.16);
+    transform: translateX(100%);
+    transition: transform 0.22s ease;
+    z-index: 21;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+  .panel.open { transform: translateX(0); }
+
+  .panel-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 1.5rem 1.5rem 1rem;
+    border-top: 4px solid var(--dot);
+  }
+
+  .panel-cat {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--dot);
+    margin: 0 0 0.4rem;
+  }
+
+  .panel-name {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--dot);
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  .panel-close {
+    flex: none;
+    width: 2rem;
+    height: 2rem;
+    display: grid;
+    place-items: center;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--ink-muted);
+    cursor: pointer;
+    font-size: 1.1rem;
+    line-height: 1;
+  }
+
+  .panel-close:hover { background: var(--surface-hover); color: var(--ink); }
+  .panel-close:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  .panel-ioc {
+    margin: 0 1.5rem 1.25rem;
+  }
+
+  .panel-body {
+    padding: 0 1.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .panel-field h3 {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0 0 0.4rem;
+  }
+
+  .panel-field p {
+    margin: 0;
+    font-size: 0.92rem;
+    color: var(--ink);
+  }
+
+  .panel-field.lookfor p {
+    color: var(--ink-muted);
+    background: var(--surface-hover);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.7rem 0.85rem;
+  }
+
+  .panel-field.spl pre {
+    margin: 0;
+    background: var(--code-bg);
+    color: var(--code-ink);
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.82rem;
+    border-radius: 6px;
+    padding: 0.75rem 0.9rem;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+</style>
+
+<div class="wrap">
+  <header class="masthead">
+    <p class="eyebrow">SOC field reference</p>
+    <h1>Wireshark Field Guide</h1>
+    <p class="dek">
+      The Wireshark fields and display filters I actually reach for during a packet capture review —
+      organized by protocol layer (transport, HTTP, DNS, TLS, ARP, ICMP), why each one is worth checking,
+      what a suspicious value looks like, and the exact filter to pull it up. Click any field for the
+      full note and a ready-to-adapt <code>filter</code>.
+    </p>
+    <div class="search-row">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <circle cx="6.7" cy="6.7" r="4.7" stroke="currentColor" stroke-width="1.4" />
+        <line x1="10.1" y1="10.1" x2="14.5" y2="14.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+      </svg>
+      <input type="text" id="search" placeholder="Filter fields — e.g. &quot;syn&quot;, &quot;dns&quot;, &quot;stream&quot;" autocomplete="off" />
+    </div>
+    <nav class="jumpnav" aria-label="Jump to category">
+      <button type="button" data-target="filters" style="--dot: var(--c-filters);"><span class="dot"></span>Filter Syntax</button>
+      <button type="button" data-target="flags" style="--dot: var(--c-flags);"><span class="dot"></span>TCP Flags &amp; Scans</button>
+      <button type="button" data-target="iptransport" style="--dot: var(--c-iptransport);"><span class="dot"></span>IP &amp; Transport</button>
+      <button type="button" data-target="creds" style="--dot: var(--c-creds);"><span class="dot"></span>Credential-Exposure Ports</button>
+      <button type="button" data-target="http" style="--dot: var(--c-http);"><span class="dot"></span>HTTP</button>
+      <button type="button" data-target="dns" style="--dot: var(--c-dns);"><span class="dot"></span>DNS</button>
+      <button type="button" data-target="tls" style="--dot: var(--c-tls);"><span class="dot"></span>TLS / SSL</button>
+      <button type="button" data-target="arp" style="--dot: var(--c-arp);"><span class="dot"></span>ARP &amp; DHCP</button>
+      <button type="button" data-target="icmp" style="--dot: var(--c-icmp);"><span class="dot"></span>ICMP</button>
+      <button type="button" data-target="tools" style="--dot: var(--c-tools);"><span class="dot"></span>Stream &amp; Decode</button>
+      <button type="button" data-target="stats" style="--dot: var(--c-stats);"><span class="dot"></span>Statistics &amp; Automation</button>
+    </nav>
+  </header>
+
+  <p class="hint">Click any field for why it matters, what a suspicious value looks like, its IOC type, and a ready display filter.</p>
+
+  <section class="category" data-category="filters" id="filters" style="--dot: var(--c-filters);">
+    <div class="category-head">
+      <h2><span class="dot"></span>Filter Syntax</h2>
+      <span class="phase-tag">Display Filters</span>
+    </div>
+    <p class="category-note">The filter idioms you chain together before you ever get to a specific field.</p>
+    <code class="category-spl">ip.addr == 198.51.100.203 and tcp.flags.syn == 1 and tcp.flags.ack == 0</code>
+    <div class="grid">
+      <button class="tool" type="button" data-ioc="Host filter"
+        data-desc="Matches traffic where the given IP address appears as either source or destination — the broadest way to filter to one host."
+        data-why="The first filter you reach for once you know a host of interest — narrows a full capture down to just its traffic before anything else."
+        data-lookfor="Use ip.src / ip.dst instead when direction matters — ip.addr hides which side actually sent a given packet."
+        data-spl="ip.addr == 198.51.100.203">
+        <div class="tool-top"><span class="tool-name">ip.addr ==</span><span class="go">details →</span></div>
+        <p class="tool-desc">Match a host as either source or destination.</p>
+        <span class="ioc-badge">Host filter</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Port filter"
+        data-desc="Matches TCP traffic where the given port appears as either source or destination."
+        data-why="Pulls up every session touching a specific port — the fastest way to isolate one service's traffic in a busy capture."
+        data-lookfor="Use tcp.dstport instead of tcp.port when you specifically care which side initiated toward that port (e.g. isolating outbound connections to a C2 port)."
+        data-spl="tcp.port == 4444">
+        <div class="tool-top"><span class="tool-name">tcp.port ==</span><span class="go">details →</span></div>
+        <p class="tool-desc">Match a port as either source or destination.</p>
+        <span class="ioc-badge">Port filter</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Protocol filter"
+        data-desc="Filters to only packets Wireshark has dissected as that protocol — http, dns, tls, arp, icmp, and so on."
+        data-why="The fastest way to strip out noise and look at exactly one protocol's traffic across the whole capture."
+        data-lookfor="Combine with a field filter (http.request, dns.qry.name) rather than using the bare protocol name alone on a large capture — otherwise it's still a lot to scroll through."
+        data-spl="http || dns || tls.handshake.type == 1">
+        <div class="tool-top"><span class="tool-name">http / dns / tls</span><span class="go">details →</span></div>
+        <p class="tool-desc">Filter to one protocol's traffic.</p>
+        <span class="ioc-badge">Protocol filter</span>
+      </button>
+      <button class="tool" type="button" data-ioc="String match"
+        data-desc="Matches a field (or the whole frame) containing the given text, without needing an exact match."
+        data-why="Useful when you don't know the exact value — searching for a fragment of a suspicious domain or a keyword in a payload."
+        data-lookfor="frame contains searches raw bytes across the entire packet, which is slow on a large capture — narrow to a specific field first when you can, e.g. http.host contains."
+        data-spl="http.host contains &quot;cloudvaultpro&quot;">
+        <div class="tool-top"><span class="tool-name">contains</span><span class="go">details →</span></div>
+        <p class="tool-desc">Match a field containing a text fragment.</p>
+        <span class="ioc-badge">String match</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Pattern match"
+        data-desc="Matches a field against a Perl-compatible regular expression, for pattern-based filtering a plain contains can't express."
+        data-why="Lets you filter on a shape (a DGA-looking domain, an encoded string) instead of one exact known value."
+        data-lookfor="Test the regex against a small sample first — a bad pattern silently returns zero results instead of erroring."
+        data-spl="dns.qry.name matches &quot;^[a-z0-9]{16,}\\.&quot;">
+        <div class="tool-top"><span class="tool-name">matches</span><span class="go">details →</span></div>
+        <p class="tool-desc">Regex-match a field against a pattern.</p>
+        <span class="ioc-badge">Pattern match</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Combinator"
+        data-desc="Combines multiple filter expressions — and / &amp;&amp; to narrow, or / || to broaden, ! or not to exclude."
+        data-why="Almost every real filter is a combination — a single field match is rarely specific enough on its own."
+        data-lookfor="Parenthesize combined and/or expressions explicitly — filter precedence mistakes are a common source of a filter silently returning the wrong set."
+        data-spl="ip.addr == 198.51.100.203 and tcp.flags.syn == 1 and tcp.flags.ack == 0">
+        <div class="tool-top"><span class="tool-name">and / or / !</span><span class="go">details →</span></div>
+        <p class="tool-desc">Combine or exclude multiple conditions.</p>
+        <span class="ioc-badge">Combinator</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Anomaly filter"
+        data-desc="Matches any packet Wireshark's own TCP analysis engine has flagged — retransmissions, out-of-order segments, duplicate ACKs, zero windows."
+        data-why="A single filter that surfaces connection problems without you having to spot them manually across thousands of packets."
+        data-lookfor="A cluster of flagged packets to one destination — either a struggling link, or a host that stopped responding mid-session, sometimes because it was isolated for containment."
+        data-spl="tcp.analysis.flags">
+        <div class="tool-top"><span class="tool-name">tcp.analysis.flags</span><span class="go">details →</span></div>
+        <p class="tool-desc">Match Wireshark's own flagged TCP anomalies.</p>
+        <span class="ioc-badge">Anomaly filter</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Noise reduction"
+        data-desc="Excludes chatty background protocols — ARP, ICMP, DNS broadcast chatter — that clutter a capture but rarely matter to a specific investigation."
+        data-why="The first filter to reach for on a raw capture — cuts the visible packet count dramatically before you start looking for anything specific."
+        data-lookfor="Don't leave this filter on permanently — the ARP/broadcast traffic it hides is exactly what you'd need for an ARP-spoofing investigation."
+        data-spl="!(arp or icmp or dns) and ip">
+        <div class="tool-top"><span class="tool-name">!(...) exclude</span><span class="go">details →</span></div>
+        <p class="tool-desc">Hide chatty background protocols.</p>
+        <span class="ioc-badge">Noise reduction</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Capture-time"
+        data-desc="Wireshark's other filtering system — set under Capture → Options before capture starts, written in BPF (Berkeley Packet Filter) syntax rather than Wireshark's own display filter syntax, and permanently discards non-matching packets instead of just hiding them."
+        data-why="Every filter elsewhere on this page is a display filter — it only hides packets from view, the full file is untouched. A capture filter is a one-way decision made before a packet is even written to disk, so getting it wrong on a live capture can mean losing evidence you can't get back."
+        data-lookfor="When in doubt, capture everything with no capture filter and narrow down with display filters afterward — display filters can always be changed; a capture filter's discarded packets cannot be recovered."
+        data-spl="host 203.0.113.9 and port 443">
+        <div class="tool-top"><span class="tool-name">Capture filter (BPF)</span><span class="go">details →</span></div>
+        <p class="tool-desc">Set before capture — discards, doesn't just hide.</p>
+        <span class="ioc-badge">Capture-time</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="category" data-category="flags" id="flags" style="--dot: var(--c-flags);">
+    <div class="category-head">
+      <h2><span class="dot"></span>TCP Flags &amp; Scan Signatures</h2>
+      <span class="phase-tag">TCP Flags · Nmap Scans</span>
+    </div>
+    <p class="category-note">Which flag combinations are a normal handshake, and which ones are a scan or a stalled connection.</p>
+    <code class="category-spl">tcp.flags.syn == 1 and tcp.flags.ack == 0</code>
+    <div class="grid">
+      <button class="tool" type="button" data-ioc="Recon signal"
+        data-desc="A single SYN flag with no ACK — the first packet of a normal three-way handshake, or the entire probe in a SYN (half-open) scan."
+        data-why="By itself this is completely normal — it's the pattern across many ports or hosts from one source that turns it into a scan signature."
+        data-lookfor="One source IP sending SYN-only packets to many different destination ports on the same host in a short window, with few or no completed handshakes — a classic Nmap SYN scan."
+        data-spl="tcp.flags.syn == 1 and tcp.flags.ack == 0">
+        <div class="tool-top"><span class="tool-name">SYN (no ACK)</span><span class="go">details →</span></div>
+        <p class="tool-desc">Handshake start, or a half-open scan probe.</p>
+        <span class="ioc-badge">Recon signal</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Baseline"
+        data-desc="The three-packet sequence that establishes a normal TCP connection: SYN, SYN-ACK, ACK."
+        data-why="The baseline to compare against — a scan or a probe usually breaks this pattern somewhere, either never completing it or completing it against a port that shouldn't be open."
+        data-lookfor="A completed handshake to a port your asset inventory says shouldn't be listening at all."
+        data-spl="tcp.flags.syn == 1 or tcp.flags.reset == 1">
+        <div class="tool-top"><span class="tool-name">Full handshake</span><span class="go">details →</span></div>
+        <p class="tool-desc">The normal SYN → SYN-ACK → ACK sequence.</p>
+        <span class="ioc-badge">Baseline</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Recon signal"
+        data-desc="Abruptly terminates a connection, instead of the normal FIN-based close."
+        data-why="A flood of RSTs back to a scanning source is exactly how a closed-port response looks — it maps out which ports are NOT open."
+        data-lookfor="A source receiving RSTs from a long, sequential range of ports on the same host — the mirror image of a port scan."
+        data-spl="tcp.flags.reset == 1">
+        <div class="tool-top"><span class="tool-name">RST</span><span class="go">details →</span></div>
+        <p class="tool-desc">Abrupt connection reset — often a closed-port reply.</p>
+        <span class="ioc-badge">Recon signal</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Recon signal"
+        data-desc="Three related stealth scan types identified by unusual flag combinations: FIN scan (FIN only), NULL scan (no flags at all), XMAS scan (FIN+PSH+URG all set)."
+        data-why="None of these are part of a normal handshake — a detection rule that only watches for SYN floods can miss all three entirely, so recognizing the raw flag pattern matters."
+        data-lookfor="Any of these exact flag combinations arriving without a prior SYN — legitimate TCP stacks essentially never generate them unprompted."
+        data-spl="tcp.flags == 0x001 or tcp.flags == 0x000 or tcp.flags == 0x029">
+        <div class="tool-top"><span class="tool-name">FIN / NULL / XMAS scan</span><span class="go">details →</span></div>
+        <p class="tool-desc">Stealth scan flag combinations.</p>
+        <span class="ioc-badge">Recon signal</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Congestion signal"
+        data-desc="Indicates the receiving side's buffer is full and cannot accept more data right now."
+        data-why="A connection stuck at zero window for an extended period usually means an overwhelmed or struggling host — worth knowing whether that's incidental congestion or a symptom of something like a DoS condition."
+        data-lookfor="A sustained run of zero-window packets from one host, especially paired with retransmissions — the connection has effectively stalled."
+        data-spl="tcp.window_size == 0">
+        <div class="tool-top"><span class="tool-name">tcp.window_size == 0</span><span class="go">details →</span></div>
+        <p class="tool-desc">Receiver's buffer is full — connection stalling.</p>
+        <span class="ioc-badge">Congestion signal</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Anomaly signal"
+        data-desc="Flags a TCP segment Wireshark has identified as a retransmission — the sender resent data it believed was lost."
+        data-why="A moderate rate is normal on any real network; a heavy, concentrated rate to one destination is a sign of a failing link, a host that went dark mid-conversation, or an active block."
+        data-lookfor="A burst of retransmissions that coincides with the exact moment a host was isolated or a firewall rule was pushed during containment — confirms the block actually took effect."
+        data-spl="tcp.analysis.retransmission">
+        <div class="tool-top"><span class="tool-name">tcp.analysis.retransmission</span><span class="go">details →</span></div>
+        <p class="tool-desc">A segment Wireshark identified as resent.</p>
+        <span class="ioc-badge">Anomaly signal</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Anomaly signal"
+        data-desc="Flags a duplicate ACK — the receiver re-acknowledging the same sequence number, usually because it's still waiting on a missing segment."
+        data-why="Three or more duplicate ACKs in a row is the trigger condition for TCP fast retransmit — seeing them cluster tells you exactly where a segment went missing in the stream."
+        data-lookfor="A tight cluster of duplicate ACKs immediately followed by a retransmission — confirms the loss and where in the sequence it happened."
+        data-spl="tcp.analysis.duplicate_ack_num > 2">
+        <div class="tool-top"><span class="tool-name">tcp.analysis.duplicate_ack</span><span class="go">details →</span></div>
+        <p class="tool-desc">Receiver re-acknowledging a missing segment.</p>
+        <span class="ioc-badge">Anomaly signal</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="category" data-category="iptransport" id="iptransport" style="--dot: var(--c-iptransport);">
+    <div class="category-head">
+      <h2><span class="dot"></span>IP &amp; Transport</h2>
+      <span class="phase-tag">Layer 3 / 4</span>
+    </div>
+    <p class="category-note">The addressing and delivery fields underneath every other protocol on this page.</p>
+    <code class="category-spl">ip.dst == 198.51.100.203 and tcp.dstport == 4444</code>
+    <div class="grid">
+      <button class="tool" type="button" data-ioc="Network IOC"
+        data-desc="The source and destination IP address fields on the IP layer of the packet."
+        data-why="The two addresses every other field in a packet hangs off of — the first thing to anchor an investigation to a specific host pair."
+        data-lookfor="An internal host talking directly to a rare or first-seen external IP, especially one outside the ASN/geo range you'd expect for that traffic type."
+        data-spl="ip.dst == 198.51.100.203">
+        <div class="tool-top"><span class="tool-name">ip.src / ip.dst</span><span class="go">details →</span></div>
+        <p class="tool-desc">Source and destination IP of the packet.</p>
+        <span class="ioc-badge">Network IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Host IOC"
+        data-desc="Time To Live — decrements by one at every router hop; the value hints at how many hops away the sender is and can suggest the sender's OS (common starting values: 64 Linux, 128 Windows, 255 network gear)."
+        data-why="An unexpected TTL on traffic that claims to be local, or one that doesn't match the OS a host is supposed to run, can indicate spoofing or a host you don't have accurately inventoried."
+        data-lookfor="A TTL noticeably lower than a direct-hop value on traffic that should be local — a sign it crossed more hops, and possibly more networks, than the topology suggests."
+        data-spl="ip.ttl < 20">
+        <div class="tool-top"><span class="tool-name">ip.ttl</span><span class="go">details →</span></div>
+        <p class="tool-desc">Hop count remaining — can hint at OS or spoofing.</p>
+        <span class="ioc-badge">Host IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Network IOC"
+        data-desc="IP fragmentation flags and offset — whether a packet is part of a larger message split across multiple IP fragments."
+        data-why="Fragmentation is legitimate but uncommon in most modern traffic — historically also abused to evade signature-based detection by splitting a malicious payload across fragments."
+        data-lookfor="Heavy fragmentation to a single destination with no clear reason (like a large legitimate file transfer) — worth reassembling and inspecting the full payload."
+        data-spl="ip.flags.mf == 1 or ip.frag_offset > 0">
+        <div class="tool-top"><span class="tool-name">ip.flags.mf</span><span class="go">details →</span></div>
+        <p class="tool-desc">Whether the packet is a fragment of a larger one.</p>
+        <span class="ioc-badge">Network IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Network IOC"
+        data-desc="The specific source and destination ports on a TCP segment."
+        data-why="Distinguishes direction the way ip.addr alone can't — dstport tells you what service was being reached, srcport is usually just an ephemeral client port."
+        data-lookfor="Traffic to a non-standard destination port for a well-known service — e.g. SMB or RDP traffic patterns showing up on port 443, a common way to blend C2 into normal HTTPS volume."
+        data-spl="tcp.dstport == 4444 or tcp.dstport == 8080">
+        <div class="tool-top"><span class="tool-name">tcp.srcport / dstport</span><span class="go">details →</span></div>
+        <p class="tool-desc">Source and destination TCP ports.</p>
+        <span class="ioc-badge">Network IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Anomaly signal"
+        data-desc="The sequence and acknowledgment numbers that order and confirm delivery of each byte in a TCP stream."
+        data-why="The mechanism Follow TCP Stream uses under the hood to reassemble a conversation in the right order — worth understanding when a stream looks garbled or out of order."
+        data-lookfor="A gap between an expected sequence number and what actually arrives next — Wireshark will usually flag this itself as an out-of-order segment or a retransmission."
+        data-spl="tcp.analysis.out_of_order">
+        <div class="tool-top"><span class="tool-name">tcp.seq / tcp.ack</span><span class="go">details →</span></div>
+        <p class="tool-desc">Byte ordering and delivery confirmation.</p>
+        <span class="ioc-badge">Anomaly signal</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="category" data-category="creds" id="creds" style="--dot: var(--c-creds);">
+    <div class="category-head">
+      <h2><span class="dot"></span>Credential-Exposure Ports</h2>
+      <span class="phase-tag">Cleartext Auth · Hash Capture</span>
+    </div>
+    <p class="category-note">The ports and protocols worth checking first when the question is specifically "did a credential cross the wire here."</p>
+    <code class="category-spl">ftp.request.command == &quot;PASS&quot; or ldap.simple or ntlmssp</code>
+    <div class="grid">
+      <button class="tool" type="button" data-ioc="Cleartext"
+        data-desc="File Transfer Protocol (port 21) — sends the username and password in cleartext as separate USER/PASS commands before any file transfer begins."
+        data-why="One of the last common protocols that still transmits full credentials in the clear — a capture containing FTP traffic almost always contains a readable login if one happened."
+        data-lookfor="The literal USER and PASS commands in a Follow TCP Stream view — the credential sits right there as plain text, no decoding needed."
+        data-spl="ftp.request.command == &quot;USER&quot; or ftp.request.command == &quot;PASS&quot;">
+        <div class="tool-top"><span class="tool-name">FTP — 21</span><span class="go">details →</span></div>
+        <p class="tool-desc">Cleartext USER/PASS login commands.</p>
+        <span class="ioc-badge">Cleartext</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Cleartext"
+        data-desc="Remote terminal access (port 23) with zero encryption — every keystroke, including the login prompt and password, travels as individual cleartext packets."
+        data-why="If Telnet shows up in a modern capture at all, that's often a finding on its own — and if a login happened during the capture window, the credential is fully recoverable."
+        data-lookfor="Follow TCP Stream on the session — the username and password appear as the literal characters typed, sometimes one packet per keystroke."
+        data-spl="telnet">
+        <div class="tool-top"><span class="tool-name">Telnet — 23</span><span class="go">details →</span></div>
+        <p class="tool-desc">Unencrypted terminal session, keystroke by keystroke.</p>
+        <span class="ioc-badge">Cleartext</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Encoded, not encrypted"
+        data-desc="HTTP's built-in authentication scheme (port 80/443) — sent in an Authorization header as base64-encoded username:password, not encrypted, just encoded."
+        data-why="Base64 is not encryption — a captured Basic Auth header is a fully recoverable credential with a single decode step, no cracking required."
+        data-lookfor="An Authorization: Basic header on an HTTP request — decode the value directly to get username:password."
+        data-spl="http.authorization contains &quot;Basic&quot;">
+        <div class="tool-top"><span class="tool-name">HTTP Basic Auth — 80</span><span class="go">details →</span></div>
+        <p class="tool-desc">Base64-encoded credential in the Authorization header.</p>
+        <span class="ioc-badge">Encoded, not encrypted</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Hash capture"
+        data-desc="Windows file sharing (port 445) — carries the NTLM authentication handshake (challenge/response) during a session setup."
+        data-why="The NTLM challenge/response captured here is exactly what tools like Responder and ntlmrelayx are built to abuse — even without a plaintext password, the hash is crackable or relayable."
+        data-lookfor="An NTLMSSP_AUTH message in the SMB negotiation — the username, domain, and NTLM response hash are all visible fields."
+        data-spl="smb2.cmd == 1 or ntlmssp">
+        <div class="tool-top"><span class="tool-name">SMB / NTLM — 445</span><span class="go">details →</span></div>
+        <p class="tool-desc">NTLM challenge/response — crackable or relayable.</p>
+        <span class="ioc-badge">Hash capture</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Poisoning attack"
+        data-desc="Legacy name-resolution protocols — LLMNR, NBT-NS, mDNS — that Windows falls back to when DNS fails to resolve a name. All three broadcast the request to the whole local segment instead of asking a trusted server."
+        data-why="Tools like Responder exploit this fallback directly — they answer the broadcast pretending to be the requested host, then capture the NTLM authentication attempt that follows. This is one of the most common ways an NTLM hash actually gets captured on an internal network."
+        data-lookfor="A host answering an LLMNR/NBT-NS/mDNS request that it has no authority over, immediately followed by an SMB/NTLM authentication attempt toward that same host — the signature of a Responder-style attack."
+        data-spl="llmnr || nbns || mdns">
+        <div class="tool-top"><span class="tool-name">LLMNR / NBT-NS / mDNS</span><span class="go">details →</span></div>
+        <p class="tool-desc">Broadcast name resolution — Responder's target.</p>
+        <span class="ioc-badge">Poisoning attack</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Cleartext"
+        data-desc="Legacy mail retrieval protocols — POP3 (port 110), IMAP (port 143) — that, like FTP, authenticate with a cleartext username and password unless wrapped in TLS (POP3S/IMAPS on 995/993)."
+        data-why="An email client still configured for unencrypted POP3/IMAP sends the full mailbox password on every single check-in, not just at initial login — a much larger window of exposure than a one-time login protocol."
+        data-lookfor="A pop.request.command or IMAP command carrying a PASS/LOGIN argument in cleartext — the password sits directly in the command."
+        data-spl="pop.request.command == &quot;PASS&quot; or imap">
+        <div class="tool-top"><span class="tool-name">POP3 / IMAP — 110 / 143</span><span class="go">details →</span></div>
+        <p class="tool-desc">Cleartext mailbox password, sent on every check-in.</p>
+        <span class="ioc-badge">Cleartext</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Cleartext"
+        data-desc="Directory service queries (port 389) — an unencrypted &quot;simple bind&quot; operation sends the full distinguished name and password in cleartext."
+        data-why="Plenty of legacy applications still authenticate to Active Directory over LDAP instead of LDAPS — this is one of the most common accidental credential leaks in an enterprise capture."
+        data-lookfor="An ldap.bindRequest with a non-empty ldap.simple field — the password is sitting there in the clear."
+        data-spl="ldap.protocolOp == 0 and ldap.simple">
+        <div class="tool-top"><span class="tool-name">LDAP simple bind — 389</span><span class="go">details →</span></div>
+        <p class="tool-desc">Cleartext distinguished name and password.</p>
+        <span class="ioc-badge">Cleartext</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Offline cracking"
+        data-desc="Windows/AD authentication (port 88) — the AS-REQ/AS-REP exchange doesn't carry a plaintext password, but the encrypted ticket data can be extracted and cracked offline if the account is misconfigured."
+        data-why="Directly ties back to the NewUacValue field in the SPL Field Guide's Account Management category — capturing this exchange on the wire is how you'd actually observe an AS-REP roasting attempt happening in real time."
+        data-lookfor="An AS-REP (message type 11) for an account, followed offline by an unusually fast, repeated series of AS-REQs — a sign someone is brute-forcing the extracted ticket."
+        data-spl="kerberos.msg_type == 11">
+        <div class="tool-top"><span class="tool-name">Kerberos AS-REP — 88</span><span class="go">details →</span></div>
+        <p class="tool-desc">Ticket exchange — extractable, crackable offline.</p>
+        <span class="ioc-badge">Offline cracking</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Encrypted target"
+        data-desc="Remote Desktop (port 3389) — encrypted by default from Windows Vista onward, so the credential itself isn't visible in a capture."
+        data-why="You won't recover a password here, but RDP shows up constantly elsewhere on this page and in the SPL Field Guide — LogonType 10, or a SYN scan hitting 3389 in the Flags category — because it's such a common lateral-movement target."
+        data-lookfor="RDP traffic to or from a host that has no legitimate reason to accept remote desktop connections at all."
+        data-spl="tcp.port == 3389">
+        <div class="tool-top"><span class="tool-name">RDP — 3389</span><span class="go">details →</span></div>
+        <p class="tool-desc">Encrypted, but a common lateral-movement target.</p>
+        <span class="ioc-badge">Encrypted target</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Cleartext"
+        data-desc="Network device management (port 161) — SNMPv1/v2c authenticate with a &quot;community string&quot; sent in cleartext, functioning as a de facto password for read or write access to the device."
+        data-why="A default community string (public/private) still in use anywhere is effectively an open door to a network device's configuration — worth checking for on that basis alone."
+        data-lookfor="The community string value in an snmp.community field — default values like public or private are an immediate finding."
+        data-spl="snmp.community">
+        <div class="tool-top"><span class="tool-name">SNMP — 161</span><span class="go">details →</span></div>
+        <p class="tool-desc">Community string acts as a cleartext password.</p>
+        <span class="ioc-badge">Cleartext</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="category" data-category="http" id="http" style="--dot: var(--c-http);">
+    <div class="category-head">
+      <h2><span class="dot"></span>HTTP</h2>
+      <span class="phase-tag">Layer 7 · Cleartext</span>
+    </div>
+    <p class="category-note">Unencrypted web traffic — the most directly readable evidence a capture can hand you.</p>
+    <code class="category-spl">http.request.method == &quot;POST&quot; and http.host contains &quot;cvp-verify&quot;</code>
+    <div class="grid">
+      <button class="tool" type="button" data-ioc="Web IOC"
+        data-desc="The Host header on an HTTP request — the domain name the client asked for, independent of whatever IP it actually connected to."
+        data-why="On a proxy, load balancer, or shared-hosting IP, this is often the only field that tells you which specific site was actually requested."
+        data-lookfor="A Host value that doesn't match the destination IP's expected domain, or a newly registered / lookalike domain."
+        data-spl="http.host contains &quot;cvp-verify&quot;">
+        <div class="tool-top"><span class="tool-name">http.host</span><span class="go">details →</span></div>
+        <p class="tool-desc">Domain requested, independent of the destination IP.</p>
+        <span class="ioc-badge">Web IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Web IOC"
+        data-desc="The HTTP verb on the request — GET, POST, and so on."
+        data-why="A POST is a stronger signal than a GET on an unfamiliar destination — it usually means data left the host, not just arrived."
+        data-lookfor="POST requests to a domain with no legitimate business reason to receive one from this environment."
+        data-spl="http.request.method == &quot;POST&quot;">
+        <div class="tool-top"><span class="tool-name">http.request.method</span><span class="go">details →</span></div>
+        <p class="tool-desc">HTTP verb used for the request.</p>
+        <span class="ioc-badge">Web IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Host IOC"
+        data-desc="The client application string on an HTTP request, self-reported by whatever made the request."
+        data-why="Malware C2 traffic frequently hardcodes an outdated, wrong, or scripted-looking user agent for the host it's actually running on."
+        data-lookfor="A user agent that doesn't match the browser normally installed on that host, or one that looks scripted (curl, python-requests, a custom string)."
+        data-spl="http.user_agent contains &quot;python-requests&quot;">
+        <div class="tool-top"><span class="tool-name">http.user_agent</span><span class="go">details →</span></div>
+        <p class="tool-desc">Self-reported client application string.</p>
+        <span class="ioc-badge">Host IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Web IOC"
+        data-desc="The HTTP status code returned by the server."
+        data-why="Patterns across status codes reveal what the client was trying to do, not just where it went."
+        data-lookfor="A run of 403/404 responses (directory or endpoint brute-forcing) followed by a 200 on an unusual path."
+        data-spl="http.response.code == 403 or http.response.code == 404">
+        <div class="tool-top"><span class="tool-name">http.response.code</span><span class="go">details →</span></div>
+        <p class="tool-desc">HTTP status code returned by the server.</p>
+        <span class="ioc-badge">Web IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="File IOC"
+        data-desc="The actual body content of an HTTP request or response — the payload itself, not just its headers."
+        data-why="This is what you'd extract to hash, sandbox, or read directly — the header fields above tell you where it came from, this is what it actually was."
+        data-lookfor="Use File → Export Objects → HTTP rather than reading this field manually for anything beyond a quick peek — it reassembles the full file cleanly."
+        data-spl="http.request or http.response">
+        <div class="tool-top"><span class="tool-name">http.file_data</span><span class="go">details →</span></div>
+        <p class="tool-desc">The actual request or response body content.</p>
+        <span class="ioc-badge">File IOC</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="category" data-category="dns" id="dns" style="--dot: var(--c-dns);">
+    <div class="category-head">
+      <h2><span class="dot"></span>DNS</h2>
+      <span class="phase-tag">Layer 7 · Resolution</span>
+    </div>
+    <p class="category-note">Resolution requests often surface a callback domain before the connection itself ever shows up.</p>
+    <code class="category-spl">dns.qry.name matches &quot;^[a-z0-9]{12,}\\.&quot;</code>
+    <div class="grid">
+      <button class="tool" type="button" data-ioc="Web IOC"
+        data-desc="The domain name being resolved in a DNS query."
+        data-why="DNS is usually the first thing a payload does — checking here often beats waiting for the actual connection to show up in the capture."
+        data-lookfor="Randomized, DGA-looking strings, a newly registered domain, or the same domain queried repeatedly at fixed intervals (beaconing)."
+        data-spl="dns.qry.name matches &quot;^[a-z0-9]{12,}\\.&quot;">
+        <div class="tool-top"><span class="tool-name">dns.qry.name</span><span class="go">details →</span></div>
+        <p class="tool-desc">Domain name being resolved.</p>
+        <span class="ioc-badge">Web IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Network IOC"
+        data-desc="The IP address(es) returned in a DNS response."
+        data-why="Links a suspicious domain straight to the infrastructure IP you'll pivot on next in the network layer."
+        data-lookfor="A resolution to an IP already flagged elsewhere in the case, or an IP outside the ASN/geo you'd expect for that domain."
+        data-spl="dns.a == 198.51.100.203">
+        <div class="tool-top"><span class="tool-name">dns.a</span><span class="go">details →</span></div>
+        <p class="tool-desc">IP address(es) the query resolved to.</p>
+        <span class="ioc-badge">Network IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Network IOC"
+        data-desc="The DNS record type requested — A, TXT, NS, MX, and so on."
+        data-why="Certain record types are rarely queried in bulk by normal endpoints — an unusual mix is worth a second look."
+        data-lookfor="An unusually high volume of TXT queries from one host — a known DNS-tunneling / covert-exfiltration pattern."
+        data-spl="dns.qry.type == 16">
+        <div class="tool-top"><span class="tool-name">dns.qry.type</span><span class="go">details →</span></div>
+        <p class="tool-desc">Type of DNS record requested.</p>
+        <span class="ioc-badge">Network IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Host IOC"
+        data-desc="The response code on a DNS answer — 0 for success, 3 (NXDOMAIN) for a name that doesn't exist."
+        data-why="A high rate of NXDOMAIN responses is a classic sign of a DGA (domain generation algorithm) — malware cycling through candidate C2 domains until one resolves."
+        data-lookfor="A burst of NXDOMAIN responses from one host in a short window, especially for randomized-looking names."
+        data-spl="dns.flags.rcode == 3">
+        <div class="tool-top"><span class="tool-name">dns.flags.rcode</span><span class="go">details →</span></div>
+        <p class="tool-desc">Success/failure result of the DNS query.</p>
+        <span class="ioc-badge">Host IOC</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="category" data-category="tls" id="tls" style="--dot: var(--c-tls);">
+    <div class="category-head">
+      <h2><span class="dot"></span>TLS / SSL</h2>
+      <span class="phase-tag">Layer 7 · Encrypted</span>
+    </div>
+    <p class="category-note">What's still visible before encryption kicks in, and what the certificate itself reveals.</p>
+    <code class="category-spl">tls.handshake.extensions_server_name contains &quot;cloudvaultpro&quot;</code>
+    <div class="grid">
+      <button class="tool" type="button" data-ioc="Web IOC"
+        data-desc="The Server Name Indication — the domain the client asked for in the TLS ClientHello, sent in plaintext before encryption begins."
+        data-why="The one piece of the domain a TLS connection reveals even though everything after the handshake is encrypted — your main visibility into what an HTTPS connection was actually for."
+        data-lookfor="An SNI value for a newly registered or lookalike domain, or one that doesn't match the certificate presented right after."
+        data-spl="tls.handshake.extensions_server_name contains &quot;cloudvaultpro&quot;">
+        <div class="tool-top"><span class="tool-name">SNI</span><span class="go">details →</span></div>
+        <p class="tool-desc">Domain requested in the TLS ClientHello, unencrypted.</p>
+        <span class="ioc-badge">Web IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Protocol filter"
+        data-desc="The specific TLS handshake message type — 1 for ClientHello, 2 for ServerHello, 11 for Certificate."
+        data-why="Lets you isolate just the handshake setup packets in a busy capture, before any application data starts flowing encrypted."
+        data-lookfor="Use this to jump straight to the Certificate message (type 11) for a connection you want to inspect the cert on."
+        data-spl="tls.handshake.type == 1">
+        <div class="tool-top"><span class="tool-name">tls.handshake.type</span><span class="go">details →</span></div>
+        <p class="tool-desc">Which TLS handshake message this packet is.</p>
+        <span class="ioc-badge">Protocol filter</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Web IOC"
+        data-desc="The Common Name and Subject Alternative Names on the certificate the server presented during the handshake."
+        data-why="Confirms whether the cert actually matches the domain the client asked for (the SNI) — a mismatch, or a certificate issued minutes before use, are both strong phishing-infrastructure signals."
+        data-lookfor="A certificate issued very recently relative to the capture's timestamp, or a CN/SAN that doesn't match the SNI from the same handshake."
+        data-spl="tls.handshake.type == 11 and x509sat.CN">
+        <div class="tool-top"><span class="tool-name">x509sat.CN</span><span class="go">details →</span></div>
+        <p class="tool-desc">Certificate Common Name / Subject Alt Names.</p>
+        <span class="ioc-badge">Web IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Host IOC"
+        data-desc="The negotiated TLS protocol version and cipher suite for the connection."
+        data-why="An outdated version (TLS 1.0/1.1) or a weak cipher suite on internal traffic is worth flagging on its own, separate from any malicious-intent question."
+        data-lookfor="TLS 1.0 or a null/export-grade cipher suite still in use anywhere in the environment — a standing weakness worth a finding regardless of the current investigation."
+        data-spl="tls.handshake.version == 0x0301">
+        <div class="tool-top"><span class="tool-name">tls.handshake.version</span><span class="go">details →</span></div>
+        <p class="tool-desc">Negotiated TLS version and cipher suite.</p>
+        <span class="ioc-badge">Host IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Decryption"
+        data-desc="A (Pre-)Master-Secret log file, produced by a browser or application when the SSLKEYLOGFILE environment variable is set before capture, that lets Wireshark decrypt a TLS session after the fact."
+        data-why="Everything else in this category reads what's visible on the outside of the encryption — this is the one legitimate way to actually see application data inside HTTPS traffic in Wireshark, and it only works if the keys were logged during capture."
+        data-lookfor="This only helps on your own controlled test or lab captures where SSLKEYLOGFILE was set in advance — a capture pulled after the fact from unrelated infrastructure has no keys to load, so don't expect this on a real incident's third-party traffic."
+        data-spl="Edit → Preferences → Protocols → TLS → (Pre)-Master-Secret log filename">
+        <div class="tool-top"><span class="tool-name">TLS session keys</span><span class="go">details →</span></div>
+        <p class="tool-desc">Decrypt HTTPS in Wireshark, if keys were logged.</p>
+        <span class="ioc-badge">Decryption</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="category" data-category="arp" id="arp" style="--dot: var(--c-arp);">
+    <div class="category-head">
+      <h2><span class="dot"></span>ARP &amp; DHCP</h2>
+      <span class="phase-tag">Layer 2 · Local Network</span>
+    </div>
+    <p class="category-note">The layer where spoofing happens closest to the wire, and where a device first identifies itself before an IP address even enters the picture.</p>
+    <code class="category-spl">arp.opcode == 2 and arp.isgratuitous == 1</code>
+    <div class="grid">
+      <button class="tool" type="button" data-ioc="Recon signal"
+        data-desc="Whether the ARP packet is a request (1, &quot;who has this IP&quot;) or a reply (2, &quot;this IP is at this MAC&quot;)."
+        data-why="ARP spoofing works by sending unsolicited replies — recognizing the request/reply pattern is the first step to spotting one."
+        data-lookfor="A reply (opcode 2) with no matching prior request in the capture — a classic sign of a gratuitous or spoofed ARP announcement."
+        data-spl="arp.opcode == 2">
+        <div class="tool-top"><span class="tool-name">arp.opcode</span><span class="go">details →</span></div>
+        <p class="tool-desc">Whether the packet is an ARP request or reply.</p>
+        <span class="ioc-badge">Recon signal</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Host IOC"
+        data-desc="The MAC address claiming ownership of an IP in an ARP reply."
+        data-why="The core of ARP spoofing detection — the same IP address should map to the same MAC address consistently across a capture."
+        data-lookfor="One IP address associated with two or more different MAC addresses within the same capture — the single clearest ARP spoofing indicator there is."
+        data-spl="arp.opcode == 2 and arp.src.proto_ipv4 == 10.1.1.1">
+        <div class="tool-top"><span class="tool-name">arp.src.hwaddr</span><span class="go">details →</span></div>
+        <p class="tool-desc">MAC address claiming an IP in a reply.</p>
+        <span class="ioc-badge">Host IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Recon signal"
+        data-desc="An ARP reply sent without a preceding request, broadcasting an IP-to-MAC mapping to the whole network unprompted."
+        data-why="Legitimate uses exist (a host announcing itself after getting a new IP), but it's also the exact mechanism behind an ARP cache-poisoning attack — context is what tells them apart."
+        data-lookfor="A gratuitous ARP claiming ownership of the default gateway's IP address — a strong sign of an active man-in-the-middle attempt."
+        data-spl="arp.isgratuitous == 1">
+        <div class="tool-top"><span class="tool-name">Gratuitous ARP</span><span class="go">details →</span></div>
+        <p class="tool-desc">Unsolicited ARP reply broadcast to the network.</p>
+        <span class="ioc-badge">Recon signal</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Automated detection"
+        data-desc="Wireshark's own built-in flag, automatically set when it observes the same IP address claimed by more than one MAC address across the capture."
+        data-why="Does the cross-referencing for you — instead of manually comparing every arp.src.hwaddr value against every IP by hand, this one field is Wireshark's own conclusion that a genuine conflict exists."
+        data-lookfor="Any hit at all is worth opening — this field only sets when Wireshark has already confirmed a real MAC-address conflict for the same IP, not a maybe."
+        data-spl="arp.duplicate-address-detected">
+        <div class="tool-top"><span class="tool-name">arp.duplicate-address-detected</span><span class="go">details →</span></div>
+        <p class="tool-desc">Wireshark's own automatic ARP-conflict flag.</p>
+        <span class="ioc-badge">Automated detection</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Host IOC"
+        data-desc="The hostname a client self-reports in its DHCP request (Option 12), captured at the moment it asks for an IP lease."
+        data-why="In a dynamic/DHCP environment, this is often the only place a hostname is tied to an IP at a specific point in time — the mapping otherwise drifts as leases change and expire."
+        data-lookfor="A hostname that doesn't match your asset inventory's naming convention requesting a lease on your network — a sign of an unmanaged or rogue device."
+        data-spl="dhcp.option.hostname">
+        <div class="tool-top"><span class="tool-name">dhcp.option.hostname</span><span class="go">details →</span></div>
+        <p class="tool-desc">Self-reported hostname at DHCP lease request.</p>
+        <span class="ioc-badge">Host IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Recon signal"
+        data-desc="The DHCP message type on a given packet — Discover, Offer, Request, or Ack — and specifically, which device on the network is the one answering with Offers."
+        data-why="A rogue DHCP server answering Discover broadcasts alongside or instead of the real one is a known attack — it can hand every new client a malicious gateway or DNS server before the legitimate server even responds."
+        data-lookfor="More than one distinct source IP sending DHCP Offer messages in the same capture — a healthy network segment has exactly one authoritative DHCP server."
+        data-spl="dhcp.option.dhcp == 2">
+        <div class="tool-top"><span class="tool-name">DHCP Offer (rogue server)</span><span class="go">details →</span></div>
+        <p class="tool-desc">Who is actually answering DHCP requests on the segment.</p>
+        <span class="ioc-badge">Recon signal</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="category" data-category="icmp" id="icmp" style="--dot: var(--c-icmp);">
+    <div class="category-head">
+      <h2><span class="dot"></span>ICMP</h2>
+      <span class="phase-tag">Layer 3 · Diagnostics</span>
+    </div>
+    <p class="category-note">Meant for network diagnostics — but also a quiet channel for sweeps and covert tunnels.</p>
+    <code class="category-spl">icmp.type == 8 and data.len &gt; 64</code>
+    <div class="grid">
+      <button class="tool" type="button" data-ioc="Recon signal"
+        data-desc="The ICMP message type — 8 for echo request (ping), 0 for echo reply, 3 for destination unreachable."
+        data-why="A burst of echo requests across a sequential IP range in a short window is a textbook ping sweep — reconnaissance before a real scan."
+        data-lookfor="One source pinging an entire subnet in sequential order within seconds — an automated sweep, not a person manually checking a handful of hosts."
+        data-spl="icmp.type == 8">
+        <div class="tool-top"><span class="tool-name">icmp.type</span><span class="go">details →</span></div>
+        <p class="tool-desc">ICMP message type (echo, reply, unreachable...).</p>
+        <span class="ioc-badge">Recon signal</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Covert channel"
+        data-desc="The size and content of the data carried inside an ICMP echo packet — normally a small, fixed pattern, not arbitrary data."
+        data-why="ICMP tunneling abuses the fact that ping traffic is rarely inspected deeply — it hides C2 or exfiltrated data inside oversized or unusually-content-varying echo packets."
+        data-lookfor="Echo request/reply pairs with payload sizes well above the OS default (usually 32-64 bytes), or payload content that changes between otherwise identical-looking pings."
+        data-spl="icmp.type == 8 and data.len > 64">
+        <div class="tool-top"><span class="tool-name">ICMP payload size</span><span class="go">details →</span></div>
+        <p class="tool-desc">Oversized or varying echo payloads — tunneling tell.</p>
+        <span class="ioc-badge">Covert channel</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Recon signal"
+        data-desc="Sent by a router or host when it can't deliver a packet — includes a code specifying why (port unreachable, host unreachable, and so on)."
+        data-why="A wall of destination-unreachable / port-unreachable responses back to one source is what a UDP port scan looks like from the network side."
+        data-lookfor="A single source receiving many type 3 code 3 (port unreachable) responses from one host across a short window — the UDP equivalent of a TCP RST flood."
+        data-spl="icmp.type == 3 and icmp.code == 3">
+        <div class="tool-top"><span class="tool-name">icmp.type == 3</span><span class="go">details →</span></div>
+        <p class="tool-desc">Destination unreachable — often a UDP scan reply.</p>
+        <span class="ioc-badge">Recon signal</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="category" data-category="tools" id="tools" style="--dot: var(--c-tools);">
+    <div class="category-head">
+      <h2><span class="dot"></span>Stream &amp; Decode</h2>
+      <span class="phase-tag">Reconstruct · Extract</span>
+    </div>
+    <p class="category-note">Reassembling a conversation into something readable, and forcing Wireshark to see a protocol it missed on its own.</p>
+    <code class="category-spl">Follow → TCP Stream</code>
+    <div class="grid">
+      <button class="tool" type="button" data-ioc="Reassembly"
+        data-desc="Reassembles an entire TCP conversation — both directions — into one readable view, in the order the bytes were actually sent."
+        data-why="The fastest way to read what actually happened in a session instead of piecing it together packet by packet — right-click a packet → Follow → TCP Stream."
+        data-lookfor="Plaintext credentials, a readable HTTP request/response pair, or a command-and-control conversation you can read start to finish."
+        data-spl="tcp.stream eq 0">
+        <div class="tool-top"><span class="tool-name">Follow TCP Stream</span><span class="go">details →</span></div>
+        <p class="tool-desc">Reassemble a full conversation, both directions.</p>
+        <span class="ioc-badge">Reassembly</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Reassembly"
+        data-desc="The UDP equivalent of Follow TCP Stream — reassembles all packets between the same address/port pair into one readable view, for protocols that don't use TCP."
+        data-why="DNS, DHCP, and QUIC all ride on UDP — a lot of investigative reading in those protocols still benefits from seeing the full back-and-forth in one place instead of packet by packet."
+        data-lookfor="Right-click a UDP packet → Follow → UDP Stream — useful for reading a full DNS-tunneling exchange or a QUIC/HTTP3 conversation's visible metadata."
+        data-spl="udp.stream eq 0">
+        <div class="tool-top"><span class="tool-name">Follow UDP Stream</span><span class="go">details →</span></div>
+        <p class="tool-desc">Reassemble a UDP conversation — DNS, DHCP, QUIC.</p>
+        <span class="ioc-badge">Reassembly</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Reassembly"
+        data-desc="The HTTP-aware version of Follow Stream — reassembles just the HTTP request/response layer, automatically decoding chunked transfer encoding and gzip/deflate-compressed bodies that Follow TCP Stream would otherwise show as unreadable binary."
+        data-why="A lot of real HTTP traffic is gzip-compressed or chunked by default — Follow TCP Stream hands you the raw wire bytes, which for compressed content is unreadable noise; Follow HTTP Stream does the decompression for you."
+        data-lookfor="Reach for this instead of Follow TCP Stream whenever a TCP stream view looks like garbled binary on HTTP traffic — that's almost always compression, not encryption, and HTTP Stream fixes it."
+        data-spl="Right-click a packet → Follow → HTTP Stream">
+        <div class="tool-top"><span class="tool-name">Follow HTTP Stream</span><span class="go">details →</span></div>
+        <p class="tool-desc">HTTP Stream — auto-decodes chunked/gzip bodies.</p>
+        <span class="ioc-badge">Reassembly</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Protocol override"
+        data-desc="Manually tells Wireshark to interpret traffic on a given port as a specific protocol, overriding its own automatic port-based guess."
+        data-why="Attacker infrastructure regularly runs a real protocol on a non-standard port to blend in or dodge automatic dissection — Wireshark won't show you HTTP fields on port 4444 traffic unless you tell it to look."
+        data-lookfor="Traffic Wireshark shows only as raw TCP with no protocol dissection, on a port you already suspect from an IP & Transport or Flags finding — Decode As is what turns that raw stream back into readable fields."
+        data-spl="Analyze → Decode As...">
+        <div class="tool-top"><span class="tool-name">Decode As...</span><span class="go">details →</span></div>
+        <p class="tool-desc">Force a port to be read as a specific protocol.</p>
+        <span class="ioc-badge">Protocol override</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Extraction"
+        data-desc="Extracts every file Wireshark reassembled from HTTP, SMB, or other supported protocols directly out of the capture, ready to save to disk."
+        data-why="The direct route from &quot;a file was transferred in this capture&quot; to &quot;I have the actual file to hash and sandbox&quot; — no manual byte-by-byte reassembly needed."
+        data-lookfor="Any executable or script-type file exported this way — worth hashing and checking against VirusTotal before anything else."
+        data-spl="File → Export Objects → HTTP">
+        <div class="tool-top"><span class="tool-name">Export Objects</span><span class="go">details →</span></div>
+        <p class="tool-desc">Pull reassembled files straight out of the capture.</p>
+        <span class="ioc-badge">Extraction</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="category" data-category="stats" id="stats" style="--dot: var(--c-stats);">
+    <div class="category-head">
+      <h2><span class="dot"></span>Statistics &amp; Automation</h2>
+      <span class="phase-tag">Wireshark Menu · CLI</span>
+    </div>
+    <p class="category-note">The aggregate views that surface a pattern across the whole capture, and the command-line tool for when there's more than one capture to look at.</p>
+    <code class="category-spl">Statistics → Conversations</code>
+    <div class="grid">
+      <button class="tool" type="button" data-ioc="Summary view"
+        data-desc="A summary table of every distinct conversation in the capture, grouped by address pair, with packet counts and byte totals."
+        data-why="The fastest way to spot a volume outlier — one conversation moving far more data, or lasting far longer, than everything else in the capture."
+        data-lookfor="A single conversation with a disproportionate byte count relative to everything else — a strong first place to look for possible exfiltration."
+        data-spl="Statistics → Conversations">
+        <div class="tool-top"><span class="tool-name">Conversations</span><span class="go">details →</span></div>
+        <p class="tool-desc">Summary table of every distinct conversation.</p>
+        <span class="ioc-badge">Summary view</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Summary view"
+        data-desc="A summary table of every individual host seen in the capture, with total packets and bytes sent and received — the per-host counterpart to Conversations' per-pair view."
+        data-why="Conversations groups by address pair; Endpoints groups by single host — better suited to &quot;which one machine, on its own, sent or received the most,&quot; independent of who it was talking to."
+        data-lookfor="A host communicating with a public IP that has no legitimate business reason to be there at all — unusual geography, an unfamiliar ASN, or a host that shouldn't be initiating outbound traffic in the first place."
+        data-spl="Statistics → Endpoints">
+        <div class="tool-top"><span class="tool-name">Endpoints</span><span class="go">details →</span></div>
+        <p class="tool-desc">Per-host totals, independent of who they talked to.</p>
+        <span class="ioc-badge">Summary view</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Summary view"
+        data-desc="A breakdown of every protocol present in the capture and what percentage of traffic each one accounts for."
+        data-why="Gives you a bird's-eye view of what's actually in a capture before you start filtering — an unexpected protocol showing up at all is sometimes the finding itself."
+        data-lookfor="A protocol that has no legitimate reason to be present in this environment at all — an unexpected tunneling protocol, or an old/insecure protocol still in use."
+        data-spl="Statistics → Protocol Hierarchy">
+        <div class="tool-top"><span class="tool-name">Protocol Hierarchy</span><span class="go">details →</span></div>
+        <p class="tool-desc">Breakdown of every protocol present, by percentage.</p>
+        <span class="ioc-badge">Summary view</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Automated triage"
+        data-desc="Wireshark's own automated analysis pass, surfacing warnings and errors it noticed while dissecting the capture — malformed packets, retransmissions, checksum errors."
+        data-why="A fast first pass on an unfamiliar capture — it does a first round of anomaly-spotting for you before you start manually filtering."
+        data-lookfor="A cluster of warnings concentrated around one host or one narrow time window — usually points straight at where something changed."
+        data-spl="Analyze → Expert Information">
+        <div class="tool-top"><span class="tool-name">Expert Info</span><span class="go">details →</span></div>
+        <p class="tool-desc">Wireshark's automated warnings and errors pass.</p>
+        <span class="ioc-badge">Automated triage</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Summary view"
+        data-desc="Plots traffic volume over time as a graph, filterable to any display filter expression."
+        data-why="Turns a beaconing pattern or a sudden volume spike into something you see at a glance instead of something you have to compute by eye across a timeline."
+        data-lookfor="A perfectly regular spike interval — every 60 seconds, every 5 minutes — a strong visual tell for automated C2 beaconing rather than human-driven traffic."
+        data-spl="Statistics → IO Graph">
+        <div class="tool-top"><span class="tool-name">IO Graph</span><span class="go">details →</span></div>
+        <p class="tool-desc">Traffic volume over time, filterable.</p>
+        <span class="ioc-badge">Summary view</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Automation"
+        data-desc="Wireshark's command-line counterpart — the same dissection engine, no GUI, built for scripting and processing large or repeated captures."
+        data-why="A GUI walkthrough doesn't scale to a hundred captures or a repeatable triage step — tshark is what you'd actually call from a script to pull the same fields out of every file in a folder."
+        data-lookfor="Reach for -T fields -e &lt;field&gt; to export exactly the columns you need to CSV, rather than eyeballing the GUI for a task you'll need to repeat."
+        data-spl="tshark -r capture.pcapng -Y &quot;http.request&quot; -T fields -e ip.src -e http.host -e http.request.uri">
+        <div class="tool-top"><span class="tool-name">TShark</span><span class="go">details →</span></div>
+        <p class="tool-desc">Command-line Wireshark, for scripting and automation.</p>
+        <span class="ioc-badge">Automation</span>
+      </button>
+    </div>
+  </section>
+
+  <p class="empty-state" id="empty">No fields match that filter.</p>
+
+  <footer>
+    Companion reference to the <a href="https://zelihazenginapogeeusa-byte.github.io/zeliha-infosec-journey/Blue-Team/01-SOC-and-SIEM-Analysis/splunk-field-guide.html" target="_blank" rel="noopener noreferrer">SPL Field Guide</a> and the <a href="https://zelihazenginapogeeusa-byte.github.io/zeliha-infosec-journey/osint-field-toolkit.html" target="_blank" rel="noopener noreferrer">OSINT Field Toolkit</a> — same case, the wire itself. BTL1-aligned.
+  </footer>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<aside class="panel" id="panel" role="dialog" aria-modal="true" aria-labelledby="panel-name" style="--dot: var(--c-iptransport);">
+  <div class="panel-head">
+    <div>
+      <p class="panel-cat" id="panel-cat">Category</p>
+      <h2 class="panel-name" id="panel-name">field_name</h2>
+    </div>
+    <button class="panel-close" id="panel-close" type="button" aria-label="Close">×</button>
+  </div>
+  <p class="panel-ioc"><span class="ioc-badge" id="panel-ioc-badge">IOC type</span></p>
+  <div class="panel-body">
+    <div class="panel-field">
+      <h3>What it is</h3>
+      <p id="panel-desc"></p>
+    </div>
+    <div class="panel-field">
+      <h3>Why look at it</h3>
+      <p id="panel-why"></p>
+    </div>
+    <div class="panel-field lookfor">
+      <h3>What to look for</h3>
+      <p id="panel-lookfor"></p>
+    </div>
+    <div class="panel-field spl">
+      <h3>Wireshark filter</h3>
+      <pre id="panel-spl"></pre>
+    </div>
+  </div>
+</aside>
+
+<script>
+  (function () {
+    var input = document.getElementById("search");
+    var categories = Array.prototype.slice.call(document.querySelectorAll(".category"));
+    var empty = document.getElementById("empty");
+
+    input.addEventListener("input", function () {
+      var q = input.value.trim().toLowerCase();
+      var anyVisible = false;
+
+      categories.forEach(function (cat) {
+        var catTools = cat.querySelectorAll(".tool");
+        var catHasMatch = false;
+
+        catTools.forEach(function (tool) {
+          var text = tool.textContent.toLowerCase();
+          var match = q === "" || text.indexOf(q) !== -1;
+          tool.style.display = match ? "" : "none";
+          if (match) { catHasMatch = true; anyVisible = true; }
+        });
+
+        cat.style.display = catHasMatch ? "" : "none";
+      });
+
+      empty.classList.toggle("show", !anyVisible);
+    });
+  })();
+
+  (function () {
+    var panel = document.getElementById("panel");
+    var scrim = document.getElementById("scrim");
+    var closeBtn = document.getElementById("panel-close");
+    var lastFocused = null;
+
+    function openPanel(tool) {
+      var cat = tool.closest(".category");
+      var catName = cat.querySelector(".category-head h2").textContent.trim();
+      var dot = getComputedStyle(tool).borderLeftColor;
+
+      panel.style.setProperty("--dot", dot);
+      document.getElementById("panel-cat").textContent = catName;
+      document.getElementById("panel-name").textContent = tool.querySelector(".tool-name").textContent;
+      document.getElementById("panel-ioc-badge").textContent = tool.getAttribute("data-ioc") || "";
+      document.getElementById("panel-desc").textContent = tool.getAttribute("data-desc") || "";
+      document.getElementById("panel-why").textContent = tool.getAttribute("data-why") || "";
+      document.getElementById("panel-lookfor").textContent = tool.getAttribute("data-lookfor") || "";
+      document.getElementById("panel-spl").textContent = tool.getAttribute("data-spl") || "";
+
+      lastFocused = tool;
+      panel.classList.add("open");
+      scrim.classList.add("open");
+      closeBtn.focus();
+    }
+
+    function closePanel() {
+      panel.classList.remove("open");
+      scrim.classList.remove("open");
+      if (lastFocused) lastFocused.focus();
+    }
+
+    document.querySelectorAll(".tool").forEach(function (tool) {
+      tool.addEventListener("click", function () { openPanel(tool); });
+    });
+
+    closeBtn.addEventListener("click", closePanel);
+    scrim.addEventListener("click", closePanel);
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && panel.classList.contains("open")) closePanel();
+    });
+  })();
+
+  (function () {
+    // Jumpnav pills are plain buttons (not <a href="#...">) on purpose — an
+    // in-page anchor link resolves to a full claudeusercontent.com URL inside
+    // this hosting environment, which triggers an "open external link"
+    // confirmation instead of just scrolling. A button with a click handler
+    // sidesteps that entirely.
+    document.querySelectorAll(".jumpnav button[data-target]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var el = document.getElementById(btn.getAttribute("data-target"));
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    });
+  })();
+</script>
