@@ -23,6 +23,7 @@
     --c-url: #b3341f;
     --c-phish: #356b30;
     --c-threat: #5b3fa0;
+    --c-framework: #7a5a1f;
     --c-social: #9c3572;
     --c-image: #2159a6;
   }
@@ -46,6 +47,7 @@
       --c-url: #e2624a;
       --c-phish: #6fb85f;
       --c-threat: #9c85e0;
+      --c-framework: #c7a25f;
       --c-social: #d874ae;
       --c-image: #6ba8ef;
     }
@@ -69,6 +71,7 @@
     --c-url: #e2624a;
     --c-phish: #6fb85f;
     --c-threat: #9c85e0;
+    --c-framework: #c7a25f;
     --c-social: #d874ae;
     --c-image: #6ba8ef;
   }
@@ -175,10 +178,11 @@
     gap: 0.5rem;
   }
 
-  .jumpnav a {
+  .jumpnav button {
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
+    font: inherit;
     font-family: "IBM Plex Mono", ui-monospace, monospace;
     font-size: 0.76rem;
     font-weight: 500;
@@ -188,11 +192,12 @@
     border: 1px solid color-mix(in srgb, var(--dot) 45%, var(--border));
     border-radius: 999px;
     padding: 0.32rem 0.75rem 0.32rem 0.6rem;
+    cursor: pointer;
   }
 
-  .jumpnav a:hover { background: color-mix(in srgb, var(--dot) 34%, var(--surface)); }
+  .jumpnav button:hover { background: color-mix(in srgb, var(--dot) 34%, var(--surface)); }
 
-  .jumpnav a:focus-visible {
+  .jumpnav button:focus-visible {
     outline: 2px solid var(--focus);
     outline-offset: 2px;
   }
@@ -512,13 +517,14 @@
       <input type="text" id="search" placeholder="Filter tools — e.g. &quot;IP&quot;, &quot;header&quot;, &quot;breach&quot;" autocomplete="off" />
     </div>
     <nav class="jumpnav" aria-label="Jump to category">
-      <a href="#email" style="--dot: var(--c-email);"><span class="dot"></span>Email &amp; Domain</a>
-      <a href="#ip" style="--dot: var(--c-ip);"><span class="dot"></span>IP &amp; Infrastructure</a>
-      <a href="#url" style="--dot: var(--c-url);"><span class="dot"></span>URL &amp; File Analysis</a>
-      <a href="#phish" style="--dot: var(--c-phish);"><span class="dot"></span>Phishing Intel</a>
-      <a href="#threat" style="--dot: var(--c-threat);"><span class="dot"></span>Threat &amp; Breach</a>
-      <a href="#social" style="--dot: var(--c-social);"><span class="dot"></span>Social &amp; Identity</a>
-      <a href="#image" style="--dot: var(--c-image);"><span class="dot"></span>Image &amp; Metadata</a>
+      <button type="button" data-target="email" style="--dot: var(--c-email);"><span class="dot"></span>Email &amp; Domain</button>
+      <button type="button" data-target="ip" style="--dot: var(--c-ip);"><span class="dot"></span>IP &amp; Infrastructure</button>
+      <button type="button" data-target="url" style="--dot: var(--c-url);"><span class="dot"></span>URL &amp; File Analysis</button>
+      <button type="button" data-target="phish" style="--dot: var(--c-phish);"><span class="dot"></span>Phishing Intel</button>
+      <button type="button" data-target="threat" style="--dot: var(--c-threat);"><span class="dot"></span>Threat &amp; Breach</button>
+      <button type="button" data-target="framework" style="--dot: var(--c-framework);"><span class="dot"></span>Frameworks &amp; Methodology</button>
+      <button type="button" data-target="social" style="--dot: var(--c-social);"><span class="dot"></span>Social &amp; Identity</button>
+      <button type="button" data-target="image" style="--dot: var(--c-image);"><span class="dot"></span>Image &amp; Metadata</button>
     </nav>
   </header>
 
@@ -781,6 +787,22 @@
         <p class="tool-desc">abuse.ch's public repository of shared malware samples, searchable by hash, tag, or signature.</p>
         <p class="tool-domain">bazaar.abuse.ch</p>
       </button>
+      <button class="tool" type="button" data-url="https://metadefender.opswat.com/" data-domain="metadefender.opswat.com"
+        data-usage="Run a document through when you suspect it's hiding something else inside it, not just carrying a single payload."
+        data-io="File, URL, IP, or hash → multi-engine scan results plus embedded/hidden file detection"
+        data-opsec="Free-tier submissions may be shared with the platform's threat-intel partners — avoid uploading anything with real user data.">
+        <div class="tool-top"><span class="tool-name">MetaDefender Cloud</span><span class="go">details →</span></div>
+        <p class="tool-desc">Multi-engine scanner that also flags files hidden inside documents.</p>
+        <p class="tool-domain">metadefender.opswat.com</p>
+      </button>
+      <button class="tool" type="button" data-url="https://analyze.intezer.com/" data-domain="analyze.intezer.com"
+        data-usage="Run a sample here when you need to identify the malware family, not just get a yes/no verdict."
+        data-io="File or hash → code-reuse ('genetic') comparison against a known-malware database, family attribution"
+        data-opsec="Free tier requires an account; uploaded samples may be retained for the comparison database.">
+        <div class="tool-top"><span class="tool-name">Intezer Analyze</span><span class="go">details →</span></div>
+        <p class="tool-desc">Identifies the malware family by comparing code reuse, not just signatures.</p>
+        <p class="tool-domain">analyze.intezer.com</p>
+      </button>
     </div>
   </section>
 
@@ -869,14 +891,6 @@
         <p class="tool-desc">Runs one IOC — IP, domain, hash, or email — across dozens of reputation engines in a single pass.</p>
         <p class="tool-domain">cybergordon.com</p>
       </button>
-      <button class="tool" type="button" data-url="https://attack.mitre.org/" data-domain="attack.mitre.org"
-        data-usage="Map the phishing technique to its ATT&CK ID for your report or ticket."
-        data-io="Technique or actor name → tactic, technique ID, and related TTPs"
-        data-opsec="Fully public reference site — no account or login involved.">
-        <div class="tool-top"><span class="tool-name">MITRE ATT&amp;CK</span><span class="go">details →</span></div>
-        <p class="tool-desc">Maps the phishing technique back to its ATT&amp;CK ID and the rest of the adversary's likely playbook.</p>
-        <p class="tool-domain">attack.mitre.org</p>
-      </button>
       <button class="tool" type="button" data-url="https://www.bitcoinwhoswho.com/" data-domain="bitcoinwhoswho.com"
         data-usage="Trace a wallet address on a BEC or crypto-phishing case for prior scam reports."
         data-io="Bitcoin address → transaction history, scam reports, tags"
@@ -884,14 +898,6 @@
         <div class="tool-top"><span class="tool-name">BitcoinWhosWho</span><span class="go">details →</span></div>
         <p class="tool-desc">Looks up a Bitcoin wallet's transaction history and scam reports — useful on BEC and crypto-phishing cases.</p>
         <p class="tool-domain">bitcoinwhoswho.com</p>
-      </button>
-      <button class="tool" type="button" data-url="https://d3fend.mitre.org/" data-domain="d3fend.mitre.org"
-        data-usage="Once you've mapped the phishing technique in ATT&CK, check here for the matching detection or mitigation control."
-        data-io="ATT&CK technique ID → matching defensive techniques and countermeasures"
-        data-opsec="Fully public reference site — no account or login involved.">
-        <div class="tool-top"><span class="tool-name">MITRE D3FEND</span><span class="go">details →</span></div>
-        <p class="tool-desc">Catalog of defensive countermeasures mapped against ATT&amp;CK techniques — the "what do we do about it" counterpart.</p>
-        <p class="tool-domain">d3fend.mitre.org</p>
       </button>
       <button class="tool" type="button" data-url="https://nvd.nist.gov/" data-domain="nvd.nist.gov"
         data-usage="Check this when the attachment or link tries to exploit a specific known vulnerability rather than just relying on user deception."
@@ -956,6 +962,98 @@
         <div class="tool-top"><span class="tool-name">Feodo Tracker</span><span class="go">details →</span></div>
         <p class="tool-desc">abuse.ch's tracker for active botnet command-and-control (C2) servers.</p>
         <p class="tool-domain">feodotracker.abuse.ch</p>
+      </button>
+      <button class="tool" type="button" data-url="https://pulsedive.com/" data-domain="pulsedive.com"
+        data-usage="Quick free aggregation across open threat feeds when OTX or ThreatMiner alone don't have enough context."
+        data-io="IP, domain, URL, or hash → aggregated open-feed results with a risk score"
+        data-opsec="Free, anonymous lookups for basic searches — no account required.">
+        <div class="tool-top"><span class="tool-name">Pulsedive</span><span class="go">details →</span></div>
+        <p class="tool-desc">Free aggregator of open threat feeds with its own IOC risk-scoring.</p>
+        <p class="tool-domain">pulsedive.com</p>
+      </button>
+    </div>
+  </section>
+
+  <section class="category" data-category="framework" id="framework" style="--dot: var(--c-framework);">
+    <div class="category-head">
+      <h2><span class="dot"></span>Frameworks &amp; Methodology</h2>
+      <span class="phase-tag">Analysis &amp; Reporting</span>
+    </div>
+    <p class="category-note">
+      Not lookup tools — the reference models that shape how you weigh an indicator and write the incident up once you've found it.
+    </p>
+    <div class="grid">
+      <button class="tool" type="button" data-url="https://attack.mitre.org/" data-domain="attack.mitre.org"
+        data-usage="Map the phishing technique to its ATT&CK ID for your report or ticket."
+        data-io="Technique or actor name → tactic, technique ID, and related TTPs"
+        data-opsec="Fully public reference site — no account or login involved.">
+        <div class="tool-top"><span class="tool-name">MITRE ATT&amp;CK</span><span class="go">details →</span></div>
+        <p class="tool-desc">Maps the phishing technique back to its ATT&amp;CK ID and the rest of the adversary's likely playbook.</p>
+        <p class="tool-domain">attack.mitre.org</p>
+      </button>
+      <button class="tool" type="button" data-url="https://d3fend.mitre.org/" data-domain="d3fend.mitre.org"
+        data-usage="Once you've mapped the phishing technique in ATT&CK, check here for the matching detection or mitigation control."
+        data-io="ATT&CK technique ID → matching defensive techniques and countermeasures"
+        data-opsec="Fully public reference site — no account or login involved.">
+        <div class="tool-top"><span class="tool-name">MITRE D3FEND</span><span class="go">details →</span></div>
+        <p class="tool-desc">Catalog of defensive countermeasures mapped against ATT&amp;CK techniques — the "what do we do about it" counterpart.</p>
+        <p class="tool-domain">d3fend.mitre.org</p>
+      </button>
+      <button class="tool" type="button" data-url="https://www.sans.org/tools/the-pyramid-of-pain" data-domain="sans.org"
+        data-usage="Use to decide how much effort is actually worth spending chasing a given IOC — a hash-only block is cheap for the attacker to evade, a TTP-level detection isn't."
+        data-io="Reference framework — no lookup, informs how you weight different indicator types"
+        data-opsec="Public reference material — no account or login involved.">
+        <div class="tool-top"><span class="tool-name">Pyramid of Pain</span><span class="go">details →</span></div>
+        <p class="tool-desc">Ranks indicator types by how costly they are for an attacker to change — hashes cheapest, TTPs hardest.</p>
+        <p class="tool-domain">sans.org</p>
+      </button>
+      <button class="tool" type="button" data-url="https://www.activeresponse.org/wp-content/uploads/2013/07/diamond.pdf" data-domain="activeresponse.org"
+        data-usage="Use when writing up an incident to structure the four core relationships instead of a loose narrative."
+        data-io="Reference framework — Adversary, Capability, Victim, Infrastructure and the edges between them"
+        data-opsec="Public academic paper — no account or login involved.">
+        <div class="tool-top"><span class="tool-name">Diamond Model of Intrusion Analysis</span><span class="go">details →</span></div>
+        <p class="tool-desc">Structures an intrusion around four linked elements: adversary, capability, victim, infrastructure.</p>
+        <p class="tool-domain">activeresponse.org</p>
+      </button>
+      <button class="tool" type="button" data-url="https://www.lockheedmartin.com/en-us/capabilities/cyber/cyber-kill-chain.html" data-domain="lockheedmartin.com"
+        data-usage="Use to place a finding on the attack's timeline — helps decide whether you're still in time to interrupt it before Actions on Objectives."
+        data-io="Reference framework — the seven linear stages from Reconnaissance to Actions on Objectives"
+        data-opsec="Public reference site — no account or login involved.">
+        <div class="tool-top"><span class="tool-name">Cyber Kill Chain</span><span class="go">details →</span></div>
+        <p class="tool-desc">Lockheed Martin's seven-stage model of how an intrusion actually unfolds, end to end.</p>
+        <p class="tool-domain">lockheedmartin.com</p>
+      </button>
+      <button class="tool" type="button" data-url="https://www.sans.org/security-resources/glossary-of-terms/incident-response" data-domain="sans.org"
+        data-usage="Use to structure a response and know what phase you're actually in — especially the discipline of collecting evidence before isolating, and not calling it done until Lessons Learned actually happens."
+        data-io="Reference framework — Preparation, Identification, Containment, Eradication, Recovery, Lessons Learned"
+        data-opsec="Public reference material — no account or login involved.">
+        <div class="tool-top"><span class="tool-name">PICERL Incident Response Lifecycle</span><span class="go">details →</span></div>
+        <p class="tool-desc">SANS's six-phase cycle for handling an incident start to finish.</p>
+        <p class="tool-domain">sans.org</p>
+      </button>
+      <button class="tool" type="button" data-url="https://docs.oasis-open.org/cti/stix/v2.1/os/stix-v2.1-os.html" data-domain="docs.oasis-open.org"
+        data-usage="Reference when exporting or ingesting IOCs between platforms — MISP and OpenCTI both speak STIX natively."
+        data-io="Reference standard — STIX structures the IOC/TTP data itself, TAXII is the transport protocol that moves it between platforms"
+        data-opsec="Public open standard — no account or login involved.">
+        <div class="tool-top"><span class="tool-name">STIX / TAXII</span><span class="go">details →</span></div>
+        <p class="tool-desc">The machine-readable format (STIX) and transport protocol (TAXII) most threat-intel platforms share data through.</p>
+        <p class="tool-domain">docs.oasis-open.org</p>
+      </button>
+      <button class="tool" type="button" data-url="https://www.misp-project.org/" data-domain="misp-project.org"
+        data-usage="Self-hosted option when you want to build a searchable, shareable IOC database instead of relying only on public lookups."
+        data-io="IOC (IP, domain, hash, etc.) → correlated events, tags, and shared community feeds, once deployed"
+        data-opsec="Self-hosted open-source software — data stays on infrastructure you control.">
+        <div class="tool-top"><span class="tool-name">MISP</span><span class="go">details →</span></div>
+        <p class="tool-desc">Open-source threat-intel platform for storing, correlating, and sharing IOCs across a team or community.</p>
+        <p class="tool-domain">misp-project.org</p>
+      </button>
+      <button class="tool" type="button" data-url="https://filigran.io/platform/opencti/" data-domain="filigran.io"
+        data-usage="Alternative to MISP when the priority is visualizing relationships between actors, campaigns, and IOCs, not just storing them."
+        data-io="IOC or entity → a knowledge graph linking it to related campaigns, actors, and techniques"
+        data-opsec="Self-hosted open-source software; a public demo instance exists for exploring the interface without deploying it yourself.">
+        <div class="tool-top"><span class="tool-name">OpenCTI</span><span class="go">details →</span></div>
+        <p class="tool-desc">Open-source threat-intel platform built around a knowledge graph of actors, campaigns, and IOCs.</p>
+        <p class="tool-domain">filigran.io</p>
       </button>
     </div>
   </section>
@@ -1075,7 +1173,7 @@
   <p class="empty-state" id="empty">No tools match that filter.</p>
 
   <footer>
-    Built alongside the <a href="https://github.com/zelihazenginapogeeusa-byte/zeliha-infosec-journey/blob/cybersecurity-learning-hub/Blue-Team-README.md" target="_blank" rel="noopener noreferrer">eM Client phishing lab</a> — relevant to both BTL1 and eJPT investigation workflows.
+    Built alongside the <a href="https://github.com/zelihazenginapogeeusa-byte/zeliha-infosec-journey/blob/cybersecurity-learning-hub/Blue-Team-README.md" target="_blank" rel="noopener noreferrer">eM Client phishing lab</a> — relevant to both BTL1 and eJPT investigation workflows. Full write-ups on <a href="https://github.com/zelihazenginapogeeusa-byte/zeliha-infosec-journey" target="_blank" rel="noopener noreferrer">GitHub</a>.
   </footer>
 </div>
 
@@ -1179,6 +1277,20 @@
     scrim.addEventListener("click", closePanel);
     document.addEventListener("keydown", function (e) {
       if (e.key === "Escape" && panel.classList.contains("open")) closePanel();
+    });
+  })();
+
+  (function () {
+    // Jumpnav pills are plain buttons (not <a href="#...">) on purpose — an
+    // in-page anchor link resolves to a full claudeusercontent.com URL inside
+    // this hosting environment, which triggers an "open external link"
+    // confirmation instead of just scrolling. A button with a click handler
+    // sidesteps that entirely.
+    document.querySelectorAll(".jumpnav button[data-target]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var el = document.getElementById(btn.getAttribute("data-target"));
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
     });
   })();
 </script>
