@@ -1,0 +1,780 @@
+<title>DeepBlueCLI Field Guide</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+<style>
+  :root {
+    --bg: #f5f2ea;
+    --surface: #ffffff;
+    --surface-hover: #f7f3e7;
+    --ink: #221f1a;
+    --ink-muted: #635c50;
+    --ink-faint: #948b7a;
+    --border: #e2dbc8;
+    --border-strong: #cdc2a6;
+    --shadow: 0 1px 2px rgba(34, 31, 26, 0.06);
+    --focus: #1f7d72;
+    --scrim: rgba(34, 31, 26, 0.32);
+    --code-bg: #221f1a;
+    --code-ink: #e8e3d6;
+
+    --c-usage: #9c3572;
+    --c-detect: #8a4a1f;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #14181d;
+      --surface: #1c2127;
+      --surface-hover: #242a31;
+      --ink: #e8e3d6;
+      --ink-muted: #a79f8f;
+      --ink-faint: #746b5c;
+      --border: #2c323a;
+      --border-strong: #3a424c;
+      --shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+      --focus: #52c2b6;
+      --scrim: rgba(0, 0, 0, 0.55);
+      --code-bg: #0e1114;
+      --code-ink: #d8e8e4;
+
+      --c-usage: #d874ae;
+      --c-detect: #cf8a52;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #14181d;
+    --surface: #1c2127;
+    --surface-hover: #242a31;
+    --ink: #e8e3d6;
+    --ink-muted: #a79f8f;
+    --ink-faint: #746b5c;
+    --border: #2c323a;
+    --border-strong: #3a424c;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+    --focus: #52c2b6;
+    --scrim: rgba(0, 0, 0, 0.55);
+    --code-bg: #0e1114;
+    --code-ink: #d8e8e4;
+
+    --c-usage: #d874ae;
+    --c-detect: #cf8a52;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: inherit; }
+  code { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+
+  .wrap {
+    max-width: 68rem;
+    margin: 0 auto;
+    padding: 3.5rem 1.5rem 4rem;
+  }
+
+  .masthead { margin-bottom: 2rem; }
+
+  .eyebrow {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--c-usage);
+    margin: 0 0 0.9rem;
+  }
+
+  h1 {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-weight: 600;
+    font-size: clamp(1.9rem, 4vw, 2.5rem);
+    letter-spacing: -0.01em;
+    margin: 0 0 0.9rem;
+    text-wrap: balance;
+  }
+
+  .dek {
+    max-width: 46rem;
+    color: var(--ink-muted);
+    font-size: 1.02rem;
+    margin: 0 0 1.6rem;
+  }
+
+  .dek code {
+    font-size: 0.88em;
+    background: var(--surface-hover);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 0.05em 0.4em;
+    color: var(--ink);
+  }
+
+  .search-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    max-width: 26rem;
+    margin-bottom: 1.1rem;
+  }
+
+  .search-row svg { flex: none; color: var(--ink-faint); }
+
+  #search {
+    width: 100%;
+    font: inherit;
+    font-size: 0.95rem;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 6px;
+    padding: 0.6rem 0.85rem;
+  }
+
+  #search::placeholder { color: var(--ink-faint); }
+  #search:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+
+  .jumpnav { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+  .jumpnav button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font: inherit;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.76rem;
+    font-weight: 500;
+    text-decoration: none;
+    color: var(--dot);
+    background: color-mix(in srgb, var(--dot) 20%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--dot) 45%, var(--border));
+    border-radius: 999px;
+    padding: 0.32rem 0.75rem 0.32rem 0.6rem;
+    cursor: pointer;
+  }
+
+  .jumpnav button:hover { background: color-mix(in srgb, var(--dot) 34%, var(--surface)); }
+  .jumpnav button:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  .dot {
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 50%;
+    background: var(--dot);
+    flex: none;
+  }
+
+  .hint { font-size: 0.86rem; color: var(--ink-faint); margin: -0.9rem 0 1.3rem; }
+
+  .category {
+    margin-bottom: 2rem;
+    scroll-margin-top: 1.5rem;
+    background: color-mix(in srgb, var(--dot) 16%, var(--bg));
+    border: 1px solid color-mix(in srgb, var(--dot) 32%, var(--border));
+    border-radius: 14px;
+    padding: 1.35rem 1.35rem 1.6rem;
+  }
+
+  .category-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    border-bottom: 3px solid var(--dot);
+    padding-bottom: 0.6rem;
+    margin-bottom: 0.35rem;
+  }
+
+  .category-head h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--dot);
+    margin: 0;
+  }
+
+  .phase-tag {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    color: var(--dot);
+    white-space: nowrap;
+  }
+
+  .category-note {
+    color: var(--ink-muted);
+    font-size: 0.92rem;
+    margin: 0.7rem 0 1rem;
+    max-width: 44rem;
+  }
+
+  .category-spl {
+    display: block;
+    background: var(--code-bg);
+    color: var(--code-ink);
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.8rem;
+    border-radius: 8px;
+    padding: 0.8rem 1rem;
+    margin: 0 0 1.4rem;
+    overflow-x: auto;
+    white-space: pre;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+    gap: 0.85rem;
+  }
+
+  .tool {
+    display: block;
+    width: 100%;
+    text-align: left;
+    font: inherit;
+    cursor: pointer;
+    text-decoration: none;
+    background: color-mix(in srgb, var(--dot) 9%, var(--surface));
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--dot);
+    border-radius: 8px;
+    padding: 1rem 1.1rem;
+    box-shadow: var(--shadow);
+    transition: background 0.15s ease, transform 0.15s ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) { .tool { transition: none; } }
+
+  .tool:hover {
+    background: color-mix(in srgb, var(--dot) 20%, var(--surface));
+    transform: translateY(-1px);
+  }
+
+  .tool:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  .tool-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .tool-name {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-weight: 600;
+    font-size: 0.98rem;
+    color: var(--ink);
+  }
+
+  .go {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.72rem;
+    color: var(--dot);
+    white-space: nowrap;
+  }
+
+  .tool-desc {
+    color: var(--ink-muted);
+    font-size: 0.88rem;
+    margin: 0.4rem 0 0.55rem;
+  }
+
+  .ioc-badge {
+    display: inline-block;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 4px;
+    padding: 0.15rem 0.45rem;
+  }
+
+  .empty-state {
+    display: none;
+    color: var(--ink-muted);
+    font-size: 0.95rem;
+    padding: 1rem 0;
+  }
+
+  .empty-state.show { display: block; }
+
+  footer {
+    border-top: 1px solid var(--border-strong);
+    padding-top: 1.5rem;
+    margin-top: 1rem;
+    color: var(--ink-muted);
+    font-size: 0.88rem;
+  }
+
+  footer a {
+    color: var(--c-usage);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  footer a:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  /* Detail panel */
+  .scrim {
+    position: fixed;
+    inset: 0;
+    background: var(--scrim);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    z-index: 20;
+  }
+
+  .scrim.open { opacity: 1; pointer-events: auto; }
+
+  @media (prefers-reduced-motion: reduce) { .scrim, .panel { transition: none; } }
+
+  .panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100%;
+    width: min(26rem, 100%);
+    background: var(--surface);
+    border-left: 1px solid var(--border-strong);
+    box-shadow: -8px 0 24px rgba(0, 0, 0, 0.16);
+    transform: translateX(100%);
+    transition: transform 0.22s ease;
+    z-index: 21;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+  .panel.open { transform: translateX(0); }
+
+  .panel-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 1.5rem 1.5rem 1rem;
+    border-top: 4px solid var(--dot);
+  }
+
+  .panel-cat {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--dot);
+    margin: 0 0 0.4rem;
+  }
+
+  .panel-name {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--dot);
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  .panel-close {
+    flex: none;
+    width: 2rem;
+    height: 2rem;
+    display: grid;
+    place-items: center;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--ink-muted);
+    cursor: pointer;
+    font-size: 1.1rem;
+    line-height: 1;
+  }
+
+  .panel-close:hover { background: var(--surface-hover); color: var(--ink); }
+  .panel-close:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  .panel-ioc {
+    margin: 0 1.5rem 1.25rem;
+  }
+
+  .panel-body {
+    padding: 0 1.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .panel-field h3 {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0 0 0.4rem;
+  }
+
+  .panel-field p {
+    margin: 0;
+    font-size: 0.92rem;
+    color: var(--ink);
+  }
+
+  .panel-field.lookfor p {
+    color: var(--ink-muted);
+    background: var(--surface-hover);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.7rem 0.85rem;
+  }
+
+  .panel-field.spl pre {
+    margin: 0;
+    background: var(--code-bg);
+    color: var(--code-ink);
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.82rem;
+    border-radius: 6px;
+    padding: 0.75rem 0.9rem;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+</style>
+
+<div class="wrap">
+  <header class="masthead">
+    <p class="eyebrow">SOC field reference</p>
+    <h1>DeepBlueCLI Field Guide</h1>
+    <p class="dek">
+      Eric Conrad's PowerShell triage script for the Windows Event Log — the fast first pass before
+      you've even opened a SIEM, run straight against an exported <code>.evtx</code> or a live log.
+      Organized by how to run it, what it's built to catch, and exactly how to read what it prints.
+    </p>
+    <div class="search-row">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <circle cx="6.7" cy="6.7" r="4.7" stroke="currentColor" stroke-width="1.4" />
+        <line x1="10.1" y1="10.1" x2="14.5" y2="14.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+      </svg>
+      <input type="text" id="search" placeholder="Filter fields — e.g. &quot;powershell&quot;, &quot;service&quot;, &quot;spray&quot;" autocomplete="off" />
+    </div>
+    <nav class="jumpnav" aria-label="Jump to category">
+      <button type="button" data-target="usage" style="--dot: var(--c-usage);"><span class="dot"></span>Usage &amp; Parameters</button>
+      <button type="button" data-target="detect" style="--dot: var(--c-detect);"><span class="dot"></span>Detections &amp; Findings</button>
+    </nav>
+  </header>
+
+  <p class="hint">Click any card for why it matters, what a suspicious value looks like, its IOC type, and exactly how to pull it up.</p>
+
+  <section class="category" data-category="usage" id="usage" style="--dot: var(--c-usage);">
+    <div class="category-head">
+      <h2><span class="dot"></span>Usage &amp; Parameters</h2>
+      <span class="phase-tag">PowerShell Script</span>
+    </div>
+    <p class="category-note">A PowerShell script, not a GUI tool — run it directly against exported .evtx files or a live Windows Event Log, tuned with a handful of flags.</p>
+    <code class="category-spl">.\DeepBlue.ps1 -log security</code>
+    <div class="grid">
+      <button class="tool" type="button" data-ioc="Command"
+        data-desc="The core command to run DeepBlueCLI against a single exported Windows Event Log file."
+        data-why="This is the starting point for every DeepBlueCLI session — it parses the specified .evtx and prints any suspicious findings directly to the console."
+        data-lookfor="Run it against Security.evtx first — most of DeepBlueCLI's built-in detections are tuned for the Windows Security log specifically. If PowerShell refuses to run the script at all, that's the execution policy, not DeepBlueCLI — bypass it for the session before anything else."
+        data-spl=".\DeepBlue.ps1 -log security
+If blocked: Set-ExecutionPolicy Bypass -Scope CurrentUser">
+        <div class="tool-top"><span class="tool-name">Basic invocation</span><span class="go">details →</span></div>
+        <p class="tool-desc">Run against a live log by name.</p>
+        <span class="ioc-badge">Command</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Command"
+        data-desc="Points DeepBlueCLI at a specific exported log file instead of a live log source — the normal mode when working from a disk image or a log pulled from a remote host."
+        data-why="Lets you run the same detections against evidence collected from an offline host, not just the machine you're actively logged into."
+        data-lookfor="Export the log with wevtutil or Event Viewer's Save As first if working from a live host you want to preserve unaltered — analyze the copy, not the original."
+        data-spl="wevtutil epl Security C:\triage\security.evtx
+.\DeepBlue.ps1 C:\triage\security.evtx">
+        <div class="tool-top"><span class="tool-name">Analyzing an exported .evtx</span><span class="go">details →</span></div>
+        <p class="tool-desc">Run against an offline, exported log file.</p>
+        <span class="ioc-badge">Command</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Command"
+        data-desc="Restricts DeepBlueCLI's analysis to a specific time window within a larger log file."
+        data-why="A full Security log can span months and contain a huge volume of routine noise — narrowing to the incident window first makes the output far more manageable."
+        data-lookfor="Use this once you already have an approximate incident window from another data source (a Splunk or Wireshark timestamp) — DeepBlueCLI doesn't help you find that window on its own."
+        data-spl=".\DeepBlue.ps1 -log security -date 08/01/2024">
+        <div class="tool-top"><span class="tool-name">Date range filtering</span><span class="go">details →</span></div>
+        <p class="tool-desc">Narrow analysis to a specific window.</p>
+        <span class="ioc-badge">Command</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Interpretation"
+        data-desc="DeepBlueCLI prints each detection as a labeled block — the date, the specific detection name, and the relevant fields it extracted from the matching event."
+        data-why="The detection name itself is the fastest triage signal — a script built to name each finding, rather than dumping raw events, saves you from re-deriving what the event means."
+        data-lookfor="Multiple different detection types firing on the same host in a short window — a stronger signal than any single detection alone, and the per-event output makes that pattern easy to spot by scrolling."
+        data-spl="Review console output — each block is one finding">
+        <div class="tool-top"><span class="tool-name">Output interpretation</span><span class="go">details →</span></div>
+        <p class="tool-desc">Reading the labeled detection blocks it prints.</p>
+        <span class="ioc-badge">Interpretation</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Command"
+        data-desc="The -log parameter isn't limited to Security — DeepBlueCLI also parses the System, Application, and PowerShell Operational logs, plus Sysmon's own operational log when present."
+        data-why="Different attacker behaviors land in different logs — service installation shows up in System (7045) as well as Security, and script block/module logging lives in the PowerShell Operational log, not Security at all."
+        data-lookfor="Run against PowerShell Operational (Microsoft-Windows-PowerShell/Operational) whenever an obfuscated command-line detection comes up empty — some obfuscation only becomes visible in the deobfuscated script block text logged there."
+        data-spl=".\DeepBlue.ps1 -log system
+.\DeepBlue.ps1 -log powershell">
+        <div class="tool-top"><span class="tool-name">Other log sources</span><span class="go">details →</span></div>
+        <p class="tool-desc">System, Application, and PowerShell Operational, not just Security.</p>
+        <span class="ioc-badge">Command</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Configuration"
+        data-desc="Parameters that reduce false positives on a known-noisy environment — a whitelist for expected service accounts, one for known-legitimate command lines, and a way to restrict a run to a single detection pattern."
+        data-why="A default run against a busy production Security log can bury real findings under expected admin activity — tuning the whitelist first makes repeat runs against the same environment far more usable."
+        data-lookfor="Build the whitelist once per environment and reuse it — a known-service-accounts list turns a noisy first run into a clean one on every subsequent run against that same host."
+        data-spl=".\DeepBlue.ps1 -log security -WhitelistUsers svc_backup,svc_scan">
+        <div class="tool-top"><span class="tool-name">Whitelisting &amp; tuning flags</span><span class="go">details →</span></div>
+        <p class="tool-desc">Cut expected noise out of repeat runs.</p>
+        <span class="ioc-badge">Configuration</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="category" data-category="detect" id="detect" style="--dot: var(--c-detect);">
+    <div class="category-head">
+      <h2><span class="dot"></span>Detections &amp; Findings</h2>
+      <span class="phase-tag">Built-in Modules</span>
+    </div>
+    <p class="category-note">What DeepBlueCLI is actually built to catch — each of these is a built-in detection, not something you configure yourself.</p>
+    <code class="category-spl">Detection: Regex match — Encoded command</code>
+    <div class="grid">
+      <button class="tool" type="button" data-ioc="Host IOC"
+        data-desc="Flags command lines using encoded (-enc/-EncodedCommand), compressed, or otherwise obfuscated PowerShell — drawn from Event ID 4104 (PowerShell Script Block Logging) as well as command-line logging, the same pattern the Splunk Field Guide's CommandLine field looks for, but pre-filtered here automatically."
+        data-why="This is DeepBlueCLI's flagship detection — obfuscated PowerShell is one of the most common execution techniques in modern intrusions, and manually scanning command lines for it doesn't scale."
+        data-lookfor="A flagged command line decoded and displayed alongside the detection — DeepBlueCLI often base64-decodes the payload for you directly in the output. Check the parent process next: a non-interactive parent like Office or a browser spawning PowerShell is a much stronger signal than a user's own interactive shell running the same command. Treat a hit as a starting point, not a verdict: some legitimate admin scripts use encoded PowerShell too, so confirm with context before calling it malicious."
+        data-spl="Detection: 'Regex match: Encoded command'  (Event ID 4104)">
+        <div class="tool-top"><span class="tool-name">Obfuscated/encoded PowerShell</span><span class="go">details →</span></div>
+        <p class="tool-desc">DeepBlueCLI's flagship, highest-signal detection.</p>
+        <span class="ioc-badge">Host IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Host IOC"
+        data-desc="Flags command lines using common download-and-execute patterns — a web client call chained with Invoke-Expression — even when the command isn't otherwise encoded."
+        data-why="One of the most common ways a first-stage payload gets pulled down and run in memory without ever touching disk as a file — distinct from the encoded-command detection because the command line here is fully readable, just structurally suspicious."
+        data-lookfor="Invoke-Expression combined with a web-download call in the same line — reading fine on its own, but forming a download-and-run pattern together."
+        data-spl="Detection: 'Regex match: Download cradle'">
+        <div class="tool-top"><span class="tool-name">PowerShell download cradle</span><span class="go">details →</span></div>
+        <p class="tool-desc">Readable command lines that still download and run a payload.</p>
+        <span class="ioc-badge">Host IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Host IOC"
+        data-desc="Flags Event ID 7045 (a new service was installed) where the service's binary path or name matches known-suspicious patterns, alongside Event ID 4698 (a new Scheduled Task was created) showing the same persistence shape."
+        data-why="Service and scheduled-task creation are the two classic persistence mechanisms — both survive reboots, and a service running as SYSTEM is a high-value foothold for an attacker to establish."
+        data-lookfor="A service or task pointing at a binary in %TEMP% or another user-writable directory, or a name that's a poor imitation of a legitimate Windows service — check the binary's hash reputation next, before deciding whether to contain it."
+        data-spl="Detection: 'Suspicious Service Installation'  (Event ID 7045)
+Event ID 4698 — Scheduled Task created (see also the Splunk Field Guide's 4698 card)">
+        <div class="tool-top"><span class="tool-name">Suspicious service / scheduled task creation</span><span class="go">details →</span></div>
+        <p class="tool-desc">A new service or task with suspicious path or naming.</p>
+        <span class="ioc-badge">Host IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Identity IOC"
+        data-desc="Flags anomalous successful logons — Event ID 4624 combined with 4672 (special/administrative privileges assigned at logon) — where the logon type, source, or time doesn't match the account's normal pattern."
+        data-why="A successful logon with an unusual logon type (a network logon where an interactive one is expected, an interactive logon in the middle of the night) or an account picking up admin rights it doesn't normally use is a stronger signal than a failed logon — the attacker is already in."
+        data-lookfor="Cross-reference the account and source against expected behavior before escalating — a legitimate admin doing off-hours maintenance produces the same pattern as a compromised admin account, so verify rather than assume."
+        data-spl="Detection: 'Suspicious Logon'  (Event ID 4624 / 4672)">
+        <div class="tool-top"><span class="tool-name">Suspicious logon</span><span class="go">details →</span></div>
+        <p class="tool-desc">Anomalous successful logons and privilege assignment, not just failures.</p>
+        <span class="ioc-badge">Identity IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Identity IOC"
+        data-desc="Flags a pattern of repeated 4625 (failed logon) events consistent with either brute-force (many attempts, one account) or password-spray (few attempts, many accounts) behavior."
+        data-why="Automates exactly the kind of counting you'd otherwise do by hand in Splunk — useful as a fast first pass on a log before you've even opened a SIEM."
+        data-lookfor="Cross-reference against the Password spray pattern card in the Splunk Field Guide — this detection and that SPL query are two ways of finding the same underlying behavior."
+        data-spl="Detection: 'Password Guessing' / 'Password Spraying'">
+        <div class="tool-top"><span class="tool-name">Password guessing / spraying</span><span class="go">details →</span></div>
+        <p class="tool-desc">Repeated failed-logon patterns, either shape.</p>
+        <span class="ioc-badge">Identity IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Identity IOC"
+        data-desc="Flags account-creation and group-membership events (4720 new account, 4732 added to a local group, 4728 added to a global security group) — the same activity covered in the Splunk Field Guide's Account Management category, surfaced automatically here."
+        data-why="Persistence via a new backdoor account is common enough that DeepBlueCLI checks for it by default, without needing to write a query."
+        data-lookfor="A newly created account added to an administrative group shortly afterward — DeepBlueCLI will typically flag both events, worth reading them together."
+        data-spl="Detection: 'User Created' / 'User Added to Local Group'">
+        <div class="tool-top"><span class="tool-name">New user / admin group changes</span><span class="go">details →</span></div>
+        <p class="tool-desc">Account creation and privileged group additions.</p>
+        <span class="ioc-badge">Identity IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Anti-forensics"
+        data-desc="Flags Event ID 1102 — the Security event log itself being cleared."
+        data-why="Same high-confidence anti-forensics signal covered in the Splunk Field Guide's Event ID Reference — DeepBlueCLI surfaces it without needing to know to search for 1102 specifically."
+        data-lookfor="Any hit at all — treat it as a standalone incident trigger and work backward from the timestamp, same guidance as the Splunk Field Guide's 1102 card."
+        data-spl="Detection: 'Audit Log Cleared'">
+        <div class="tool-top"><span class="tool-name">Log clearing</span><span class="go">details →</span></div>
+        <p class="tool-desc">The Security log itself being wiped.</p>
+        <span class="ioc-badge">Anti-forensics</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Host IOC"
+        data-desc="Flags command-line invocations of legitimate Windows binaries (regsvr32, mshta, rundll32, certutil) used in ways consistent with known living-off-the-land abuse techniques, drawn from Event ID 4688 process-creation logging."
+        data-why="These binaries are digitally signed and trusted by default — that's exactly why attackers use them to execute code while evading signature-based detection."
+        data-lookfor="certutil invoked with -decode or -urlcache — both are legitimate certificate-management flags being abused respectively for payload decoding and stealth downloading."
+        data-spl="Detection: 'Suspicious Command Line'  (Event ID 4688)">
+        <div class="tool-top"><span class="tool-name">LOLBins / suspicious command lines</span><span class="go">details →</span></div>
+        <p class="tool-desc">Trusted Windows binaries abused to run code.</p>
+        <span class="ioc-badge">Host IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Identity IOC"
+        data-desc="Flags command lines and PowerShell blocks containing keywords associated with credential-dumping tools, most notably Mimikatz — matched from Event ID 4688 and 4104 content rather than a specific dedicated event ID."
+        data-why="Credential dumping is how an attacker turns one compromised host into domain-wide access — catching the tool invocation itself, before it succeeds, is far cheaper than catching the aftermath."
+        data-lookfor="Mimikatz-associated strings (sekurlsa, lsadump, DCSync-related keywords) anywhere in a logged command line or script block — a hit here warrants immediate escalation, not just a note."
+        data-spl="Detection: keyword match against known credential-dumping tool names">
+        <div class="tool-top"><span class="tool-name">Credential dumping keywords</span><span class="go">details →</span></div>
+        <p class="tool-desc">Mimikatz and similar tool names in command lines.</p>
+        <span class="ioc-badge">Identity IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Identity IOC"
+        data-desc="Flags Event ID 4740 — an account was locked out after exceeding the failed-logon threshold set by account lockout policy."
+        data-why="A lockout is the policy-enforced endpoint of a failed-logon pattern — it confirms the threshold was actually crossed, which is a stronger, lower-noise signal than counting 4625 events yourself."
+        data-lookfor="A lockout on an account that isn't the one actively being investigated — can reveal a password-spray hitting the whole user population, not just the account that first drew attention."
+        data-spl="Detection: 'Account Lockout'  (Event ID 4740)">
+        <div class="tool-top"><span class="tool-name">Account lockout</span><span class="go">details →</span></div>
+        <p class="tool-desc">The policy-enforced result of too many failed logons.</p>
+        <span class="ioc-badge">Identity IOC</span>
+      </button>
+    </div>
+  </section>
+
+  <p class="empty-state" id="empty">No fields match that filter.</p>
+
+  <footer>
+    Companion reference to the <a href="https://zelihazenginapogeeusa-byte.github.io/zeliha-infosec-journey/autopsy-field-guide.html" target="_blank" rel="noopener noreferrer">Autopsy Field Guide</a> and the <a href="https://zelihazenginapogeeusa-byte.github.io/zeliha-infosec-journey/splunk-field-guide.html" target="_blank" rel="noopener noreferrer">Splunk Field Guide</a> — same host, the event log instead of the disk. BTL1-aligned. Full write-ups on <a href="https://github.com/zelihazenginapogeeusa-byte/zeliha-infosec-journey" target="_blank" rel="noopener noreferrer">GitHub</a>.
+  </footer>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<aside class="panel" id="panel" role="dialog" aria-modal="true" aria-labelledby="panel-name" style="--dot: var(--c-usage);">
+  <div class="panel-head">
+    <div>
+      <p class="panel-cat" id="panel-cat">Category</p>
+      <h2 class="panel-name" id="panel-name">field_name</h2>
+    </div>
+    <button class="panel-close" id="panel-close" type="button" aria-label="Close">×</button>
+  </div>
+  <p class="panel-ioc"><span class="ioc-badge" id="panel-ioc-badge">IOC type</span></p>
+  <div class="panel-body">
+    <div class="panel-field">
+      <h3>What it is</h3>
+      <p id="panel-desc"></p>
+    </div>
+    <div class="panel-field">
+      <h3>Why look at it</h3>
+      <p id="panel-why"></p>
+    </div>
+    <div class="panel-field lookfor">
+      <h3>What to look for</h3>
+      <p id="panel-lookfor"></p>
+    </div>
+    <div class="panel-field spl">
+      <h3>How to do it</h3>
+      <pre id="panel-spl"></pre>
+    </div>
+  </div>
+</aside>
+
+<script>
+  (function () {
+    var input = document.getElementById("search");
+    var categories = Array.prototype.slice.call(document.querySelectorAll(".category"));
+    var empty = document.getElementById("empty");
+
+    input.addEventListener("input", function () {
+      var q = input.value.trim().toLowerCase();
+      var anyVisible = false;
+
+      categories.forEach(function (cat) {
+        var catTools = cat.querySelectorAll(".tool");
+        var catHasMatch = false;
+
+        catTools.forEach(function (tool) {
+          var text = tool.textContent.toLowerCase();
+          var match = q === "" || text.indexOf(q) !== -1;
+          tool.style.display = match ? "" : "none";
+          if (match) { catHasMatch = true; anyVisible = true; }
+        });
+
+        cat.style.display = catHasMatch ? "" : "none";
+      });
+
+      empty.classList.toggle("show", !anyVisible);
+    });
+  })();
+
+  (function () {
+    var panel = document.getElementById("panel");
+    var scrim = document.getElementById("scrim");
+    var closeBtn = document.getElementById("panel-close");
+    var lastFocused = null;
+
+    function openPanel(tool) {
+      var cat = tool.closest(".category");
+      var catName = cat.querySelector(".category-head h2").textContent.trim();
+      var dot = getComputedStyle(tool).borderLeftColor;
+
+      panel.style.setProperty("--dot", dot);
+      document.getElementById("panel-cat").textContent = catName;
+      document.getElementById("panel-name").textContent = tool.querySelector(".tool-name").textContent;
+      document.getElementById("panel-ioc-badge").textContent = tool.getAttribute("data-ioc") || "";
+      document.getElementById("panel-desc").textContent = tool.getAttribute("data-desc") || "";
+      document.getElementById("panel-why").textContent = tool.getAttribute("data-why") || "";
+      document.getElementById("panel-lookfor").textContent = tool.getAttribute("data-lookfor") || "";
+      document.getElementById("panel-spl").textContent = tool.getAttribute("data-spl") || "";
+
+      lastFocused = tool;
+      panel.classList.add("open");
+      scrim.classList.add("open");
+      closeBtn.focus();
+    }
+
+    function closePanel() {
+      panel.classList.remove("open");
+      scrim.classList.remove("open");
+      if (lastFocused) lastFocused.focus();
+    }
+
+    document.querySelectorAll(".tool").forEach(function (tool) {
+      tool.addEventListener("click", function () { openPanel(tool); });
+    });
+
+    closeBtn.addEventListener("click", closePanel);
+    scrim.addEventListener("click", closePanel);
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && panel.classList.contains("open")) closePanel();
+    });
+  })();
+
+  (function () {
+    // Jumpnav pills are plain buttons (not <a href="#...">) on purpose — an
+    // in-page anchor link resolves to a full claudeusercontent.com URL inside
+    // this hosting environment, which triggers an "open external link"
+    // confirmation instead of just scrolling. A button with a click handler
+    // sidesteps that entirely.
+    document.querySelectorAll(".jumpnav button[data-target]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var el = document.getElementById(btn.getAttribute("data-target"));
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    });
+  })();
+</script>
