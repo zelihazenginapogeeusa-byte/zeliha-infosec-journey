@@ -1,0 +1,959 @@
+<title>Live Host Triage Field Guide</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+<style>
+  :root {
+    --bg: #f5f2ea;
+    --surface: #ffffff;
+    --surface-hover: #f7f3e7;
+    --ink: #221f1a;
+    --ink-muted: #635c50;
+    --ink-faint: #948b7a;
+    --border: #e2dbc8;
+    --border-strong: #cdc2a6;
+    --shadow: 0 1px 2px rgba(34, 31, 26, 0.06);
+    --focus: #1f7d72;
+    --scrim: rgba(34, 31, 26, 0.32);
+    --code-bg: #221f1a;
+    --code-ink: #e8e3d6;
+
+    --c-env: #4a5568;
+    --c-network: #1c6e8c;
+    --c-process: #2f7d3a;
+    --c-accounts: #6a3f9e;
+    --c-persist: #b3341f;
+    --c-export: #8a5a1f;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #14181d;
+      --surface: #1c2127;
+      --surface-hover: #242a31;
+      --ink: #e8e3d6;
+      --ink-muted: #a79f8f;
+      --ink-faint: #746b5c;
+      --border: #2c323a;
+      --border-strong: #3a424c;
+      --shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+      --focus: #52c2b6;
+      --scrim: rgba(0, 0, 0, 0.55);
+      --code-bg: #0e1114;
+      --code-ink: #d8e8e4;
+
+      --c-env: #9aa5b8;
+      --c-network: #5fb8d9;
+      --c-process: #6fcf7a;
+      --c-accounts: #b28ce0;
+      --c-persist: #e2624a;
+      --c-export: #cf9a52;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #14181d;
+    --surface: #1c2127;
+    --surface-hover: #242a31;
+    --ink: #e8e3d6;
+    --ink-muted: #a79f8f;
+    --ink-faint: #746b5c;
+    --border: #2c323a;
+    --border-strong: #3a424c;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+    --focus: #52c2b6;
+    --scrim: rgba(0, 0, 0, 0.55);
+    --code-bg: #0e1114;
+    --code-ink: #d8e8e4;
+
+    --c-env: #9aa5b8;
+    --c-network: #5fb8d9;
+    --c-process: #6fcf7a;
+    --c-accounts: #b28ce0;
+    --c-persist: #e2624a;
+    --c-export: #cf9a52;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: inherit; }
+  code { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+
+  .wrap {
+    max-width: 68rem;
+    margin: 0 auto;
+    padding: 3.5rem 1.5rem 4rem;
+  }
+
+  .masthead { margin-bottom: 2rem; }
+
+  .eyebrow {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--c-process);
+    margin: 0 0 0.9rem;
+  }
+
+  h1 {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-weight: 600;
+    font-size: clamp(1.9rem, 4vw, 2.5rem);
+    letter-spacing: -0.01em;
+    margin: 0 0 0.9rem;
+    text-wrap: balance;
+  }
+
+  .dek {
+    max-width: 46rem;
+    color: var(--ink-muted);
+    font-size: 1.02rem;
+    margin: 0 0 1.6rem;
+  }
+
+  .dek code {
+    font-size: 0.88em;
+    background: var(--surface-hover);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 0.05em 0.4em;
+    color: var(--ink);
+  }
+
+  .search-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    max-width: 26rem;
+    margin-bottom: 1.1rem;
+  }
+
+  .search-row svg { flex: none; color: var(--ink-faint); }
+
+  #search {
+    width: 100%;
+    font: inherit;
+    font-size: 0.95rem;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 6px;
+    padding: 0.6rem 0.85rem;
+  }
+
+  #search::placeholder { color: var(--ink-faint); }
+  #search:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+
+  .jumpnav { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+  .jumpnav button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font: inherit;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.76rem;
+    font-weight: 500;
+    text-decoration: none;
+    color: var(--dot);
+    background: color-mix(in srgb, var(--dot) 20%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--dot) 45%, var(--border));
+    border-radius: 999px;
+    padding: 0.32rem 0.75rem 0.32rem 0.6rem;
+    cursor: pointer;
+  }
+
+  .jumpnav button:hover { background: color-mix(in srgb, var(--dot) 34%, var(--surface)); }
+  .jumpnav button:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  .dot {
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 50%;
+    background: var(--dot);
+    flex: none;
+  }
+
+  .hint { font-size: 0.86rem; color: var(--ink-faint); margin: -0.9rem 0 1.3rem; }
+
+  .category {
+    margin-bottom: 2rem;
+    scroll-margin-top: 1.5rem;
+    background: color-mix(in srgb, var(--dot) 16%, var(--bg));
+    border: 1px solid color-mix(in srgb, var(--dot) 32%, var(--border));
+    border-radius: 14px;
+    padding: 1.35rem 1.35rem 1.6rem;
+  }
+
+  .category-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    border-bottom: 3px solid var(--dot);
+    padding-bottom: 0.6rem;
+    margin-bottom: 0.35rem;
+  }
+
+  .category-head h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--dot);
+    margin: 0;
+  }
+
+  .phase-tag {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    color: var(--dot);
+    white-space: nowrap;
+  }
+
+  .category-note {
+    color: var(--ink-muted);
+    font-size: 0.92rem;
+    margin: 0.7rem 0 1rem;
+    max-width: 44rem;
+  }
+
+  .category-spl {
+    display: block;
+    background: var(--code-bg);
+    color: var(--code-ink);
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.8rem;
+    border-radius: 8px;
+    padding: 0.8rem 1rem;
+    margin: 0 0 1.4rem;
+    overflow-x: auto;
+    white-space: pre;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+    gap: 0.85rem;
+  }
+
+  .tool {
+    display: block;
+    width: 100%;
+    text-align: left;
+    font: inherit;
+    cursor: pointer;
+    text-decoration: none;
+    background: color-mix(in srgb, var(--dot) 9%, var(--surface));
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--dot);
+    border-radius: 8px;
+    padding: 1rem 1.1rem;
+    box-shadow: var(--shadow);
+    transition: background 0.15s ease, transform 0.15s ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) { .tool { transition: none; } }
+
+  .tool:hover {
+    background: color-mix(in srgb, var(--dot) 20%, var(--surface));
+    transform: translateY(-1px);
+  }
+
+  .tool:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  .tool-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .tool-name {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-weight: 600;
+    font-size: 0.98rem;
+    color: var(--ink);
+  }
+
+  .go {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.72rem;
+    color: var(--dot);
+    white-space: nowrap;
+  }
+
+  .tool-desc {
+    color: var(--ink-muted);
+    font-size: 0.88rem;
+    margin: 0.4rem 0 0.55rem;
+  }
+
+  .ioc-badge {
+    display: inline-block;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 4px;
+    padding: 0.15rem 0.45rem;
+  }
+
+  .empty-state {
+    display: none;
+    color: var(--ink-muted);
+    font-size: 0.95rem;
+    padding: 1rem 0;
+  }
+
+  .empty-state.show { display: block; }
+
+  footer {
+    border-top: 1px solid var(--border-strong);
+    padding-top: 1.5rem;
+    margin-top: 1rem;
+    color: var(--ink-muted);
+    font-size: 0.88rem;
+  }
+
+  footer a {
+    color: var(--c-network);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  footer a:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  /* Detail panel */
+  .scrim {
+    position: fixed;
+    inset: 0;
+    background: var(--scrim);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    z-index: 20;
+  }
+
+  .scrim.open { opacity: 1; pointer-events: auto; }
+
+  @media (prefers-reduced-motion: reduce) { .scrim, .panel { transition: none; } }
+
+  .panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100%;
+    width: min(26rem, 100%);
+    background: var(--surface);
+    border-left: 1px solid var(--border-strong);
+    box-shadow: -8px 0 24px rgba(0, 0, 0, 0.16);
+    transform: translateX(100%);
+    transition: transform 0.22s ease;
+    z-index: 21;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+  .panel.open { transform: translateX(0); }
+
+  .panel-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 1.5rem 1.5rem 1rem;
+    border-top: 4px solid var(--dot);
+  }
+
+  .panel-cat {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--dot);
+    margin: 0 0 0.4rem;
+  }
+
+  .panel-name {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--dot);
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  .panel-close {
+    flex: none;
+    width: 2rem;
+    height: 2rem;
+    display: grid;
+    place-items: center;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--ink-muted);
+    cursor: pointer;
+    font-size: 1.1rem;
+    line-height: 1;
+  }
+
+  .panel-close:hover { background: var(--surface-hover); color: var(--ink); }
+  .panel-close:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  .panel-ioc {
+    margin: 0 1.5rem 1.25rem;
+  }
+
+  .panel-body {
+    padding: 0 1.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .panel-field h3 {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0 0 0.4rem;
+  }
+
+  .panel-field p {
+    margin: 0;
+    font-size: 0.92rem;
+    color: var(--ink);
+  }
+
+  .panel-field.lookfor p {
+    color: var(--ink-muted);
+    background: var(--surface-hover);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.7rem 0.85rem;
+  }
+
+  .panel-field.spl pre {
+    margin: 0;
+    background: var(--code-bg);
+    color: var(--code-ink);
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.82rem;
+    border-radius: 6px;
+    padding: 0.75rem 0.9rem;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+</style>
+
+<div class="wrap">
+  <header class="masthead">
+    <p class="eyebrow">SOC field reference</p>
+    <h1>Live Host Triage Field Guide</h1>
+    <p class="dek">
+      What a live Windows host reveals before it's ever imaged or its memory ever captured —
+      running processes, active connections, local accounts, and persistence mechanisms, pulled
+      straight from the command line while the system is still up. Organized by what each command
+      surfaces, why it's worth checking, what a suspicious value looks like, and exactly how to run it.
+    </p>
+    <div class="search-row">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <circle cx="6.7" cy="6.7" r="4.7" stroke="currentColor" stroke-width="1.4" />
+        <line x1="10.1" y1="10.1" x2="14.5" y2="14.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+      </svg>
+      <input type="text" id="search" placeholder="Filter — e.g. &quot;netstat&quot;, &quot;schtasks&quot;, &quot;admin&quot;" autocomplete="off" />
+    </div>
+    <nav class="jumpnav" aria-label="Jump to category">
+      <button type="button" data-target="env" style="--dot: var(--c-env);"><span class="dot"></span>Environment &amp; Prerequisites</button>
+      <button type="button" data-target="network" style="--dot: var(--c-network);"><span class="dot"></span>Network Configuration</button>
+      <button type="button" data-target="process" style="--dot: var(--c-process);"><span class="dot"></span>Process &amp; Service Enumeration</button>
+      <button type="button" data-target="accounts" style="--dot: var(--c-accounts);"><span class="dot"></span>User &amp; Group Accounts</button>
+      <button type="button" data-target="persist" style="--dot: var(--c-persist);"><span class="dot"></span>Scheduled Tasks &amp; Persistence</button>
+      <button type="button" data-target="export" style="--dot: var(--c-export);"><span class="dot"></span>Log &amp; Artifact Export</button>
+    </nav>
+  </header>
+
+  <p class="hint">Click any card for why it matters, what a suspicious value looks like, its IOC type, and exactly how to run it.</p>
+
+  <section class="category" data-category="env" id="env" style="--dot: var(--c-env);">
+    <div class="category-head">
+      <h2><span class="dot"></span>Environment &amp; Prerequisites</h2>
+      <span class="phase-tag">Before You Start</span>
+    </div>
+    <p class="category-note">Before any command below returns something you can trust — confirm the session is elevated, PowerShell isn't blocking your tools, and the clock isn't already skewed against everything else in the case.</p>
+    <code class="category-spl">Set-ExecutionPolicy Bypass -Scope CurrentUser</code>
+    <div class="grid">
+      <button class="tool" type="button" data-ioc="Setup"
+        data-desc="Temporarily relaxes PowerShell's script-execution restriction for the current user session only, allowing a downloaded or transferred triage script (like DeepBlueCLI) to actually run instead of being blocked outright."
+        data-why="PowerShell's default execution policy blocks unsigned scripts by default — without this, half the triage tooling in this guide family, DeepBlueCLI included, simply refuses to launch on a fresh host."
+        data-lookfor="Scope it to CurrentUser rather than changing the machine-wide policy — the narrower change does the job without leaving a permanent, harder-to-justify security-posture change behind on someone else's system."
+        data-spl="Set-ExecutionPolicy Bypass -Scope CurrentUser">
+        <div class="tool-top"><span class="tool-name">Set-ExecutionPolicy Bypass</span><span class="go">details →</span></div>
+        <p class="tool-desc">Unblocks unsigned triage scripts for the current session only.</p>
+        <span class="ioc-badge">Setup</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Setup"
+        data-desc="A quick way to confirm the current session is actually running with administrator rights before relying on any command below that silently fails or returns incomplete output without it."
+        data-why="Several commands in this guide — full process command lines via CIM, some registry reads, some Get-WinEvent queries — return partial or empty results under a standard user token with no obvious error, so confirming elevation up front saves time chasing a false negative."
+        data-lookfor="A high mandatory integrity label in the output, or membership in BUILTIN\Administrators under whoami /groups — either confirms the session is actually elevated, not just launched from an admin account."
+        data-spl="whoami /groups | findstr /i &quot;Label&quot;">
+        <div class="tool-top"><span class="tool-name">Confirm elevation</span><span class="go">details →</span></div>
+        <p class="tool-desc">Checks whether the current session is actually running elevated.</p>
+        <span class="ioc-badge">Setup</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Setup"
+        data-desc="Confirms which PowerShell version and edition — Windows PowerShell vs. PowerShell 7 — is actually running the triage commands, since cmdlet availability and default output shape both shift meaningfully between versions."
+        data-why="A cmdlet used further down this guide, such as Get-NetTCPConnection or Get-LocalUser, may simply not exist on an older PowerShell version — checking this first avoids mistaking 'not installed' for 'nothing found.'"
+        data-lookfor="A major version below 5.1 on a Windows host — some of the newer networking and account cmdlets in this guide were introduced in 5.1 and aren't available on anything older."
+        data-spl="$PSVersionTable.PSVersion">
+        <div class="tool-top"><span class="tool-name">PowerShell version check</span><span class="go">details →</span></div>
+        <p class="tool-desc">Confirms cmdlet availability before relying on it further down.</p>
+        <span class="ioc-badge">Setup</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Caveat"
+        data-desc="Confirms the host's current system time and time zone before pulling a single timestamp from anywhere else in the investigation."
+        data-why="Every timeline built across this guide family — Volatility's timeliner, Autopsy's Timeline tool, Splunk's _time field — is only as trustworthy as the clock that generated it; a skewed or wrong-timezone host silently shifts every timestamp collected from it."
+        data-lookfor="A system time that doesn't match a trusted reference, such as an NTP source or another host in the same environment — note the offset explicitly in your case notes rather than assuming timestamps line up."
+        data-spl="w32tm /query /status
+Get-Date">
+        <div class="tool-top"><span class="tool-name">System clock check</span><span class="go">details →</span></div>
+        <p class="tool-desc">A skewed clock silently shifts every timestamp collected from this host.</p>
+        <span class="ioc-badge">Caveat</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="category" data-category="network" id="network" style="--dot: var(--c-network);">
+    <div class="category-head">
+      <h2><span class="dot"></span>Network Configuration</h2>
+      <span class="phase-tag">First Pass</span>
+    </div>
+    <p class="category-note">What the host thought its network looked like, and what it was actually connected to — often two different answers.</p>
+    <code class="category-spl">ipconfig /all</code>
+    <div class="grid">
+      <button class="tool" type="button" data-ioc="Host IOC"
+        data-desc="Full network adapter configuration — IP address, subnet, gateway, DNS servers, and DHCP lease details for every adapter on the host."
+        data-why="Establishes the network baseline before anything else — a rogue DNS server or an unexpected secondary adapter, like a mobile hotspot or a VPN adapter the user shouldn't have, both show up here first."
+        data-lookfor="A DNS server that doesn't match the environment's known-good DNS infrastructure — a classic sign of DNS hijacking or a compromised DHCP response."
+        data-spl="ipconfig /all">
+        <div class="tool-top"><span class="tool-name">ipconfig /all</span><span class="go">details →</span></div>
+        <p class="tool-desc">Full adapter, IP, and DNS configuration for every interface.</p>
+        <span class="ioc-badge">Host IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Network IOC"
+        data-desc="Lists every active connection and listening port, the numeric process ID that owns it (-o), and — when run elevated — the actual executable behind each connection (-b)."
+        data-why="Ties a live network connection directly to the process responsible for it — the same correlation Volatility's netscan plugin makes from a memory image and Sysmon Event ID 3 makes from a log, just read straight off the running system."
+        data-lookfor="A connection to an unfamiliar external IP owned by a process with no legitimate reason to be networked, such as notepad.exe or a script host holding an open TCP connection."
+        data-spl="netstat -anob">
+        <div class="tool-top"><span class="tool-name">netstat -anob</span><span class="go">details →</span></div>
+        <p class="tool-desc">Active connections and listeners, tied to the owning process and binary.</p>
+        <span class="ioc-badge">Network IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Network IOC"
+        data-desc="The PowerShell-native equivalent of netstat — returns live TCP connections as structured objects, including local/remote address, port, state, and owning process ID, without needing to parse text output."
+        data-why="Structured object output pipes cleanly into a filter or an export, which matters when triaging a host under time pressure and needing just the connections tied to one suspicious PID."
+        data-lookfor="The same anomalous-destination and unexpected-owning-process patterns as netstat above — this is the same data, just easier to filter at the command line."
+        data-spl="Get-NetTCPConnection | Where-Object State -eq 'Established' | Select-Object LocalAddress, RemoteAddress, RemotePort, OwningProcess">
+        <div class="tool-top"><span class="tool-name">Get-NetTCPConnection</span><span class="go">details →</span></div>
+        <p class="tool-desc">netstat's structured PowerShell equivalent — easy to filter and export.</p>
+        <span class="ioc-badge">Network IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Host IOC"
+        data-desc="The PowerShell-native equivalent of ipconfig /all — structured adapter, IP, and DNS configuration, easier to filter and export than parsing ipconfig's text output."
+        data-why="Same baseline value as ipconfig /all, in a form that pipes directly into a filter or a report — useful when scripting triage across more than one host."
+        data-lookfor="Same DNS and adapter anomalies as the ipconfig /all card above."
+        data-spl="Get-NetIPConfiguration | Format-List">
+        <div class="tool-top"><span class="tool-name">Get-NetIPConfiguration</span><span class="go">details →</span></div>
+        <p class="tool-desc">ipconfig /all's structured PowerShell equivalent.</p>
+        <span class="ioc-badge">Host IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Network IOC"
+        data-desc="Lists the host's ARP cache — every other device on the local network segment it has recently communicated with, as MAC-to-IP address pairs."
+        data-why="Reveals lateral-movement targets and peer hosts on the same subnet that a routed connection list like netstat can't show — useful for scoping how far an incident may have already spread on the local segment."
+        data-lookfor="A MAC address matching a known-suspicious host from elsewhere in the case, or an unusually large number of entries suggesting the host itself was used to scan its own subnet."
+        data-spl="arp -a">
+        <div class="tool-top"><span class="tool-name">arp -a</span><span class="go">details →</span></div>
+        <p class="tool-desc">Peer hosts on the local segment — a lateral-movement scoping check.</p>
+        <span class="ioc-badge">Network IOC</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="category" data-category="process" id="process" style="--dot: var(--c-process);">
+    <div class="category-head">
+      <h2><span class="dot"></span>Process &amp; Service Enumeration</h2>
+      <span class="phase-tag">First Pass</span>
+    </div>
+    <p class="category-note">What's actually running right now, matched up against what service or account is responsible for it.</p>
+    <code class="category-spl">tasklist /svc</code>
+    <div class="grid">
+      <button class="tool" type="button" data-ioc="Process"
+        data-desc="Lists every running process alongside the Windows services hosted inside it — critical because a single svchost.exe process commonly hosts several unrelated services at once."
+        data-why="Without the /svc mapping, a suspicious svchost.exe process is just a PID with no context — this is what turns that PID into which specific service is actually responsible for it."
+        data-lookfor="An unfamiliar service name hosted inside a process that should only be running well-known Windows services."
+        data-spl="tasklist /svc">
+        <div class="tool-top"><span class="tool-name">tasklist /svc</span><span class="go">details →</span></div>
+        <p class="tool-desc">Every running process, mapped to the services it hosts.</p>
+        <span class="ioc-badge">Process</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Process"
+        data-desc="Returns the full command-line arguments a process was launched with — something Get-Process alone does not expose, making this the live-host equivalent of Volatility's cmdline plugin or Splunk's CommandLine field."
+        data-why="This is the single most common gap in a quick live triage — an analyst checks Get-Process, sees nothing alarming, and never realizes the process's actual launch arguments, like an encoded PowerShell payload or a suspicious download URL, were never even displayed."
+        data-lookfor="The same patterns as every other guide in this family — encoded PowerShell, a LOLBin invoked with an unusual flag, a script interpreter with a URL or IP address in its own arguments."
+        data-spl="Get-CimInstance Win32_Process | Select-Object ProcessId, ParentProcessId, Name, CommandLine">
+        <div class="tool-top"><span class="tool-name">Get-CimInstance Win32_Process</span><span class="go">details →</span></div>
+        <p class="tool-desc">The command-line arguments Get-Process alone won't show you.</p>
+        <span class="ioc-badge">Process</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Process"
+        data-desc="PowerShell's native process listing — process name, PID, CPU and memory usage, and, with -IncludeUserName run elevated, the account each process is running as."
+        data-why="A fast structured-object alternative to tasklist for filtering or exporting, though it's worth remembering this alone won't show command-line arguments — that's what the Win32_Process card above is for."
+        data-lookfor="A process running under an account that doesn't match its normal execution context — a service-account process suddenly running interactively, for example."
+        data-spl="Get-Process -IncludeUserName | Sort-Object CPU -Descending">
+        <div class="tool-top"><span class="tool-name">Get-Process</span><span class="go">details →</span></div>
+        <p class="tool-desc">Structured process listing, filterable by CPU, memory, or owner.</p>
+        <span class="ioc-badge">Process</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Persistence"
+        data-desc="Queries the Service Control Manager for every registered service and its current state — running, stopped, or its start type — independent of whether the service is currently executing."
+        data-why="Surfaces a service that's registered but not currently running — a dormant persistence mechanism that a process-only view like tasklist would never show, since it only lists what's active right now."
+        data-lookfor="A service set to Auto start with a suspicious binary path, even if it isn't currently running — that's still a live persistence mechanism waiting for the next reboot."
+        data-spl="sc query state= all">
+        <div class="tool-top"><span class="tool-name">sc query</span><span class="go">details →</span></div>
+        <p class="tool-desc">Every registered service and its state, running or not.</p>
+        <span class="ioc-badge">Persistence</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Persistence"
+        data-desc="PowerShell's native service listing — the structured-object equivalent of sc query, easier to filter by status or name."
+        data-why="Same value as sc query above, in a form that pipes cleanly into a filter — useful when scanning for services matching a known-bad name pattern across the fleet."
+        data-lookfor="Same start-type and binary-path anomalies as the sc query card above."
+        data-spl="Get-Service | Where-Object Status -eq 'Running'">
+        <div class="tool-top"><span class="tool-name">Get-Service</span><span class="go">details →</span></div>
+        <p class="tool-desc">sc query's structured PowerShell equivalent.</p>
+        <span class="ioc-badge">Persistence</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="category" data-category="accounts" id="accounts" style="--dot: var(--c-accounts);">
+    <div class="category-head">
+      <h2><span class="dot"></span>User &amp; Group Accounts</h2>
+      <span class="phase-tag">Second Pass</span>
+    </div>
+    <p class="category-note">Who exists on this host, what they belong to, and what the current session is actually allowed to do.</p>
+    <code class="category-spl">net user</code>
+    <div class="grid">
+      <button class="tool" type="button" data-ioc="Identity IOC"
+        data-desc="Lists every local user account on the host, or — given a specific username — that account's full detail, including last logon, password age, group memberships, and account expiration."
+        data-why="Establishes the baseline of who legitimately has an account on this machine before looking for one that doesn't belong — the same starting point as the Autopsy Field Guide's disk-based OS / User Account Info card, just read live instead of from an image."
+        data-lookfor="An account name that doesn't match any known onboarding record, or one created and never used until right before the incident window."
+        data-spl="net user
+net user &lt;username&gt;">
+        <div class="tool-top"><span class="tool-name">net user</span><span class="go">details →</span></div>
+        <p class="tool-desc">Every local account, or full detail on one specific account.</p>
+        <span class="ioc-badge">Identity IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Privilege"
+        data-desc="Lists every member of the local Administrators group — the account tier an attacker most wants to land in for full control of the host."
+        data-why="Privilege escalation almost always ends with a new or existing account being added to this specific group — checking membership directly is faster than inferring it from logon events alone."
+        data-lookfor="An account in this group that has no legitimate business reason for local admin rights, especially one added recently."
+        data-spl="net localgroup administrators">
+        <div class="tool-top"><span class="tool-name">net localgroup administrators</span><span class="go">details →</span></div>
+        <p class="tool-desc">Who currently has local admin rights on this host.</p>
+        <span class="ioc-badge">Privilege</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Privilege"
+        data-desc="Lists accounts explicitly granted the ability to log on over RDP, independent of whether they're also local administrators."
+        data-why="RDP access is a common lateral-movement and persistence vector on its own — an account added here doesn't need admin rights to still represent a foothold an attacker can reuse."
+        data-lookfor="An account added to this group that has no documented reason to need remote desktop access to this specific host."
+        data-spl="net localgroup &quot;Remote Desktop Users&quot;">
+        <div class="tool-top"><span class="tool-name">net localgroup "Remote Desktop Users"</span><span class="go">details →</span></div>
+        <p class="tool-desc">Who can RDP into this host, admin or not.</p>
+        <span class="ioc-badge">Privilege</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Identity IOC"
+        data-desc="PowerShell's native local-account listing — structured output including whether the account is enabled, its SID, and last password-set date."
+        data-why="Same baseline value as net user, in a form that's easier to filter and export when triaging more than one host at once."
+        data-lookfor="Same account-anomaly patterns as the net user card above."
+        data-spl="Get-LocalUser | Select-Object Name, Enabled, LastLogon">
+        <div class="tool-top"><span class="tool-name">Get-LocalUser</span><span class="go">details →</span></div>
+        <p class="tool-desc">net user's structured PowerShell equivalent.</p>
+        <span class="ioc-badge">Identity IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Privilege"
+        data-desc="PowerShell's native group-membership listing — the structured equivalent of net localgroup for any local group, not just Administrators."
+        data-why="Same value as the net localgroup cards above, but easier to loop across every local group on the host in one script instead of querying group by group."
+        data-lookfor="Same unexplained-membership pattern as the net localgroup cards — a name that doesn't belong, in a group it doesn't belong to."
+        data-spl="Get-LocalGroupMember -Group 'Administrators'">
+        <div class="tool-top"><span class="tool-name">Get-LocalGroupMember</span><span class="go">details →</span></div>
+        <p class="tool-desc">net localgroup's structured equivalent, for any local group.</p>
+        <span class="ioc-badge">Privilege</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Privilege"
+        data-desc="Lists every Windows privilege — not group membership, actual token privileges like SeDebugPrivilege or SeImpersonatePrivilege — assigned to the current session."
+        data-why="Several well-known privilege-escalation techniques depend entirely on a specific privilege being enabled on the current token — this confirms whether the session you're triaging from actually has the access it appears to have."
+        data-lookfor="A privilege like SeDebugPrivilege or SeImpersonatePrivilege enabled on an account that shouldn't normally need it — both are commonly abused for privilege escalation and credential access."
+        data-spl="whoami /priv">
+        <div class="tool-top"><span class="tool-name">whoami /priv</span><span class="go">details →</span></div>
+        <p class="tool-desc">The current session's actual token privileges, not just its groups.</p>
+        <span class="ioc-badge">Privilege</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="category" data-category="persist" id="persist" style="--dot: var(--c-persist);">
+    <div class="category-head">
+      <h2><span class="dot"></span>Scheduled Tasks &amp; Persistence</h2>
+      <span class="phase-tag">Second Pass</span>
+    </div>
+    <p class="category-note">The live-host counterpart to the Autopsy Field Guide's on-disk Registry, Email &amp; EXIF category — the same persistence mechanisms, read straight off a running system instead of an image.</p>
+    <code class="category-spl">Get-ScheduledTask | Where-Object State -ne 'Disabled'</code>
+    <div class="grid">
+      <button class="tool" type="button" data-ioc="Persistence"
+        data-desc="Lists every registered Scheduled Task on the host, including its current state, without needing to parse each task's on-disk XML file individually."
+        data-why="The live-host equivalent of both the Splunk Field Guide's 4698 event and the Autopsy Field Guide's on-disk Scheduled Tasks card — checking it directly here is often faster than waiting on a log query or a disk image during active triage."
+        data-lookfor="A task with an innocuous name whose action, visible via schtasks /query /v below, runs a script interpreter or an encoded command."
+        data-spl="Get-ScheduledTask | Where-Object State -ne 'Disabled' | Select-Object TaskName, State">
+        <div class="tool-top"><span class="tool-name">Get-ScheduledTask</span><span class="go">details →</span></div>
+        <p class="tool-desc">Every registered task and its current state.</p>
+        <span class="ioc-badge">Persistence</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Persistence"
+        data-desc="A verbose, legacy command-line listing of every scheduled task, including the full Task To Run field — the actual command each task executes."
+        data-why="Get-ScheduledTask alone doesn't always surface the exact command line a task runs as clearly as this verbose text output does — worth cross-checking when a task from the card above looks worth a closer read."
+        data-lookfor="A Task To Run value pointing at a script interpreter, an encoded PowerShell command, or a binary in a Temp or AppData path — the same red flags as a Run key, in Task Scheduler's shape."
+        data-spl="schtasks /query /fo LIST /v">
+        <div class="tool-top"><span class="tool-name">schtasks /query /fo LIST /v</span><span class="go">details →</span></div>
+        <p class="tool-desc">The exact command line each scheduled task actually runs.</p>
+        <span class="ioc-badge">Persistence</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Persistence"
+        data-desc="Reads the HKLM and HKCU Run/RunOnce autostart keys directly off the live registry, without needing to mount or parse the hive file separately."
+        data-why="The live-host equivalent of the Autopsy Field Guide's Autorun / Run Keys card and Volatility's printkey plugin — the same classic persistence mechanism, checked straight from the running system instead of an offline image."
+        data-lookfor="A Run key value pointing at a binary in a Temp, Downloads, or AppData path — the same pattern as the disk-based version of this check."
+        data-spl="reg query &quot;HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run&quot;
+reg query &quot;HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run&quot;">
+        <div class="tool-top"><span class="tool-name">reg query Run keys</span><span class="go">details →</span></div>
+        <p class="tool-desc">The live registry's autostart entries, no hive parsing required.</p>
+        <span class="ioc-badge">Persistence</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Persistence"
+        data-desc="Lists the contents of both the per-user and all-users Startup folders — shortcuts and scripts Windows launches automatically at logon, independent of the registry Run keys entirely."
+        data-why="A separate persistence location from the Run keys above — a shortcut dropped here survives a reboot just as reliably, and is easy to overlook when a triage checklist only covers the registry."
+        data-lookfor="A .lnk or script file with a name that doesn't match any legitimate installed application, or one with a very recent creation date relative to the incident window."
+        data-spl="dir &quot;C:\Users\%USERNAME%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup&quot;
+dir &quot;C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Startup&quot;">
+        <div class="tool-top"><span class="tool-name">Startup folder</span><span class="go">details →</span></div>
+        <p class="tool-desc">A persistence location entirely separate from the registry.</p>
+        <span class="ioc-badge">Persistence</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Persistence"
+        data-desc="A single structured view that consolidates Run-key entries, Startup-folder items, and a handful of other autostart locations Windows itself tracks, into one command's output."
+        data-why="A useful cross-check against the individual Run-key and Startup-folder cards above — a fast way to confirm nothing was missed by checking one location at a time."
+        data-lookfor="Any entry here with no corresponding hit in the individual Run-key or Startup-folder checks above — worth a closer look at what location it's actually coming from."
+        data-spl="Get-CimInstance Win32_StartupCommand | Select-Object Name, command, Location, User">
+        <div class="tool-top"><span class="tool-name">Get-CimInstance Win32_StartupCommand</span><span class="go">details →</span></div>
+        <p class="tool-desc">Every autostart location Windows tracks, in one consolidated view.</p>
+        <span class="ioc-badge">Persistence</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="category" data-category="export" id="export" style="--dot: var(--c-export);">
+    <div class="category-head">
+      <h2><span class="dot"></span>Log &amp; Artifact Export</h2>
+      <span class="phase-tag">Preservation</span>
+    </div>
+    <p class="category-note">Getting what you found off the live host and into the rest of the investigation, before the system is powered off or reimaged.</p>
+    <code class="category-spl">wevtutil epl Security C:\triage\security.evtx</code>
+    <div class="grid">
+      <button class="tool" type="button" data-ioc="Export"
+        data-desc="Exports a full Windows Event Log channel — Security, System, or any other log — to a portable .evtx file, preserving every event exactly as logged."
+        data-why="The exact export step the DeepBlueCLI Field Guide's Analyzing an exported .evtx card assumes already happened — this is where that .evtx file actually comes from, straight off the live host before it's touched further."
+        data-lookfor="Export the full log rather than a filtered subset whenever possible — a filter applied at export time can't be undone later, while a filter applied during analysis always can."
+        data-spl="wevtutil epl Security C:\triage\security.evtx
+wevtutil epl System C:\triage\system.evtx">
+        <div class="tool-top"><span class="tool-name">wevtutil epl</span><span class="go">details →</span></div>
+        <p class="tool-desc">Exports a full event log channel to a portable .evtx file.</p>
+        <span class="ioc-badge">Export</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Export"
+        data-desc="Queries the live event log directly from PowerShell, filterable by event ID, time range, or log name, without needing to export the full log first."
+        data-why="Faster than a full export when only a specific window or event ID actually needs a quick look during active triage — save the full wevtutil export for what actually needs to leave the host."
+        data-lookfor="Scope the -FilterHashtable to a specific ID and a tight time window first — an unfiltered Get-WinEvent against the Security log on a busy host can take a long time to return."
+        data-spl="Get-WinEvent -FilterHashtable @{LogName='Security'; Id=4688; StartTime=(Get-Date).AddHours(-2)}">
+        <div class="tool-top"><span class="tool-name">Get-WinEvent</span><span class="go">details →</span></div>
+        <p class="tool-desc">A live, filterable query against the event log, no export needed.</p>
+        <span class="ioc-badge">Export</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Export"
+        data-desc="Copies files and folders while preserving timestamps and attributes (/COPYALL), including files that would otherwise be locked by a running process — useful for pulling Prefetch, browser artifacts, or a specific log folder off a live host intact."
+        data-why="A plain copy can silently update a file's Modified timestamp or fail outright on a locked file — robocopy with the right flags avoids both, which matters when the file being copied is itself evidence."
+        data-lookfor="Confirm the copy actually preserved original timestamps by checking the destination file's metadata against the source before treating the copy as forensically sound."
+        data-spl="robocopy &quot;C:\Windows\Prefetch&quot; &quot;D:\triage\prefetch&quot; /COPYALL /R:1">
+        <div class="tool-top"><span class="tool-name">robocopy</span><span class="go">details →</span></div>
+        <p class="tool-desc">Copies locked or in-use files while preserving their original metadata.</p>
+        <span class="ioc-badge">Export</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Documentation"
+        data-desc="Computes a cryptographic hash — SHA256 by default — of a file directly from PowerShell, the live-host equivalent of the Autopsy Field Guide's manual hashing card."
+        data-why="Hash every artifact exported in this category immediately after pulling it off the live host — the same chain-of-custody discipline the Autopsy guide's reporting category applies to a disk image, applied here to whatever left this host live."
+        data-lookfor="Hash before and after transferring a file off the host — a mismatch means the copy is no longer trustworthy as evidence, regardless of what the content looks like."
+        data-spl="Get-FileHash C:\triage\security.evtx -Algorithm SHA256">
+        <div class="tool-top"><span class="tool-name">Get-FileHash</span><span class="go">details →</span></div>
+        <p class="tool-desc">Chain-of-custody hashing for whatever just left this host.</p>
+        <span class="ioc-badge">Documentation</span>
+      </button>
+    </div>
+  </section>
+
+  <p class="empty-state" id="empty">No fields match that filter.</p>
+
+  <footer>
+    Companion reference to the <a href="https://zelihazenginapogeeusa-byte.github.io/zeliha-infosec-journey/volatility-field-guide.html" target="_blank" rel="noopener noreferrer">Volatility Field Guide</a> and the <a href="https://zelihazenginapogeeusa-byte.github.io/zeliha-infosec-journey/deepblue-field-guide.html" target="_blank" rel="noopener noreferrer">DeepBlueCLI Field Guide</a> — same host, what it looks like before the memory is ever captured or the disk is ever imaged. BTL1-aligned. Full write-ups on <a href="https://github.com/zelihazenginapogeeusa-byte/zeliha-infosec-journey" target="_blank" rel="noopener noreferrer">GitHub</a>.
+  </footer>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<aside class="panel" id="panel" role="dialog" aria-modal="true" aria-labelledby="panel-name" style="--dot: var(--c-process);">
+  <div class="panel-head">
+    <div>
+      <p class="panel-cat" id="panel-cat">Category</p>
+      <h2 class="panel-name" id="panel-name">field_name</h2>
+    </div>
+    <button class="panel-close" id="panel-close" type="button" aria-label="Close">×</button>
+  </div>
+  <p class="panel-ioc"><span class="ioc-badge" id="panel-ioc-badge">IOC type</span></p>
+  <div class="panel-body">
+    <div class="panel-field">
+      <h3>What it is</h3>
+      <p id="panel-desc"></p>
+    </div>
+    <div class="panel-field">
+      <h3>Why look at it</h3>
+      <p id="panel-why"></p>
+    </div>
+    <div class="panel-field lookfor">
+      <h3>What to look for</h3>
+      <p id="panel-lookfor"></p>
+    </div>
+    <div class="panel-field spl">
+      <h3>How to do it</h3>
+      <pre id="panel-spl"></pre>
+    </div>
+  </div>
+</aside>
+
+<script>
+  (function () {
+    var input = document.getElementById("search");
+    var categories = Array.prototype.slice.call(document.querySelectorAll(".category"));
+    var empty = document.getElementById("empty");
+
+    input.addEventListener("input", function () {
+      var q = input.value.trim().toLowerCase();
+      var anyVisible = false;
+
+      categories.forEach(function (cat) {
+        var catTools = cat.querySelectorAll(".tool");
+        var catHasMatch = false;
+
+        catTools.forEach(function (tool) {
+          var text = tool.textContent.toLowerCase();
+          var match = q === "" || text.indexOf(q) !== -1;
+          tool.style.display = match ? "" : "none";
+          if (match) { catHasMatch = true; anyVisible = true; }
+        });
+
+        cat.style.display = catHasMatch ? "" : "none";
+      });
+
+      empty.classList.toggle("show", !anyVisible);
+    });
+  })();
+
+  (function () {
+    var panel = document.getElementById("panel");
+    var scrim = document.getElementById("scrim");
+    var closeBtn = document.getElementById("panel-close");
+    var lastFocused = null;
+
+    function openPanel(tool) {
+      var cat = tool.closest(".category");
+      var catName = cat.querySelector(".category-head h2").textContent.trim();
+      var dot = getComputedStyle(tool).borderLeftColor;
+
+      panel.style.setProperty("--dot", dot);
+      document.getElementById("panel-cat").textContent = catName;
+      document.getElementById("panel-name").textContent = tool.querySelector(".tool-name").textContent;
+      document.getElementById("panel-ioc-badge").textContent = tool.getAttribute("data-ioc") || "";
+      document.getElementById("panel-desc").textContent = tool.getAttribute("data-desc") || "";
+      document.getElementById("panel-why").textContent = tool.getAttribute("data-why") || "";
+      document.getElementById("panel-lookfor").textContent = tool.getAttribute("data-lookfor") || "";
+      document.getElementById("panel-spl").textContent = tool.getAttribute("data-spl") || "";
+
+      lastFocused = tool;
+      panel.classList.add("open");
+      scrim.classList.add("open");
+      closeBtn.focus();
+    }
+
+    function closePanel() {
+      panel.classList.remove("open");
+      scrim.classList.remove("open");
+      if (lastFocused) lastFocused.focus();
+    }
+
+    document.querySelectorAll(".tool").forEach(function (tool) {
+      tool.addEventListener("click", function () { openPanel(tool); });
+    });
+
+    closeBtn.addEventListener("click", closePanel);
+    scrim.addEventListener("click", closePanel);
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && panel.classList.contains("open")) closePanel();
+    });
+  })();
+
+  (function () {
+    // Jumpnav pills are plain buttons (not <a href="#...">) on purpose — an
+    // in-page anchor link resolves to a full claudeusercontent.com URL inside
+    // this hosting environment, which triggers an "open external link"
+    // confirmation instead of just scrolling. A button with a click handler
+    // sidesteps that entirely.
+    document.querySelectorAll(".jumpnav button[data-target]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var el = document.getElementById(btn.getAttribute("data-target"));
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    });
+  })();
+</script>
