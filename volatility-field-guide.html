@@ -1,0 +1,910 @@
+<title>Volatility Field Guide</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+<style>
+  :root {
+    --bg: #f5f2ea;
+    --surface: #ffffff;
+    --surface-hover: #f7f3e7;
+    --ink: #221f1a;
+    --ink-muted: #635c50;
+    --ink-faint: #948b7a;
+    --border: #e2dbc8;
+    --border-strong: #cdc2a6;
+    --shadow: 0 1px 2px rgba(34, 31, 26, 0.06);
+    --focus: #1f7d72;
+    --scrim: rgba(34, 31, 26, 0.32);
+    --code-bg: #221f1a;
+    --code-ink: #e8e3d6;
+
+    --c-acq: #6b5a1f;
+    --c-proc: #1e5aa8;
+    --c-internals: #1f7d72;
+    --c-inject: #b3341f;
+    --c-netreg: #7a3f9e;
+    --c-timeline: #356b30;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #14181d;
+      --surface: #1c2127;
+      --surface-hover: #242a31;
+      --ink: #e8e3d6;
+      --ink-muted: #a79f8f;
+      --ink-faint: #746b5c;
+      --border: #2c323a;
+      --border-strong: #3a424c;
+      --shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+      --focus: #52c2b6;
+      --scrim: rgba(0, 0, 0, 0.55);
+      --code-bg: #0e1114;
+      --code-ink: #d8e8e4;
+
+      --c-acq: #b09b6f;
+      --c-proc: #6ba8ef;
+      --c-internals: #52c2b6;
+      --c-inject: #e2624a;
+      --c-netreg: #b28ce0;
+      --c-timeline: #6fb85f;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #14181d;
+    --surface: #1c2127;
+    --surface-hover: #242a31;
+    --ink: #e8e3d6;
+    --ink-muted: #a79f8f;
+    --ink-faint: #746b5c;
+    --border: #2c323a;
+    --border-strong: #3a424c;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+    --focus: #52c2b6;
+    --scrim: rgba(0, 0, 0, 0.55);
+    --code-bg: #0e1114;
+    --code-ink: #d8e8e4;
+
+    --c-acq: #b09b6f;
+    --c-proc: #6ba8ef;
+    --c-internals: #52c2b6;
+    --c-inject: #e2624a;
+    --c-netreg: #b28ce0;
+    --c-timeline: #6fb85f;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: inherit; }
+  code { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+
+  .wrap {
+    max-width: 68rem;
+    margin: 0 auto;
+    padding: 3.5rem 1.5rem 4rem;
+  }
+
+  .masthead { margin-bottom: 2rem; }
+
+  .eyebrow {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--c-proc);
+    margin: 0 0 0.9rem;
+  }
+
+  h1 {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-weight: 600;
+    font-size: clamp(1.9rem, 4vw, 2.5rem);
+    letter-spacing: -0.01em;
+    margin: 0 0 0.9rem;
+    text-wrap: balance;
+  }
+
+  .dek {
+    max-width: 46rem;
+    color: var(--ink-muted);
+    font-size: 1.02rem;
+    margin: 0 0 1.6rem;
+  }
+
+  .dek code {
+    font-size: 0.88em;
+    background: var(--surface-hover);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 0.05em 0.4em;
+    color: var(--ink);
+  }
+
+  .search-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    max-width: 26rem;
+    margin-bottom: 1.1rem;
+  }
+
+  .search-row svg { flex: none; color: var(--ink-faint); }
+
+  #search {
+    width: 100%;
+    font: inherit;
+    font-size: 0.95rem;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 6px;
+    padding: 0.6rem 0.85rem;
+  }
+
+  #search::placeholder { color: var(--ink-faint); }
+  #search:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+
+  .jumpnav { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+  .jumpnav button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font: inherit;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.76rem;
+    font-weight: 500;
+    text-decoration: none;
+    color: var(--dot);
+    background: color-mix(in srgb, var(--dot) 20%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--dot) 45%, var(--border));
+    border-radius: 999px;
+    padding: 0.32rem 0.75rem 0.32rem 0.6rem;
+    cursor: pointer;
+  }
+
+  .jumpnav button:hover { background: color-mix(in srgb, var(--dot) 34%, var(--surface)); }
+  .jumpnav button:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  .dot {
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 50%;
+    background: var(--dot);
+    flex: none;
+  }
+
+  .hint { font-size: 0.86rem; color: var(--ink-faint); margin: -0.9rem 0 1.3rem; }
+
+  .category {
+    margin-bottom: 2rem;
+    scroll-margin-top: 1.5rem;
+    background: color-mix(in srgb, var(--dot) 16%, var(--bg));
+    border: 1px solid color-mix(in srgb, var(--dot) 32%, var(--border));
+    border-radius: 14px;
+    padding: 1.35rem 1.35rem 1.6rem;
+  }
+
+  .category-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    border-bottom: 3px solid var(--dot);
+    padding-bottom: 0.6rem;
+    margin-bottom: 0.35rem;
+  }
+
+  .category-head h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--dot);
+    margin: 0;
+  }
+
+  .phase-tag {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    color: var(--dot);
+    white-space: nowrap;
+  }
+
+  .category-note {
+    color: var(--ink-muted);
+    font-size: 0.92rem;
+    margin: 0.7rem 0 1rem;
+    max-width: 44rem;
+  }
+
+  .category-spl {
+    display: block;
+    background: var(--code-bg);
+    color: var(--code-ink);
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.8rem;
+    border-radius: 8px;
+    padding: 0.8rem 1rem;
+    margin: 0 0 1.4rem;
+    overflow-x: auto;
+    white-space: pre;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+    gap: 0.85rem;
+  }
+
+  .tool {
+    display: block;
+    width: 100%;
+    text-align: left;
+    font: inherit;
+    cursor: pointer;
+    text-decoration: none;
+    background: color-mix(in srgb, var(--dot) 9%, var(--surface));
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--dot);
+    border-radius: 8px;
+    padding: 1rem 1.1rem;
+    box-shadow: var(--shadow);
+    transition: background 0.15s ease, transform 0.15s ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) { .tool { transition: none; } }
+
+  .tool:hover {
+    background: color-mix(in srgb, var(--dot) 20%, var(--surface));
+    transform: translateY(-1px);
+  }
+
+  .tool:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  .tool-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .tool-name {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-weight: 600;
+    font-size: 0.98rem;
+    color: var(--ink);
+  }
+
+  .go {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.72rem;
+    color: var(--dot);
+    white-space: nowrap;
+  }
+
+  .tool-desc {
+    color: var(--ink-muted);
+    font-size: 0.88rem;
+    margin: 0.4rem 0 0.55rem;
+  }
+
+  .ioc-badge {
+    display: inline-block;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 4px;
+    padding: 0.15rem 0.45rem;
+  }
+
+  .empty-state {
+    display: none;
+    color: var(--ink-muted);
+    font-size: 0.95rem;
+    padding: 1rem 0;
+  }
+
+  .empty-state.show { display: block; }
+
+  footer {
+    border-top: 1px solid var(--border-strong);
+    padding-top: 1.5rem;
+    margin-top: 1rem;
+    color: var(--ink-muted);
+    font-size: 0.88rem;
+  }
+
+  footer a {
+    color: var(--c-internals);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  footer a:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  /* Detail panel */
+  .scrim {
+    position: fixed;
+    inset: 0;
+    background: var(--scrim);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    z-index: 20;
+  }
+
+  .scrim.open { opacity: 1; pointer-events: auto; }
+
+  @media (prefers-reduced-motion: reduce) { .scrim, .panel { transition: none; } }
+
+  .panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100%;
+    width: min(26rem, 100%);
+    background: var(--surface);
+    border-left: 1px solid var(--border-strong);
+    box-shadow: -8px 0 24px rgba(0, 0, 0, 0.16);
+    transform: translateX(100%);
+    transition: transform 0.22s ease;
+    z-index: 21;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+  .panel.open { transform: translateX(0); }
+
+  .panel-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 1.5rem 1.5rem 1rem;
+    border-top: 4px solid var(--dot);
+  }
+
+  .panel-cat {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--dot);
+    margin: 0 0 0.4rem;
+  }
+
+  .panel-name {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--dot);
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  .panel-close {
+    flex: none;
+    width: 2rem;
+    height: 2rem;
+    display: grid;
+    place-items: center;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--ink-muted);
+    cursor: pointer;
+    font-size: 1.1rem;
+    line-height: 1;
+  }
+
+  .panel-close:hover { background: var(--surface-hover); color: var(--ink); }
+  .panel-close:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  .panel-ioc {
+    margin: 0 1.5rem 1.25rem;
+  }
+
+  .panel-body {
+    padding: 0 1.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .panel-field h3 {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0 0 0.4rem;
+  }
+
+  .panel-field p {
+    margin: 0;
+    font-size: 0.92rem;
+    color: var(--ink);
+  }
+
+  .panel-field.lookfor p {
+    color: var(--ink-muted);
+    background: var(--surface-hover);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.7rem 0.85rem;
+  }
+
+  .panel-field.spl pre {
+    margin: 0;
+    background: var(--code-bg);
+    color: var(--code-ink);
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.82rem;
+    border-radius: 6px;
+    padding: 0.75rem 0.9rem;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+</style>
+
+<div class="wrap">
+  <header class="masthead">
+    <p class="eyebrow">SOC field reference</p>
+    <h1>Volatility Field Guide</h1>
+    <p class="dek">
+      What was actually running when the machine was captured — processes, injected code, open
+      connections, and registry state that a disk image alone can't show. Organized by what each
+      plugin surfaces, why it's worth checking, what a suspicious value looks like, and exactly how
+      to pull it up.
+    </p>
+    <div class="search-row">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <circle cx="6.7" cy="6.7" r="4.7" stroke="currentColor" stroke-width="1.4" />
+        <line x1="10.1" y1="10.1" x2="14.5" y2="14.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+      </svg>
+      <input type="text" id="search" placeholder="Filter — e.g. &quot;malfind&quot;, &quot;netscan&quot;, &quot;hidden&quot;" autocomplete="off" />
+    </div>
+    <nav class="jumpnav" aria-label="Jump to category">
+      <button type="button" data-target="acq" style="--dot: var(--c-acq);"><span class="dot"></span>Acquisition &amp; Setup</button>
+      <button type="button" data-target="proc" style="--dot: var(--c-proc);"><span class="dot"></span>Process Analysis</button>
+      <button type="button" data-target="internals" style="--dot: var(--c-internals);"><span class="dot"></span>Process Internals</button>
+      <button type="button" data-target="inject" style="--dot: var(--c-inject);"><span class="dot"></span>Injection &amp; Hooking</button>
+      <button type="button" data-target="netreg" style="--dot: var(--c-netreg);"><span class="dot"></span>Network &amp; Registry</button>
+      <button type="button" data-target="timeline" style="--dot: var(--c-timeline);"><span class="dot"></span>Timeline &amp; File Activity</button>
+    </nav>
+  </header>
+
+  <p class="hint">Click any card for why it matters, what a suspicious value looks like, its IOC type, and exactly how to pull it up.</p>
+
+  <section class="category" data-category="acq" id="acq" style="--dot: var(--c-acq);">
+    <div class="category-head">
+      <h2><span class="dot"></span>Acquisition &amp; Setup</h2>
+      <span class="phase-tag">Before Analysis</span>
+    </div>
+    <p class="category-note">Getting the memory image in the first place, and telling Volatility what OS it's looking at, before any plugin will run correctly.</p>
+    <code class="category-spl">volatility3 -f memory.dmp windows.info</code>
+    <div class="grid">
+      <button class="tool" type="button" data-ioc="Setup"
+        data-desc="A kernel module (LiME — Linux Memory Extractor) loaded onto a live Linux host to dump the full contents of physical RAM to a file or over the network, before the host is touched further."
+        data-why="Volatility only analyzes a memory image that already exists — LiME is how that image actually gets created on a live Linux system in the first place, the acquisition step that has to happen before any of the analysis below."
+        data-lookfor="Acquire over the network to a remote listener when possible, rather than writing the dump to the local disk — writing locally risks overwriting evidence still sitting in the very RAM being captured."
+        data-spl="insmod lime.ko &quot;path=/mnt/evidence/mem.lime format=lime&quot;">
+        <div class="tool-top"><span class="tool-name">LiME (Linux acquisition)</span><span class="go">details →</span></div>
+        <p class="tool-desc">Kernel module that dumps live RAM before analysis can start.</p>
+        <span class="ioc-badge">Setup</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Setup"
+        data-desc="Volatility 2's profile-identification plugin — inspects the raw memory image and reports the best-matching OS/build profile string needed for every subsequent Volatility 2 command's --profile flag."
+        data-why="Volatility 2 can't correctly walk kernel structures without knowing the exact OS build first — this is almost always the first command run against a fresh image."
+        data-lookfor="More than one suggested profile in the output — pick the most specific match (exact build number) rather than a generic family match, since a wrong profile silently produces incomplete or wrong results downstream."
+        data-spl="volatility -f memory.dmp imageinfo">
+        <div class="tool-top"><span class="tool-name">imageinfo</span><span class="go">details →</span></div>
+        <p class="tool-desc">Volatility 2: identifies the OS profile every other command needs.</p>
+        <span class="ioc-badge">Setup</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Setup"
+        data-desc="A deeper, more reliable profile-identification method than imageinfo, scanning for the kernel debugger block directly rather than relying on header heuristics — worth running when imageinfo's suggestions look ambiguous or wrong."
+        data-why="imageinfo occasionally suggests a profile that turns out to be wrong once real plugins are run against it — kdbgscan is the fallback that gets a confirmed answer instead of a best guess."
+        data-lookfor="A single confident match rather than multiple candidates — if kdbgscan is also ambiguous, the image may be corrupted or from an OS version Volatility 2 doesn't fully support."
+        data-spl="volatility -f memory.dmp kdbgscan">
+        <div class="tool-top"><span class="tool-name">kdbgscan</span><span class="go">details →</span></div>
+        <p class="tool-desc">Fallback profile ID when imageinfo's guess is ambiguous.</p>
+        <span class="ioc-badge">Setup</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Syntax"
+        data-desc="Volatility 3 drops the --profile requirement entirely — it auto-detects the OS using downloaded symbol tables and organizes plugins under an os.plugin_name namespace (windows.pslist, windows.malfind) instead of Volatility 2's flat plugin names."
+        data-why="The two major versions have meaningfully different syntax and command sets — knowing which one a given writeup or exam question assumes avoids wasted time hunting for a --profile flag that Volatility 3 doesn't use."
+        data-lookfor="Check windows.info first in Volatility 3 — the equivalent confirmation step to imageinfo, just without needing to feed the result back into every later command."
+        data-spl="volatility3 -f memory.dmp windows.info
+volatility3 -f memory.dmp windows.pslist">
+        <div class="tool-top"><span class="tool-name">Volatility 3 vs. 2 syntax</span><span class="go">details →</span></div>
+        <p class="tool-desc">No --profile flag, and plugins live under an os. namespace.</p>
+        <span class="ioc-badge">Syntax</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="category" data-category="proc" id="proc" style="--dot: var(--c-proc);">
+    <div class="category-head">
+      <h2><span class="dot"></span>Process Analysis</h2>
+      <span class="phase-tag">First Pass</span>
+    </div>
+    <p class="category-note">What was running, and — critically — whether every method of asking agrees on the answer.</p>
+    <code class="category-spl">volatility -f memory.dmp --profile=PROFILE pstree</code>
+    <div class="grid">
+      <button class="tool" type="button" data-ioc="Process"
+        data-desc="Lists running processes by walking the OS's own doubly-linked list of active EPROCESS structures — the same list Windows Task Manager ultimately reads from."
+        data-why="The standard starting point for a process inventory, but it trusts a structure a rootkit can tamper with directly — a process unlinked from this list by malware (DKOM, Direct Kernel Object Manipulation) simply won't appear here, which is exactly why psscan exists as a cross-check."
+        data-lookfor="Any process with a parent process ID that doesn't correspond to a process that makes sense — the process-tree relationship pstree shows more clearly than pslist's flat list."
+        data-spl="volatility -f memory.dmp --profile=PROFILE pslist">
+        <div class="tool-top"><span class="tool-name">pslist</span><span class="go">details →</span></div>
+        <p class="tool-desc">Standard process list — walks a linked list a rootkit can unlink from.</p>
+        <span class="ioc-badge">Process</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Detection"
+        data-desc="Finds process objects by scanning memory pools for their structural signature, independent of the active-process linked list pslist relies on — catches processes a rootkit has hidden by unlinking them from that list."
+        data-why="This is the direct answer to pslist's blind spot — a process present in psscan but absent from pslist is a strong, specific indicator of active list-unlinking, a classic rootkit hiding technique."
+        data-lookfor="Any PID that appears in psscan but not in pslist — treat that gap itself as the finding, before even looking at what the hidden process was doing."
+        data-spl="volatility -f memory.dmp --profile=PROFILE psscan">
+        <div class="tool-top"><span class="tool-name">psscan</span><span class="go">details →</span></div>
+        <p class="tool-desc">Pool-scan for processes — finds what pslist's linked list misses.</p>
+        <span class="ioc-badge">Detection</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Process"
+        data-desc="The same process listing as pslist, rendered as a parent-child tree so the spawning relationship between processes is visible at a glance."
+        data-why="A suspicious process is often much easier to spot by its parentage than by its name alone — the same 'wrong parent' logic as the Splunk and Sysmon ParentImage field, just applied to a memory snapshot instead of a live log stream."
+        data-lookfor="A non-interactive parent (a browser, an Office app, a service host) with a shell or scripting-engine child — powershell.exe or cmd.exe under winword.exe is the classic macro-dropper shape, visible here in the tree structure directly. Also worth a second look: svchost.exe running from any parent other than services.exe."
+        data-spl="volatility -f memory.dmp --profile=PROFILE pstree">
+        <div class="tool-top"><span class="tool-name">pstree</span><span class="go">details →</span></div>
+        <p class="tool-desc">Parent-child hierarchy — spot the wrong parent at a glance.</p>
+        <span class="ioc-badge">Process</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Detection"
+        data-desc="Cross-references a process's presence across several independent detection methods at once (the active list, pool scanning, session enumeration, thread ownership, and more) in a single table, showing exactly which method(s) see a given process and which don't."
+        data-why="This is the most authoritative hidden-process check available — rather than manually diffing pslist and psscan output yourself, psxview lays every method side by side and does the comparison for you."
+        data-lookfor="A row where most columns say False except one or two — that specific pattern of partial visibility is often characteristic of a particular hiding technique, not just noise."
+        data-spl="volatility -f memory.dmp --profile=PROFILE psxview">
+        <div class="tool-top"><span class="tool-name">psxview</span><span class="go">details →</span></div>
+        <p class="tool-desc">Every detection method compared side by side, in one table.</p>
+        <span class="ioc-badge">Detection</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="category" data-category="internals" id="internals" style="--dot: var(--c-internals);">
+    <div class="category-head">
+      <h2><span class="dot"></span>Process Internals</h2>
+      <span class="phase-tag">Deep Dive</span>
+    </div>
+    <p class="category-note">Once a process is worth a second look — what it loaded, what it was told to do, and what it had open.</p>
+    <code class="category-spl">volatility -f memory.dmp --profile=PROFILE dlllist -p &lt;PID&gt;</code>
+    <div class="grid">
+      <button class="tool" type="button" data-ioc="Host IOC"
+        data-desc="Lists the DLLs loaded into a specific process's address space, including the full path each was loaded from."
+        data-why="A DLL loaded from an unusual path (Temp, a user profile directory, anywhere outside System32/Program Files) inside an otherwise-trusted process is a common sign of DLL side-loading or injection."
+        data-lookfor="A DLL with a name mimicking a legitimate system library but loaded from the wrong directory, or any DLL path sitting in a user-writable location."
+        data-spl="volatility -f memory.dmp --profile=PROFILE dlllist -p 1234">
+        <div class="tool-top"><span class="tool-name">dlllist</span><span class="go">details →</span></div>
+        <p class="tool-desc">DLLs loaded by a process, with their full load path.</p>
+        <span class="ioc-badge">Host IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Host IOC"
+        data-desc="Extracts the full command-line arguments a process was launched with, straight from its process environment block in memory."
+        data-why="The memory-forensics equivalent of the Splunk Field Guide's CommandLine field or Sysmon Event ID 1 — same investigative value, pulled from a snapshot instead of a log."
+        data-lookfor="The same patterns covered across every other guide in this family — encoded PowerShell, LOLBins with suspicious flags, a script interpreter invoked with a suspicious argument."
+        data-spl="volatility -f memory.dmp --profile=PROFILE cmdline -p 1234">
+        <div class="tool-top"><span class="tool-name">cmdline</span><span class="go">details →</span></div>
+        <p class="tool-desc">Full command-line arguments, pulled from memory directly.</p>
+        <span class="ioc-badge">Host IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Host IOC"
+        data-desc="Lists the open handles a process holds — files, registry keys, mutants (mutexes), and other kernel objects — at the moment of capture."
+        data-why="A malware family's mutex name is often a hardcoded, reusable indicator across samples and campaigns — seeing it here confirms the specific family, and a handle to a file no longer visible on disk can reveal what was open right before capture."
+        data-lookfor="A mutant (mutex) with a distinctive, hardcoded-looking name — search it directly against threat-intel sources, since malware authors frequently reuse the same mutex string across builds. A handle to lsass.exe held by a process with no legitimate reason to touch it is a strong credential-dumping indicator — corroborate it against hashdump below."
+        data-spl="volatility -f memory.dmp --profile=PROFILE handles -p 1234 -t mutant">
+        <div class="tool-top"><span class="tool-name">handles</span><span class="go">details →</span></div>
+        <p class="tool-desc">Open files, registry keys, and mutexes at time of capture.</p>
+        <span class="ioc-badge">Host IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Recovery"
+        data-desc="Reconstructs a process's executable image from memory back into a file on disk, for further static analysis or a VirusTotal/sandbox submission."
+        data-why="Lets you pull the actual running binary out for a second opinion elsewhere, even when the original file on disk has been deleted, packed differently, or never existed as a standalone file at all (as with a fully in-memory / fileless payload)."
+        data-lookfor="Compare the dumped executable's hash against the on-disk version, if one still exists — a mismatch confirms the in-memory copy was altered (unpacked, patched) after it loaded."
+        data-spl="volatility -f memory.dmp --profile=PROFILE procdump -p 1234 -D /output/">
+        <div class="tool-top"><span class="tool-name">procdump</span><span class="go">details →</span></div>
+        <p class="tool-desc">Dumps a process's executable back to disk for a second opinion.</p>
+        <span class="ioc-badge">Recovery</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="category" data-category="inject" id="inject" style="--dot: var(--c-inject);">
+    <div class="category-head">
+      <h2><span class="dot"></span>Injection &amp; Hooking</h2>
+      <span class="phase-tag">Anti-forensics</span>
+    </div>
+    <p class="category-note">Memory-only techniques with nothing to find on disk — this is the category that exists specifically because a disk image alone would miss all of it.</p>
+    <code class="category-spl">volatility -f memory.dmp --profile=PROFILE malfind</code>
+    <div class="grid">
+      <button class="tool" type="button" data-ioc="Injection"
+        data-desc="Scans every process for memory regions marked both writable and executable (RWX) with no file on disk backing them — the structural signature of injected or unpacked code, regardless of which specific injection technique produced it."
+        data-why="Legitimate code almost never needs a region that's simultaneously writable and executable with no backing file — this single check catches an enormous range of injection techniques without needing to know which one was used in advance."
+        data-lookfor="A flagged region whose disassembly starts with a suspicious opcode pattern (a MZ header appearing mid-memory, or a stub matching a known injection technique) — Volatility prints a hex/disassembly preview directly in the output."
+        data-spl="volatility -f memory.dmp --profile=PROFILE malfind -p 1234 -D /output/">
+        <div class="tool-top"><span class="tool-name">malfind</span><span class="go">details →</span></div>
+        <p class="tool-desc">RWX memory with no backing file — the universal injection signature.</p>
+        <span class="ioc-badge">Injection</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Injection"
+        data-desc="Cross-references a process's own module list (what it reports loading, via the PEB) against what's actually mapped into its address space (the VAD tree) — surfacing any module present in memory but missing from the process's own self-reported list."
+        data-why="Catches DLL hollowing and unlinking specifically — malware that maps a malicious module and then removes it from the process's own bookkeeping structures so it doesn't show up in a normal module enumeration, including dlllist's."
+        data-lookfor="A module the VAD tree confirms is mapped but that's absent from the process's own reported module list — that specific mismatch is the finding, independent of what the module's code actually does."
+        data-spl="volatility -f memory.dmp --profile=PROFILE ldrmodules -p 1234">
+        <div class="tool-top"><span class="tool-name">ldrmodules</span><span class="go">details →</span></div>
+        <p class="tool-desc">Catches a module hidden from its own process's module list.</p>
+        <span class="ioc-badge">Injection</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Rootkit"
+        data-desc="Detects API hooking — inline hooks (a function's own first bytes patched to redirect execution) and IAT hooks (an import table entry pointed somewhere other than the real function) — across running processes."
+        data-why="Hooking is how a lot of rootkit and credential-stealing malware intercepts calls (like a login prompt or a keystroke) without needing its own injected thread — apihooks catches the interception mechanism directly."
+        data-lookfor="A hook pointing into a memory region already flagged by malfind — the two findings corroborating each other is a much stronger case than either alone."
+        data-spl="volatility -f memory.dmp --profile=PROFILE apihooks -p 1234">
+        <div class="tool-top"><span class="tool-name">apihooks</span><span class="go">details →</span></div>
+        <p class="tool-desc">Inline and IAT hooks — how malware intercepts calls without injection.</p>
+        <span class="ioc-badge">Rootkit</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="category" data-category="netreg" id="netreg" style="--dot: var(--c-netreg);">
+    <div class="category-head">
+      <h2><span class="dot"></span>Network &amp; Registry</h2>
+      <span class="phase-tag">Live State</span>
+    </div>
+    <p class="category-note">What the host was talking to, registry state as it actually sat in memory — sometimes different from what's on disk — and credentials that only ever existed in RAM.</p>
+    <code class="category-spl">volatility -f memory.dmp --profile=PROFILE netscan</code>
+    <div class="grid">
+      <button class="tool" type="button" data-ioc="Network IOC"
+        data-desc="Lists network connections and listening sockets active at the moment of capture, including the owning process — the memory equivalent of running netstat at the exact instant the image was taken."
+        data-why="Captures ephemeral or already-closed connections that might not appear in a log yet, and directly ties a connection to the process that owned it — the same correlation Sysmon Event ID 3 provides on the live-log side."
+        data-lookfor="A connection owned by a process that has no legitimate networking purpose, or a destination IP already flagged elsewhere in the case (Wireshark, Splunk, or an OSINT lookup)."
+        data-spl="volatility -f memory.dmp --profile=PROFILE netscan">
+        <div class="tool-top"><span class="tool-name">netscan</span><span class="go">details →</span></div>
+        <p class="tool-desc">Connections and listeners at the exact moment of capture, per process.</p>
+        <span class="ioc-badge">Network IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Registry"
+        data-desc="Lists every registry hive currently loaded in memory, along with its virtual offset — the required first step before reading any specific key with printkey."
+        data-why="printkey needs an offset (or hive name) to know which loaded hive to read from — hivelist is how you get that reference in the first place."
+        data-lookfor="A hive that shouldn't normally be loaded on this system, or one loaded from an unexpected path — worth a second look before moving on to printkey."
+        data-spl="volatility -f memory.dmp --profile=PROFILE hivelist">
+        <div class="tool-top"><span class="tool-name">hivelist</span><span class="go">details →</span></div>
+        <p class="tool-desc">Every registry hive loaded in memory — the input printkey needs.</p>
+        <span class="ioc-badge">Registry</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Registry"
+        data-desc="Reads a specific registry key's values directly out of the loaded hive in memory, rather than from the hive file on disk."
+        data-why="Catches a key that was set and then deliberately removed from disk before the memory was captured, or a value malware wrote purely at runtime without ever persisting the change — either would be invisible to Autopsy's disk-based registry parsing alone."
+        data-lookfor="A Run key or similar autostart value present in the in-memory hive that Autopsy's disk-based Registry, Email & EXIF category didn't find — that gap is itself a strong anti-forensics signal."
+        data-spl="volatility -f memory.dmp --profile=PROFILE printkey -o 0x8a1c2b60 -K 'Microsoft\\Windows\\CurrentVersion\\Run'">
+        <div class="tool-top"><span class="tool-name">printkey</span><span class="go">details →</span></div>
+        <p class="tool-desc">Live registry state — can catch what disk-based parsing misses.</p>
+        <span class="ioc-badge">Registry</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Credentials"
+        data-desc="Extracts NTLM password hashes directly from the SAM and SYSTEM hives as they sit loaded in memory — no disk parsing, no offline hive extraction step needed first."
+        data-why="A confirmed hashdump result alongside a suspicious handle to lsass.exe in the handles output is the strongest possible corroboration that credential dumping actually happened on this host, rather than just being attempted."
+        data-lookfor="Any hash for a privileged account (an admin or service account) — treat that as an assume-breach signal for lateral movement even before the hash is cracked, since it's directly usable in a pass-the-hash attack as-is."
+        data-spl="volatility -f memory.dmp --profile=PROFILE hashdump">
+        <div class="tool-top"><span class="tool-name">hashdump</span><span class="go">details →</span></div>
+        <p class="tool-desc">NTLM hashes straight from the in-memory SAM/SYSTEM hives.</p>
+        <span class="ioc-badge">Credentials</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Credentials"
+        data-desc="Extracts cached domain logon credentials (MSCash/MSCash2 hashes) from the in-memory registry — the same cached-credential mechanism that lets a domain-joined laptop log a user in while offline."
+        data-why="Cached domain credentials are a separate hash format from local SAM hashes and open a different attack path (offline cracking against the domain account) — worth pulling alongside hashdump rather than assuming one command covers both credential types."
+        data-lookfor="A cached entry for an account that shouldn't have recently logged onto this specific host — that mismatch alone is worth flagging, independent of whether the hash is ever cracked."
+        data-spl="volatility -f memory.dmp --profile=PROFILE cachedump">
+        <div class="tool-top"><span class="tool-name">cachedump</span><span class="go">details →</span></div>
+        <p class="tool-desc">Cached domain-logon hashes — a separate credential type from hashdump.</p>
+        <span class="ioc-badge">Credentials</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="category" data-category="timeline" id="timeline" style="--dot: var(--c-timeline);">
+    <div class="category-head">
+      <h2><span class="dot"></span>Timeline &amp; File Activity</h2>
+      <span class="phase-tag">Reconstruction</span>
+    </div>
+    <p class="category-note">Turning a static snapshot back into a sequence of events, and recovering file activity the snapshot happened to catch.</p>
+    <code class="category-spl">volatility -f memory.dmp --profile=PROFILE timeliner</code>
+    <div class="grid">
+      <button class="tool" type="button" data-ioc="Analysis view"
+        data-desc="Builds a single chronological timeline from every timestamped artifact Volatility can find across the image — process start times, DLL load times, registry last-write times, and more — combined into one view."
+        data-why="The memory equivalent of the Autopsy Field Guide's Timeline tool — turns a point-in-time snapshot into a sequence, useful for correlating what loaded, ran, and connected in relation to each other, not just individually."
+        data-lookfor="A tight cluster of process starts, module loads, and registry writes all within a narrow window — the same burst-of-activity signature the Autopsy Timeline card looks for, just built from RAM instead of disk."
+        data-spl="volatility -f memory.dmp --profile=PROFILE timeliner">
+        <div class="tool-top"><span class="tool-name">timeliner</span><span class="go">details →</span></div>
+        <p class="tool-desc">Every timestamped memory artifact, combined into one timeline.</p>
+        <span class="ioc-badge">Analysis view</span>
+      </button>
+      <button class="tool" type="button" data-ioc="File IOC"
+        data-desc="Scans memory for file object structures, surfacing files that were open or recently referenced at the moment of capture — including files since deleted from disk."
+        data-why="A file object can still exist in memory after the underlying file has been deleted from the file system, making this one of the few ways to confirm a since-removed file's name and metadata without needing the Autopsy Deleted Files view to have caught it."
+        data-lookfor="A file object referencing a path that no longer exists on disk according to Autopsy's own file listing — that gap is the finding, and dumpfiles is the next step to recover the actual content."
+        data-spl="volatility -f memory.dmp --profile=PROFILE filescan">
+        <div class="tool-top"><span class="tool-name">filescan</span><span class="go">details →</span></div>
+        <p class="tool-desc">File objects in memory — can reveal files already deleted from disk.</p>
+        <span class="ioc-badge">File IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Recovery"
+        data-desc="Extracts the actual content of a file object found via filescan back out to disk, using the offset filescan reported."
+        data-why="filescan tells you a file object exists; dumpfiles is what actually gets its bytes back, including for a file whose on-disk copy is already gone — the closest thing to recovering a deleted file that was never written to unallocated space in the first place."
+        data-lookfor="Confirm the dumped file's hash and content make sense before treating it as recovered evidence — a partially-paged-out file can dump incomplete or corrupted content."
+        data-spl="volatility -f memory.dmp --profile=PROFILE dumpfiles -Q 0x8a1c2b60 -D /output/">
+        <div class="tool-top"><span class="tool-name">dumpfiles</span><span class="go">details →</span></div>
+        <p class="tool-desc">Pulls a file object's actual content back out to disk.</p>
+        <span class="ioc-badge">Recovery</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Web IOC"
+        data-desc="Recovers Internet Explorer browsing history entries cached in memory at the time of capture, independent of whatever Autopsy's disk-based Web History module already found."
+        data-why="Cached-in-memory history can include very recent browsing activity that hasn't been flushed to the on-disk history database yet — a gap Autopsy's own Web History card can't fill on its own."
+        data-lookfor="A URL here with no matching entry in Autopsy's Web History results — recent-enough activity that it only ever existed in memory."
+        data-spl="volatility -f memory.dmp --profile=PROFILE iehistory">
+        <div class="tool-top"><span class="tool-name">iehistory</span><span class="go">details →</span></div>
+        <p class="tool-desc">Cached browsing history — can catch activity too recent for disk.</p>
+        <span class="ioc-badge">Web IOC</span>
+      </button>
+    </div>
+  </section>
+
+  <p class="empty-state" id="empty">No fields match that filter.</p>
+
+  <footer>
+    Companion reference to the <a href="https://zelihazenginapogeeusa-byte.github.io/zeliha-infosec-journey/autopsy-field-guide.html" target="_blank" rel="noopener noreferrer">Autopsy Field Guide</a> and the <a href="https://zelihazenginapogeeusa-byte.github.io/zeliha-infosec-journey/deepblue-field-guide.html" target="_blank" rel="noopener noreferrer">DeepBlueCLI Field Guide</a> — same host, what was running in RAM when it was captured. BTL1-aligned. Full write-ups on <a href="https://github.com/zelihazenginapogeeusa-byte/zeliha-infosec-journey" target="_blank" rel="noopener noreferrer">GitHub</a>.
+  </footer>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<aside class="panel" id="panel" role="dialog" aria-modal="true" aria-labelledby="panel-name" style="--dot: var(--c-proc);">
+  <div class="panel-head">
+    <div>
+      <p class="panel-cat" id="panel-cat">Category</p>
+      <h2 class="panel-name" id="panel-name">field_name</h2>
+    </div>
+    <button class="panel-close" id="panel-close" type="button" aria-label="Close">×</button>
+  </div>
+  <p class="panel-ioc"><span class="ioc-badge" id="panel-ioc-badge">IOC type</span></p>
+  <div class="panel-body">
+    <div class="panel-field">
+      <h3>What it is</h3>
+      <p id="panel-desc"></p>
+    </div>
+    <div class="panel-field">
+      <h3>Why look at it</h3>
+      <p id="panel-why"></p>
+    </div>
+    <div class="panel-field lookfor">
+      <h3>What to look for</h3>
+      <p id="panel-lookfor"></p>
+    </div>
+    <div class="panel-field spl">
+      <h3>How to do it</h3>
+      <pre id="panel-spl"></pre>
+    </div>
+  </div>
+</aside>
+
+<script>
+  (function () {
+    var input = document.getElementById("search");
+    var categories = Array.prototype.slice.call(document.querySelectorAll(".category"));
+    var empty = document.getElementById("empty");
+
+    input.addEventListener("input", function () {
+      var q = input.value.trim().toLowerCase();
+      var anyVisible = false;
+
+      categories.forEach(function (cat) {
+        var catTools = cat.querySelectorAll(".tool");
+        var catHasMatch = false;
+
+        catTools.forEach(function (tool) {
+          var text = tool.textContent.toLowerCase();
+          var match = q === "" || text.indexOf(q) !== -1;
+          tool.style.display = match ? "" : "none";
+          if (match) { catHasMatch = true; anyVisible = true; }
+        });
+
+        cat.style.display = catHasMatch ? "" : "none";
+      });
+
+      empty.classList.toggle("show", !anyVisible);
+    });
+  })();
+
+  (function () {
+    var panel = document.getElementById("panel");
+    var scrim = document.getElementById("scrim");
+    var closeBtn = document.getElementById("panel-close");
+    var lastFocused = null;
+
+    function openPanel(tool) {
+      var cat = tool.closest(".category");
+      var catName = cat.querySelector(".category-head h2").textContent.trim();
+      var dot = getComputedStyle(tool).borderLeftColor;
+
+      panel.style.setProperty("--dot", dot);
+      document.getElementById("panel-cat").textContent = catName;
+      document.getElementById("panel-name").textContent = tool.querySelector(".tool-name").textContent;
+      document.getElementById("panel-ioc-badge").textContent = tool.getAttribute("data-ioc") || "";
+      document.getElementById("panel-desc").textContent = tool.getAttribute("data-desc") || "";
+      document.getElementById("panel-why").textContent = tool.getAttribute("data-why") || "";
+      document.getElementById("panel-lookfor").textContent = tool.getAttribute("data-lookfor") || "";
+      document.getElementById("panel-spl").textContent = tool.getAttribute("data-spl") || "";
+
+      lastFocused = tool;
+      panel.classList.add("open");
+      scrim.classList.add("open");
+      closeBtn.focus();
+    }
+
+    function closePanel() {
+      panel.classList.remove("open");
+      scrim.classList.remove("open");
+      if (lastFocused) lastFocused.focus();
+    }
+
+    document.querySelectorAll(".tool").forEach(function (tool) {
+      tool.addEventListener("click", function () { openPanel(tool); });
+    });
+
+    closeBtn.addEventListener("click", closePanel);
+    scrim.addEventListener("click", closePanel);
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && panel.classList.contains("open")) closePanel();
+    });
+  })();
+
+  (function () {
+    // Jumpnav pills are plain buttons (not <a href="#...">) on purpose — an
+    // in-page anchor link resolves to a full claudeusercontent.com URL inside
+    // this hosting environment, which triggers an "open external link"
+    // confirmation instead of just scrolling. A button with a click handler
+    // sidesteps that entirely.
+    document.querySelectorAll(".jumpnav button[data-target]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var el = document.getElementById(btn.getAttribute("data-target"));
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    });
+  })();
+</script>
