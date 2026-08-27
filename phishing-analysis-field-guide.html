@@ -1,0 +1,1043 @@
+<title>Phishing Analysis Field Guide</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+<style>
+  :root {
+    --bg: #f5f2ea;
+    --surface: #ffffff;
+    --surface-hover: #f7f3e7;
+    --ink: #221f1a;
+    --ink-muted: #635c50;
+    --ink-faint: #948b7a;
+    --border: #e2dbc8;
+    --border-strong: #cdc2a6;
+    --shadow: 0 1px 2px rgba(34, 31, 26, 0.06);
+    --focus: #1f7d72;
+    --scrim: rgba(34, 31, 26, 0.32);
+    --code-bg: #221f1a;
+    --code-ink: #e8e3d6;
+
+    --c-header: #1e5aa8;
+    --c-auth: #1f7d72;
+    --c-redflags: #b3341f;
+    --c-content: #7a3f9e;
+    --c-attach: #8a4a1f;
+    --c-ioc: #356b30;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #14181d;
+      --surface: #1c2127;
+      --surface-hover: #242a31;
+      --ink: #e8e3d6;
+      --ink-muted: #a79f8f;
+      --ink-faint: #746b5c;
+      --border: #2c323a;
+      --border-strong: #3a424c;
+      --shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+      --focus: #52c2b6;
+      --scrim: rgba(0, 0, 0, 0.55);
+      --code-bg: #0e1114;
+      --code-ink: #d8e8e4;
+
+      --c-header: #6ba8ef;
+      --c-auth: #52c2b6;
+      --c-redflags: #e2624a;
+      --c-content: #b28ce0;
+      --c-attach: #cf8a52;
+      --c-ioc: #6fb85f;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #14181d;
+    --surface: #1c2127;
+    --surface-hover: #242a31;
+    --ink: #e8e3d6;
+    --ink-muted: #a79f8f;
+    --ink-faint: #746b5c;
+    --border: #2c323a;
+    --border-strong: #3a424c;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+    --focus: #52c2b6;
+    --scrim: rgba(0, 0, 0, 0.55);
+    --code-bg: #0e1114;
+    --code-ink: #d8e8e4;
+
+    --c-header: #6ba8ef;
+    --c-auth: #52c2b6;
+    --c-redflags: #e2624a;
+    --c-content: #b28ce0;
+    --c-attach: #cf8a52;
+    --c-ioc: #6fb85f;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: inherit; }
+  code { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+
+  .wrap {
+    max-width: 68rem;
+    margin: 0 auto;
+    padding: 3.5rem 1.5rem 4rem;
+  }
+
+  .masthead { margin-bottom: 2rem; }
+
+  .eyebrow {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--c-header);
+    margin: 0 0 0.9rem;
+  }
+
+  h1 {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-weight: 600;
+    font-size: clamp(1.9rem, 4vw, 2.5rem);
+    letter-spacing: -0.01em;
+    margin: 0 0 0.9rem;
+    text-wrap: balance;
+  }
+
+  .dek {
+    max-width: 46rem;
+    color: var(--ink-muted);
+    font-size: 1.02rem;
+    margin: 0 0 1.6rem;
+  }
+
+  .dek code {
+    font-size: 0.88em;
+    background: var(--surface-hover);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 0.05em 0.4em;
+    color: var(--ink);
+  }
+
+  .search-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    max-width: 26rem;
+    margin-bottom: 1.1rem;
+  }
+
+  .search-row svg { flex: none; color: var(--ink-faint); }
+
+  #search {
+    width: 100%;
+    font: inherit;
+    font-size: 0.95rem;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 6px;
+    padding: 0.6rem 0.85rem;
+  }
+
+  #search::placeholder { color: var(--ink-faint); }
+  #search:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+
+  .jumpnav { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+  .jumpnav button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font: inherit;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.76rem;
+    font-weight: 500;
+    text-decoration: none;
+    color: var(--dot);
+    background: color-mix(in srgb, var(--dot) 20%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--dot) 45%, var(--border));
+    border-radius: 999px;
+    padding: 0.32rem 0.75rem 0.32rem 0.6rem;
+    cursor: pointer;
+  }
+
+  .jumpnav button:hover { background: color-mix(in srgb, var(--dot) 34%, var(--surface)); }
+  .jumpnav button:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  .dot {
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 50%;
+    background: var(--dot);
+    flex: none;
+  }
+
+  .hint { font-size: 0.86rem; color: var(--ink-faint); margin: -0.9rem 0 1.3rem; }
+
+  .category {
+    margin-bottom: 2rem;
+    scroll-margin-top: 1.5rem;
+    background: color-mix(in srgb, var(--dot) 16%, var(--bg));
+    border: 1px solid color-mix(in srgb, var(--dot) 32%, var(--border));
+    border-radius: 14px;
+    padding: 1.35rem 1.35rem 1.6rem;
+  }
+
+  .category-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    border-bottom: 3px solid var(--dot);
+    padding-bottom: 0.6rem;
+    margin-bottom: 0.35rem;
+  }
+
+  .category-head h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--dot);
+    margin: 0;
+  }
+
+  .phase-tag {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    color: var(--dot);
+    white-space: nowrap;
+  }
+
+  .category-note {
+    color: var(--ink-muted);
+    font-size: 0.92rem;
+    margin: 0.7rem 0 1rem;
+    max-width: 44rem;
+  }
+
+  .category-spl {
+    display: block;
+    background: var(--code-bg);
+    color: var(--code-ink);
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.8rem;
+    border-radius: 8px;
+    padding: 0.8rem 1rem;
+    margin: 0 0 1.4rem;
+    overflow-x: auto;
+    white-space: pre;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+    gap: 0.85rem;
+  }
+
+  .tool {
+    display: block;
+    width: 100%;
+    text-align: left;
+    font: inherit;
+    cursor: pointer;
+    text-decoration: none;
+    background: color-mix(in srgb, var(--dot) 9%, var(--surface));
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--dot);
+    border-radius: 8px;
+    padding: 1rem 1.1rem;
+    box-shadow: var(--shadow);
+    transition: background 0.15s ease, transform 0.15s ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) { .tool { transition: none; } }
+
+  .tool:hover {
+    background: color-mix(in srgb, var(--dot) 20%, var(--surface));
+    transform: translateY(-1px);
+  }
+
+  .tool:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  .tool-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .tool-name {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-weight: 600;
+    font-size: 0.98rem;
+    color: var(--ink);
+  }
+
+  .go {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.72rem;
+    color: var(--dot);
+    white-space: nowrap;
+  }
+
+  .tool-desc {
+    color: var(--ink-muted);
+    font-size: 0.88rem;
+    margin: 0.4rem 0 0.55rem;
+  }
+
+  .ioc-badge {
+    display: inline-block;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 4px;
+    padding: 0.15rem 0.45rem;
+  }
+
+  .empty-state {
+    display: none;
+    color: var(--ink-muted);
+    font-size: 0.95rem;
+    padding: 1rem 0;
+  }
+
+  .empty-state.show { display: block; }
+
+  footer {
+    border-top: 1px solid var(--border-strong);
+    padding-top: 1.5rem;
+    margin-top: 1rem;
+    color: var(--ink-muted);
+    font-size: 0.88rem;
+  }
+
+  footer a {
+    color: var(--c-auth);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  footer a:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  /* Detail panel */
+  .scrim {
+    position: fixed;
+    inset: 0;
+    background: var(--scrim);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    z-index: 20;
+  }
+
+  .scrim.open { opacity: 1; pointer-events: auto; }
+
+  @media (prefers-reduced-motion: reduce) { .scrim, .panel { transition: none; } }
+
+  .panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100%;
+    width: min(26rem, 100%);
+    background: var(--surface);
+    border-left: 1px solid var(--border-strong);
+    box-shadow: -8px 0 24px rgba(0, 0, 0, 0.16);
+    transform: translateX(100%);
+    transition: transform 0.22s ease;
+    z-index: 21;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+  .panel.open { transform: translateX(0); }
+
+  .panel-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 1.5rem 1.5rem 1rem;
+    border-top: 4px solid var(--dot);
+  }
+
+  .panel-cat {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--dot);
+    margin: 0 0 0.4rem;
+  }
+
+  .panel-name {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--dot);
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  .panel-close {
+    flex: none;
+    width: 2rem;
+    height: 2rem;
+    display: grid;
+    place-items: center;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--ink-muted);
+    cursor: pointer;
+    font-size: 1.1rem;
+    line-height: 1;
+  }
+
+  .panel-close:hover { background: var(--surface-hover); color: var(--ink); }
+  .panel-close:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  .panel-ioc {
+    margin: 0 1.5rem 1.25rem;
+  }
+
+  .panel-body {
+    padding: 0 1.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .panel-field h3 {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0 0 0.4rem;
+  }
+
+  .panel-field p {
+    margin: 0;
+    font-size: 0.92rem;
+    color: var(--ink);
+  }
+
+  .panel-field.lookfor p {
+    color: var(--ink-muted);
+    background: var(--surface-hover);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.7rem 0.85rem;
+  }
+
+  .panel-field.spl pre {
+    margin: 0;
+    background: var(--code-bg);
+    color: var(--code-ink);
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.82rem;
+    border-radius: 6px;
+    padding: 0.75rem 0.9rem;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+</style>
+
+<div class="wrap">
+  <header class="masthead">
+    <p class="eyebrow">SOC field reference</p>
+    <h1>Phishing Analysis Field Guide</h1>
+    <p class="dek">
+      Reading the message itself — headers, authentication results, sender red flags, content,
+      attachments, and what to extract once it's confirmed. Where the OSINT Field Toolkit tells you
+      which site to check, this is the manual read that tells you what to check for.
+    </p>
+    <div class="search-row">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <circle cx="6.7" cy="6.7" r="4.7" stroke="currentColor" stroke-width="1.4" />
+        <line x1="10.1" y1="10.1" x2="14.5" y2="14.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+      </svg>
+      <input type="text" id="search" placeholder="Filter — e.g. &quot;SPF&quot;, &quot;spoofing&quot;, &quot;macro&quot;" autocomplete="off" />
+    </div>
+    <nav class="jumpnav" aria-label="Jump to category">
+      <button type="button" data-target="header" style="--dot: var(--c-header);"><span class="dot"></span>Header Analysis</button>
+      <button type="button" data-target="auth" style="--dot: var(--c-auth);"><span class="dot"></span>SPF / DKIM / DMARC</button>
+      <button type="button" data-target="redflags" style="--dot: var(--c-redflags);"><span class="dot"></span>Sender &amp; Domain Red Flags</button>
+      <button type="button" data-target="content" style="--dot: var(--c-content);"><span class="dot"></span>Content &amp; Social Engineering</button>
+      <button type="button" data-target="attach" style="--dot: var(--c-attach);"><span class="dot"></span>Attachment &amp; Link Analysis</button>
+      <button type="button" data-target="ioc" style="--dot: var(--c-ioc);"><span class="dot"></span>IOC Extraction &amp; Escalation</button>
+    </nav>
+  </header>
+
+  <p class="hint">Click any card for why it matters, what a suspicious value looks like, its IOC type, and exactly how to check it.</p>
+
+  <section class="category" data-category="header" id="header" style="--dot: var(--c-header);">
+    <div class="category-head">
+      <h2><span class="dot"></span>Header Analysis</h2>
+      <span class="phase-tag">Phase 1</span>
+    </div>
+    <p class="category-note">Before touching the body or a single link — the routing metadata almost never lies the way the visible message does.</p>
+    <code class="category-spl">View raw source / View original → read Received: from the bottom up</code>
+    <div class="grid">
+      <button class="tool" type="button" data-ioc="Routing"
+        data-desc="The stack of Received: headers, one added by every mail server the message passed through — read bottom to top, oldest hop first, to trace it back toward the true origin."
+        data-why="The bottom-most Received line is closest to the actual sending server, before it entered infrastructure you trust — this is usually the most reliable place to find the true originating IP, harder for an attacker to fake convincingly than the From address."
+        data-lookfor="A gap or inconsistency in the hop sequence, or an originating IP that geolocates somewhere the claimed sender has no business sending from."
+        data-spl="View original / Show source → read every 'Received: from' line, bottom to top">
+        <div class="tool-top"><span class="tool-name">Received chain</span><span class="go">details →</span></div>
+        <p class="tool-desc">Trace hop-by-hop, bottom to top, toward the true origin.</p>
+        <span class="ioc-badge">Routing</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Identity IOC"
+        data-desc="The address bounces and delivery failures actually go to — set separately from the visible From address, and often invisible unless you check headers."
+        data-why="An attacker can make the From address look like anything, but bounces still need to reach a mailbox they control — a Return-Path pointing somewhere unrelated to the claimed sender's domain is a strong, hard-to-fake tell."
+        data-lookfor="A Return-Path domain that has nothing to do with the organization the From address claims to represent."
+        data-spl="Header field: Return-Path:">
+        <div class="tool-top"><span class="tool-name">Return-Path mismatch</span><span class="go">details →</span></div>
+        <p class="tool-desc">Where bounces actually go — often not where From claims.</p>
+        <span class="ioc-badge">Identity IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Identity IOC"
+        data-desc="A Reply-To header set to a different address than From — replies silently route to the attacker's mailbox even though the visible sender looks legitimate."
+        data-why="This is one of the cheapest, most common phishing tricks — the victim never notices they're replying somewhere else, because most mail clients don't surface Reply-To prominently."
+        data-lookfor="Any Reply-To at all on a message that shouldn't need one — most routine business email doesn't set it, so its mere presence is worth a second look, and a mismatch against From confirms it."
+        data-spl="Header field: Reply-To:  (compare against From:)">
+        <div class="tool-top"><span class="tool-name">Reply-To mismatch</span><span class="go">details →</span></div>
+        <p class="tool-desc">Replies silently redirected to a different address than From.</p>
+        <span class="ioc-badge">Identity IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Routing"
+        data-desc="A unique identifier generated by the originating mail system when the message was created, structured as a string @ the domain of the system that generated it."
+        data-why="The domain portion normally matches the sending infrastructure — a Message-ID generated by a domain totally unrelated to the claimed sender is a sign the message didn't originate where it claims to."
+        data-lookfor="A Message-ID domain that doesn't match From, Return-Path, or any Received hop — three independent fields disagreeing about origin is a strong combined signal."
+        data-spl="Header field: Message-ID:">
+        <div class="tool-top"><span class="tool-name">Message-ID structure</span><span class="go">details →</span></div>
+        <p class="tool-desc">Should trace back to the real sending infrastructure.</p>
+        <span class="ioc-badge">Routing</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Content IOC"
+        data-desc="The human-readable name shown in a mail client (e.g. &quot;IT Support&quot;) is set independently of the actual email address underneath it, and most clients show only the display name by default."
+        data-why="The single most common, least technical spoofing trick — no header forgery needed at all, just a display name chosen to match a trusted brand or colleague while the real address is unrelated."
+        data-lookfor="Click or hover the sender name to reveal the actual address underneath — a mismatch between a trusted-looking display name and an unrelated or lookalike address is often visible at a glance once you check."
+        data-spl="Click/hover the sender name → compare against the real address">
+        <div class="tool-top"><span class="tool-name">Display name spoofing</span><span class="go">details →</span></div>
+        <p class="tool-desc">A trusted-looking name over an unrelated real address.</p>
+        <span class="ioc-badge">Content IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Routing"
+        data-desc="Older, non-standard headers that some mail systems still add — X-Originating-IP records the client IP the message was submitted from, and X-Mailer identifies the software used to send it."
+        data-why="Not present on every message, but when they are, they're harder for an attacker to think to fake than the fields everyone knows to check — an X-Mailer inconsistent with the claimed sending platform, or an X-Originating-IP that doesn't match the organization's expected range, is a useful supporting signal."
+        data-lookfor="Don't rely on either being present — many legitimate and malicious messages omit them entirely — but treat them as a bonus data point when they do show up."
+        data-spl="Header fields: X-Originating-IP:  /  X-Mailer:">
+        <div class="tool-top"><span class="tool-name">X-Originating-IP / X-Mailer</span><span class="go">details →</span></div>
+        <p class="tool-desc">Legacy headers — a bonus signal when present, not always there.</p>
+        <span class="ioc-badge">Routing</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="category" data-category="auth" id="auth" style="--dot: var(--c-auth);">
+    <div class="category-head">
+      <h2><span class="dot"></span>SPF / DKIM / DMARC</h2>
+      <span class="phase-tag">Phase 1 · Authentication</span>
+    </div>
+    <p class="category-note">The three mechanisms that validate the sending domain technically — and the important caveat that passing all three doesn't mean the message is trustworthy.</p>
+    <code class="category-spl">Header field: Authentication-Results:</code>
+    <div class="grid">
+      <button class="tool" type="button" data-ioc="Authentication"
+        data-desc="Sender Policy Framework — a DNS TXT record published by a domain listing which mail servers are authorized to send on its behalf."
+        data-why="Fails when a message claiming to be from a domain was actually sent from a server that domain never authorized — the most basic, longest-standing of the three checks."
+        data-lookfor="An spf=fail or spf=softfail result on a message claiming to be from a domain that publishes a strict SPF policy — a legitimate sender rarely fails its own policy."
+        data-spl="dig TXT example.com  → look for 'v=spf1 ...'">
+        <div class="tool-top"><span class="tool-name">SPF</span><span class="go">details →</span></div>
+        <p class="tool-desc">DNS record listing servers authorized to send for a domain.</p>
+        <span class="ioc-badge">Authentication</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Authentication"
+        data-desc="DomainKeys Identified Mail — a cryptographic signature added to the message by the sending server, verifiable against a public key published in that domain's DNS."
+        data-why="Unlike SPF, DKIM also proves the message body wasn't altered in transit — a valid signature confirms both who sent it and that it arrived unmodified."
+        data-lookfor="The d= domain in the DKIM signature — it should match the claimed sending domain; a valid signature from an unrelated d= domain means the message is authenticated, just not by who it claims to be."
+        data-spl="Header field: DKIM-Signature:  (check d= against the claimed sender)">
+        <div class="tool-top"><span class="tool-name">DKIM</span><span class="go">details →</span></div>
+        <p class="tool-desc">Cryptographic signature proving sender and message integrity.</p>
+        <span class="ioc-badge">Authentication</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Authentication"
+        data-desc="Domain-based Message Authentication, Reporting and Conformance — a policy layer on top of SPF and DKIM that also checks alignment (whether the domains those two checks validated actually match the visible From domain) and tells receiving servers what to do on failure."
+        data-why="Alignment is the piece SPF and DKIM don't check on their own — a message can pass SPF and DKIM for a completely different domain than the one shown in From, and DMARC alignment is what catches that gap."
+        data-lookfor="A dmarc=fail result, or a domain with p=none (monitor-only, no enforcement) — the latter means DMARC exists but isn't actually blocking anything yet."
+        data-spl="dig TXT _dmarc.example.com  → look for 'v=DMARC1; p=reject/quarantine/none'">
+        <div class="tool-top"><span class="tool-name">DMARC</span><span class="go">details →</span></div>
+        <p class="tool-desc">Alignment check plus policy — what SPF/DKIM alone can't catch.</p>
+        <span class="ioc-badge">Authentication</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Header field"
+        data-desc="A single summary header, usually added by the receiving mail server, reporting the combined spf=/dkim=/dmarc= verdicts in one place instead of making you compute them by hand."
+        data-why="The fastest path to the same answer the three cards above walk through individually — most receiving mail systems compute and stamp this automatically."
+        data-lookfor="Any of the three showing fail, or dmarc=fail specifically even when spf and dkim individually pass — that combination is exactly the alignment gap DMARC exists to catch."
+        data-spl="Header field: Authentication-Results:  spf=... dkim=... dmarc=...">
+        <div class="tool-top"><span class="tool-name">Authentication-Results header</span><span class="go">details →</span></div>
+        <p class="tool-desc">The combined SPF/DKIM/DMARC verdict in one header.</p>
+        <span class="ioc-badge">Header field</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Caveat"
+        data-desc="The important limit of all three checks: they validate the technical sending domain, not the human-perceived identity — an attacker who registers their own domain and sets up SPF/DKIM/DMARC correctly for it will pass every check while using a display name or lookalike domain to impersonate someone else entirely."
+        data-why="A common exam and real-world trap — a message can be fully authenticated and still be a phishing email, because authentication was never designed to catch display-name spoofing or lookalike domains in the first place."
+        data-lookfor="All three checks passing on a message that still fails the Sender & Domain Red Flags checks below — authentication passing is necessary, not sufficient, on its own."
+        data-spl="Cross-check against Display name spoofing and the Red Flags category below">
+        <div class="tool-top"><span class="tool-name">Passing ≠ trustworthy</span><span class="go">details →</span></div>
+        <p class="tool-desc">SPF/DKIM/DMARC validate the domain, not the human sender.</p>
+        <span class="ioc-badge">Caveat</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="category" data-category="redflags" id="redflags" style="--dot: var(--c-redflags);">
+    <div class="category-head">
+      <h2><span class="dot"></span>Sender &amp; Domain Red Flags</h2>
+      <span class="phase-tag">Phase 1 · Phase 2</span>
+    </div>
+    <p class="category-note">The parts of the sending domain itself worth a second look, independent of whether authentication technically passed.</p>
+    <code class="category-spl">Compare the sending domain character by character against the real one</code>
+    <div class="grid">
+      <button class="tool" type="button" data-ioc="Domain IOC"
+        data-desc="A domain that visually resembles a trusted one through character substitution (rn for m, 0 for o), an added or removed letter, or an extra hyphen or subdomain layer."
+        data-why="Designed specifically to survive a quick glance — the visual trick works precisely because most people don't read a domain character by character."
+        data-lookfor="Compare the domain character by character against the real one, or paste both into a text diff — an extra hyphen (paypal-secure.com) or a homoglyph swap is easy to miss at normal reading speed."
+        data-spl="Compare character-by-character against the legitimate domain">
+        <div class="tool-top"><span class="tool-name">Homoglyph / typosquat domains</span><span class="go">details →</span></div>
+        <p class="tool-desc">Visually similar domains built to survive a quick glance.</p>
+        <span class="ioc-badge">Domain IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Domain IOC"
+        data-desc="Punycode — the ASCII encoding (xn-- prefix) that lets a domain register non-Latin characters, such as visually-identical Cyrillic letters, that a browser then renders back as normal-looking Latin text."
+        data-why="The most convincing version of a lookalike domain — unlike a typosquat with an extra hyphen or swapped digit, a punycode homograph can render as 100% visually identical to the real domain in an address bar."
+        data-lookfor="An address bar showing a domain that looks exactly right — copy it into a plain-text field or a tool that shows the raw xn-- form instead of trusting the rendered display."
+        data-spl="Copy the URL into a plain-text editor to reveal the raw xn-- punycode form">
+        <div class="tool-top"><span class="tool-name">Punycode / Cyrillic homographs</span><span class="go">details →</span></div>
+        <p class="tool-desc">Non-Latin characters rendered as a visually identical Latin domain.</p>
+        <span class="ioc-badge">Domain IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Domain IOC"
+        data-desc="A sending domain registered very recently — days or weeks before the message arrived, rather than the months or years a legitimate long-running organization's domain would show."
+        data-why="Phishing infrastructure is often stood up and burned quickly, so registration age is one of the highest-signal, hardest-to-fake indicators available — check it via the OSINT Field Toolkit's WHOIS and SecurityTrails tools."
+        data-lookfor="A creation date within days or weeks of the message, especially paired with a domain that's a lookalike of a well-known brand."
+        data-spl="Feed the domain into the OSINT Field Toolkit's ICANN WHOIS or SecurityTrails cards">
+        <div class="tool-top"><span class="tool-name">Newly registered domain</span><span class="go">details →</span></div>
+        <p class="tool-desc">Registration age is one of the hardest indicators to fake.</p>
+        <span class="ioc-badge">Domain IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Domain IOC"
+        data-desc="A message claiming to be an official notice from a bank, SaaS vendor, or internal department, sent from a free consumer webmail address (Gmail, Outlook.com, Yahoo) instead of that organization's actual domain."
+        data-why="Legitimate organizations essentially never send official account or security notices from a free consumer email provider — this mismatch alone is often enough to call a message out."
+        data-lookfor="Any 'official' notice — password reset, invoice, security alert — arriving from a @gmail.com or similar address instead of the organization's own domain."
+        data-spl="Check the sending domain against the organization's actual domain">
+        <div class="tool-top"><span class="tool-name">Free webmail impersonating a brand</span><span class="go">details →</span></div>
+        <p class="tool-desc">An 'official' notice from a personal Gmail/Outlook address.</p>
+        <span class="ioc-badge">Domain IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Domain IOC"
+        data-desc="Running the sending domain and any linked URLs through several independent reputation engines rather than trusting a single source, since coverage and detection timing vary between vendors."
+        data-why="No single engine catches everything, and a brand-new malicious domain often shows clean on some engines before others have indexed it — the OSINT Field Toolkit's VirusTotal, URLVoid, and Talos cards exist for exactly this cross-check."
+        data-lookfor="A split verdict across engines — even one flag among several clean results is worth treating as a lead, not dismissing as noise."
+        data-spl="Run the domain through the OSINT Field Toolkit's IP &amp; Infrastructure and Phishing Intel categories">
+        <div class="tool-top"><span class="tool-name">Cross-engine reputation check</span><span class="go">details →</span></div>
+        <p class="tool-desc">No single engine catches everything — check several.</p>
+        <span class="ioc-badge">Domain IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Domain IOC"
+        data-desc="A phishing page hosted not on attacker-registered infrastructure but on a real, otherwise-legitimate domain that's been compromised — via a vulnerable plugin, an exposed admin panel, or reused credentials — with the phishing content sitting on an obscure path."
+        data-why="This is why domain reputation alone isn't a complete answer — the domain itself may have years of clean history and a good reputation score, because the phishing content is new and the compromise is recent."
+        data-lookfor="A phishing URL sitting on an unrelated, oddly-specific path (a legitimate small-business site with a folder like /wp-content/xyz/login.html) rather than at the domain's root."
+        data-spl="Check the full URL path, not just the domain, against Wayback Machine and urlscan.io history">
+        <div class="tool-top"><span class="tool-name">Compromised legitimate domain</span><span class="go">details →</span></div>
+        <p class="tool-desc">A clean-reputation domain hosting phishing on an obscure path.</p>
+        <span class="ioc-badge">Domain IOC</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="category" data-category="content" id="content" style="--dot: var(--c-content);">
+    <div class="category-head">
+      <h2><span class="dot"></span>Content &amp; Social Engineering</h2>
+      <span class="phase-tag">Phase 2</span>
+    </div>
+    <p class="category-note">What the message is actually trying to make the reader feel and do, independent of any technical indicator.</p>
+    <code class="category-spl">Read the message the way the intended victim would, not as an analyst</code>
+    <div class="grid">
+      <button class="tool" type="button" data-ioc="Social IOC"
+        data-desc="Language engineered to short-circuit careful thinking — an account will be suspended, a payment is overdue, a document needs signing within hours, framed with a tight deadline."
+        data-why="Urgency is the single most consistent lever across almost every phishing pretext, because it's specifically designed to get the reader to act before they'd normally stop to verify."
+        data-lookfor="A deadline or consequence that doesn't match how the claimed sender actually operates — most legitimate account or billing issues don't come with a countdown."
+        data-spl="Note the specific deadline/consequence language used">
+        <div class="tool-top"><span class="tool-name">Urgency / pretext language</span><span class="go">details →</span></div>
+        <p class="tool-desc">Engineered to get the reader to act before they verify.</p>
+        <span class="ioc-badge">Social IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Social IOC"
+        data-desc="A greeting like 'Dear Customer' or 'Dear User' on a message claiming to be a personalized notice from a service the recipient actually has an account with."
+        data-why="A real service that already has the recipient's account details almost always personalizes the greeting — a generic one suggests the sender doesn't actually have that data, because they're sending the same template to everyone."
+        data-lookfor="A generic greeting combined with a claim of specific account knowledge ('your account has been compromised') — the two don't logically fit together."
+        data-spl="Compare the greeting against how the real service normally addresses the recipient">
+        <div class="tool-top"><span class="tool-name">Generic greeting</span><span class="go">details →</span></div>
+        <p class="tool-desc">'Dear Customer' where a real account holder's name should be.</p>
+        <span class="ioc-badge">Social IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Social IOC"
+        data-desc="Content structured to mimic a familiar login flow — a warning that access needs to be 'verified' or 'reactivated,' leading to a page that looks like the real service's sign-in screen."
+        data-why="This is the setup for the credential-harvesting page the link ultimately leads to — recognizing the pattern in the email content lets you anticipate what the linked page will try to do before you ever open it."
+        data-lookfor="Verify/reactivate/confirm-your-identity language paired with a link — the email's job is entirely to get the click, the actual harvesting happens on the landing page."
+        data-spl="Note the verify/reactivate framing before following any link">
+        <div class="tool-top"><span class="tool-name">Credential-harvesting language</span><span class="go">details →</span></div>
+        <p class="tool-desc">'Verify your account' framing that sets up the linked page.</p>
+        <span class="ioc-badge">Social IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="BEC IOC"
+        data-desc="Business Email Compromise — a request for a wire transfer, a gift card purchase, or a change to vendor payment details, impersonating an executive or an existing vendor, almost always with no malware or malicious link involved at all — pure social engineering."
+        data-why="BEC bypasses every technical control in this guide, because there's often nothing technical to catch — no attachment, no link, sometimes not even a spoofed domain, just a convincing pretext and a request that sounds plausible from the claimed sender."
+        data-lookfor="Any payment-method-change request or urgent wire/gift-card ask, especially one that arrives out of normal band (a CEO emailing finance directly instead of going through the usual process) — verify out-of-band, by phone, before acting."
+        data-spl="Verify any payment-related request via a separate, known-good channel">
+        <div class="tool-top"><span class="tool-name">BEC patterns</span><span class="go">details →</span></div>
+        <p class="tool-desc">Wire/gift-card/payment-change requests — no malware needed.</p>
+        <span class="ioc-badge">BEC IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Social IOC"
+        data-desc="Spelling, grammar, formatting, or tone that doesn't match how the claimed sender or organization normally communicates."
+        data-why="Weaker on its own than it used to be — well-resourced phishing campaigns increasingly write cleanly — but still a useful supporting signal when it lines up with other red flags on the same message."
+        data-lookfor="Inconsistency against a known baseline specifically — an organization's actual past emails or the sender's normal writing style — rather than judging the message in isolation."
+        data-spl="Compare against a known-legitimate prior message from the same sender, if available">
+        <div class="tool-top"><span class="tool-name">Style / formatting inconsistency</span><span class="go">details →</span></div>
+        <p class="tool-desc">A supporting signal, not a standalone verdict on its own.</p>
+        <span class="ioc-badge">Social IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Vocabulary"
+        data-desc="The named attack variants — mass/generic phishing (broad, low-effort, sent to many), spear phishing (researched, targeted at one person or team), whaling (spear phishing aimed at an executive), pharming (redirecting traffic at the DNS/host level rather than via a message), and watering hole (compromising a site the target is known to visit)."
+        data-why="Naming the variant correctly shapes the rest of the investigation — a watering-hole case starts with the compromised site, not a message; a whaling case usually means BEC-style social engineering is more likely than a generic credential-harvesting link."
+        data-lookfor="Match the scope and targeting of what actually arrived against these categories before writing a verdict — the exam and real incident reports both expect the correct term, not just 'phishing' generically."
+        data-spl="Classify by targeting scope and delivery mechanism before analysis">
+        <div class="tool-top"><span class="tool-name">Attack type classification</span><span class="go">details →</span></div>
+        <p class="tool-desc">Mass, spear, whaling, pharming, watering hole — name it correctly.</p>
+        <span class="ioc-badge">Vocabulary</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Content IOC"
+        data-desc="Text rendered at 0-size or in a color matching the background, invisible to the human reader but still parsed by spam filters and preview-pane text extraction."
+        data-why="Used to manipulate automated filters two ways — stuffing invisible legitimate-sounding text to dilute a filter's spam score, or hiding a payload/keyword from a human reviewer scanning the rendered message."
+        data-lookfor="View the raw HTML source rather than the rendered message — any text with font-size:0, color matching the background, or display:none is invisible in a normal mail client but sitting right there in the source."
+        data-spl="View message source → search the HTML for zero-size or background-matched text runs">
+        <div class="tool-top"><span class="tool-name">Zero-font hidden text</span><span class="go">details →</span></div>
+        <p class="tool-desc">Invisible text used to evade spam filters, visible only in raw HTML.</p>
+        <span class="ioc-badge">Content IOC</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="category" data-category="attach" id="attach" style="--dot: var(--c-attach);">
+    <div class="category-head">
+      <h2><span class="dot"></span>Attachment &amp; Link Analysis</h2>
+      <span class="phase-tag">Phase 3</span>
+    </div>
+    <p class="category-note">What the message actually delivers, and how to look at it without becoming the next victim yourself.</p>
+    <code class="category-spl">Never open an attachment or follow a link directly — always through a sandbox</code>
+    <div class="grid">
+      <button class="tool" type="button" data-ioc="File IOC"
+        data-desc="Office documents (Word, Excel) containing embedded VBA macros that, once the recipient clicks 'Enable Content,' download and execute a first-stage payload."
+        data-why="One of the longest-running and still most common initial-access techniques — it relies entirely on the recipient overriding Office's default macro-blocking, which is exactly what the surrounding email content is written to convince them to do."
+        data-lookfor="Any unsolicited document that displays a banner urging you to 'Enable Content' or 'Enable Editing' to view it properly — that framing is itself the social-engineering step, independent of what the macro actually does."
+        data-spl="Detonate in ANY.RUN or Hybrid Analysis — never enable macros locally">
+        <div class="tool-top"><span class="tool-name">Macro-enabled documents</span><span class="go">details →</span></div>
+        <p class="tool-desc">VBA macros as a first-stage dropper, gated behind 'Enable Content.'</p>
+        <span class="ioc-badge">File IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="File IOC"
+        data-desc="Extracting and reading a macro's actual VBA source code statically — with oledump.py to pull the OLE streams out of the document and olevba to decompile and print the macro source directly — instead of only detonating it in a sandbox."
+        data-why="Static analysis reads the attacker's actual logic without ever running it, and surfaces auto-execution hooks (AutoOpen, Document_Open) and suspicious calls (Shell, CreateObject, encoded PowerShell) directly in the source — often faster than waiting on a sandbox report, and useful as a cross-check against one."
+        data-lookfor="An AutoOpen or Document_Open sub calling Shell, CreateObject, or a PowerShell invocation — that combination is the macro-dropper pattern almost every malicious document shares."
+        data-spl="olevba suspicious.docm    /    oledump.py -s 5 -v suspicious.docm">
+        <div class="tool-top"><span class="tool-name">Static macro analysis</span><span class="go">details →</span></div>
+        <p class="tool-desc">Read the actual VBA source with oledump/olevba, without running it.</p>
+        <span class="ioc-badge">File IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="File IOC"
+        data-desc="File extensions that have no ordinary reason to arrive as an email attachment at all — .iso and .img (disk images that mount and hide their contents from some scanners), .js/.vbs/.hta (script files that execute directly), and macro-enabled Office formats (.docm, .xlsm)."
+        data-why="Several of these exist specifically because they slip past filters tuned for the obvious .exe — an .iso attachment, for instance, mounts as a virtual drive and can smuggle an executable inside where simple attachment scanning doesn't always look."
+        data-lookfor="Any of these extensions arriving from an external sender with no prior business reason to send that file type — treat the extension itself as the first red flag, before even opening anything."
+        data-spl="Check the attachment extension before opening — .iso/.img/.js/.vbs/.hta/.docm/.xlsm">
+        <div class="tool-top"><span class="tool-name">Unusual attachment types</span><span class="go">details →</span></div>
+        <p class="tool-desc">.iso, .js, .hta, and macro formats — built to slip past filters.</p>
+        <span class="ioc-badge">File IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="File IOC"
+        data-desc="An HTML attachment that assembles its actual malicious payload (a fake login form, an encoded redirect) client-side, in the browser, using JavaScript — rather than shipping the payload directly in a form a gateway scanner can inspect."
+        data-why="Built specifically to evade attachment scanning — the HTML file itself looks innocuous on inspection because the harmful content doesn't exist until the script runs it in the victim's own browser."
+        data-lookfor="An .html or .htm attachment at all — legitimate business correspondence essentially never delivers content this way, so its mere presence as an attachment type is worth flagging."
+        data-spl="Read the JavaScript source directly rather than rendering the page">
+        <div class="tool-top"><span class="tool-name">HTML smuggling</span><span class="go">details →</span></div>
+        <p class="tool-desc">Payload assembled client-side in-browser to dodge gateway scans.</p>
+        <span class="ioc-badge">File IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Content IOC"
+        data-desc="A phishing URL embedded inside a QR code image rather than as clickable text — the recipient is prompted to scan it with a phone, often bypassing corporate email link-scanning entirely since the URL is never rendered as text."
+        data-why="Moves the click from a monitored corporate device and network to the recipient's personal phone, stepping outside most organizations' email security tooling in the process."
+        data-lookfor="Any QR code in a business email at all — legitimate internal or vendor communication essentially never needs one, making its presence itself a useful flag before even decoding it."
+        data-spl="Decode the QR in a sandboxed tool, never with your own phone camera">
+        <div class="tool-top"><span class="tool-name">QR code phishing (quishing)</span><span class="go">details →</span></div>
+        <p class="tool-desc">A URL hidden in an image, read by a phone instead of a filter.</p>
+        <span class="ioc-badge">Content IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="URL IOC"
+        data-desc="A link disguised through a redirector chain, a URL shortener, or heavily encoded query parameters, so the final destination isn't visible from the link text or a casual glance at the URL bar."
+        data-why="Buys the attacker two things at once — the true destination is hidden from a quick visual check, and shortener services often provide click analytics the attacker can use to see who's actually opening the message."
+        data-lookfor="Feed the full URL into the OSINT Field Toolkit's Unfurl or CyberChef cards to unwind every redirect and encoding layer before deciding whether it's safe to visit at all."
+        data-spl="Unfurl or CyberChef → decode the full redirect/encoding chain">
+        <div class="tool-top"><span class="tool-name">URL obfuscation</span><span class="go">details →</span></div>
+        <p class="tool-desc">Redirect chains and encoding that hide the real destination.</p>
+        <span class="ioc-badge">URL IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Process"
+        data-desc="The discipline of never opening a suspicious attachment or following a suspicious link on your own machine — always through an isolated sandbox (ANY.RUN, Hybrid Analysis, urlscan.io) or a disposable VM instead."
+        data-why="The entire point of everything else in this category is moot if the analyst becomes the second victim — a sandbox absorbs whatever the payload actually does, safely, and hands back the behavior report instead."
+        data-lookfor="Before opening anything at all: is this happening in a sandbox, not on my own device? If not, stop and set one up first."
+        data-spl="Route every attachment/link through the OSINT Field Toolkit's URL &amp; File Analysis category first">
+        <div class="tool-top"><span class="tool-name">Safe detonation practice</span><span class="go">details →</span></div>
+        <p class="tool-desc">Sandbox first, every time — never your own machine.</p>
+        <span class="ioc-badge">Process</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="category" data-category="ioc" id="ioc" style="--dot: var(--c-ioc);">
+    <div class="category-head">
+      <h2><span class="dot"></span>IOC Extraction &amp; Escalation</h2>
+      <span class="phase-tag">Phase 4</span>
+    </div>
+    <p class="category-note">Turning what you found into indicators others can block on, and a case record someone else can trust.</p>
+    <code class="category-spl">Sender, Reply-To, every URL, attachment hash — the standard extraction set</code>
+    <div class="grid">
+      <button class="tool" type="button" data-ioc="Process"
+        data-desc="The standard set pulled from a confirmed phishing email — the sending address and domain, the Reply-To address if different, every URL in the body (unwound, not the shortened form), and the hash of any attachment."
+        data-why="This is the shareable, actionable output of the whole analysis — a SOC can block on a domain or a hash, but can't block on 'this email felt suspicious.'"
+        data-lookfor="Extract the unwound final URL, not the shortener or redirector link — blocking the redirector alone leaves the actual malicious destination untouched if the attacker stands up a new redirector pointing at it."
+        data-spl="Sender / Reply-To / every unwound URL / attachment hash(es)">
+        <div class="tool-top"><span class="tool-name">What to extract</span><span class="go">details →</span></div>
+        <p class="tool-desc">The shareable, actionable output of the analysis.</p>
+        <span class="ioc-badge">Process</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Process"
+        data-desc="Once IOCs are extracted here, the natural next step is feeding each one into the OSINT Field Toolkit's lookup tools — VirusTotal and AbuseIPDB for the sender IP, urlscan.io for the URLs, MalwareBazaar for the attachment hash."
+        data-why="This guide identifies what's worth checking; the OSINT Field Toolkit is where the actual checking happens — the two are meant to be used back to back on the same case."
+        data-lookfor="Cross-reference every extracted IOC across at least two independent sources before writing a conclusion, the same discipline the OSINT Field Toolkit's own tools are built around."
+        data-spl="Hand off each IOC to the matching OSINT Field Toolkit category">
+        <div class="tool-top"><span class="tool-name">Feed into OSINT lookups</span><span class="go">details →</span></div>
+        <p class="tool-desc">Where this guide's findings go to actually get checked.</p>
+        <span class="ioc-badge">Process</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Process"
+        data-desc="Reporting a confirmed phishing domain or URL to the hosting provider's and registrar's abuse contacts, and submitting it to public feeds like PhishTank and OpenPhish so other defenders benefit from the finding."
+        data-why="A takedown removes the infrastructure for everyone, not just your own organization — and a submission to a public feed means the next analyst who encounters the same domain gets an instant answer instead of starting from zero."
+        data-lookfor="Use the OSINT Field Toolkit's phish.report card to identify the correct abuse contact automatically, rather than guessing at a registrar's abuse address."
+        data-spl="OSINT Field Toolkit → phish.report, PhishTank, OpenPhish">
+        <div class="tool-top"><span class="tool-name">Reporting &amp; takedown</span><span class="go">details →</span></div>
+        <p class="tool-desc">Get the infrastructure removed, not just blocked locally.</p>
+        <span class="ioc-badge">Process</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Documentation"
+        data-desc="Preserving the original message as a raw .eml or .msg file, and capturing a screenshot of the key headers, before the case is closed or the message is deleted from the mailbox."
+        data-why="A summary written after the fact loses the raw evidence — the original file is what lets you or anyone else re-verify a header or re-run an analysis later, the same chain-of-custody discipline covered in the Autopsy Field Guide."
+        data-lookfor="Save the .eml before forwarding or replying to anything — forwarding can alter or strip headers depending on the mail client, corrupting the evidence you're trying to preserve."
+        data-spl="Export/Save As → .eml or .msg, before any further handling">
+        <div class="tool-top"><span class="tool-name">Preserve the original file</span><span class="go">details →</span></div>
+        <p class="tool-desc">Save the raw .eml before forwarding alters anything.</p>
+        <span class="ioc-badge">Documentation</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Process"
+        data-desc="Writing IOCs in a format that can't accidentally trigger if clicked or pasted — replacing dots with [.] (hxxp[://]evil[.]com) and http/https with hxxp/hxxps."
+        data-why="A live link or IP pasted into a ticket, chat, or report can get clicked by someone else on the team, or trigger an automated tool that fetches URLs it finds in text — defanging removes that risk entirely while keeping the indicator fully readable."
+        data-lookfor="Defang every IOC before it leaves your analysis — this is a standard, exam-expected formatting requirement, not an optional nicety."
+        data-spl="evil-domain[.]com   /   hxxp[://]evil-domain[.]com/payload">
+        <div class="tool-top"><span class="tool-name">Defanging IOCs</span><span class="go">details →</span></div>
+        <p class="tool-desc">[.]  and hxxp — standard, expected formatting for shared IOCs.</p>
+        <span class="ioc-badge">Process</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Process"
+        data-desc="Searching the mail gateway or SIEM for the same sender, subject line, embedded link domain, or attachment hash arriving in other mailboxes — turning a single user report into a scoped campaign assessment."
+        data-why="A report that looked like one isolated phish is often one of dozens landing across the organization at once — campaign scope changes both the escalation urgency and the remediation approach, from a single mailbox cleanup to a bulk purge."
+        data-lookfor="Any additional mailbox match at all — even two or three hits confirms this isn't isolated, and the actual count shapes how the remediation is scoped and communicated."
+        data-spl="Search mail gateway/SIEM: sender, subject pattern, link domain, or attachment hash">
+        <div class="tool-top"><span class="tool-name">Campaign detection</span><span class="go">details →</span></div>
+        <p class="tool-desc">Search other mailboxes for the same sender, subject, link, or hash.</p>
+        <span class="ioc-badge">Process</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Identity IOC"
+        data-desc="Checking a user's mailbox for rules they didn't create — most commonly an auto-forward to an external address, or a rule that silently deletes replies to specific senders, both of which let an attacker keep reading mail after the initial compromise without repeatedly logging in."
+        data-why="This is one of the quietest post-compromise persistence techniques available, because it requires no malware and no further suspicious sign-ins — the attacker simply reads what forwards to them, or hides evidence of a BEC conversation from the real account owner."
+        data-lookfor="Any forwarding or deletion rule the account owner doesn't recognize creating themselves — especially one forwarding to an external, unfamiliar address, or one filtering on the specific sender/subject of an ongoing BEC conversation."
+        data-spl="Review the account's inbox rules for unrecognized auto-forward or auto-delete entries">
+        <div class="tool-top"><span class="tool-name">Mailbox rule review</span><span class="go">details →</span></div>
+        <p class="tool-desc">Auto-forward/delete rules — quiet persistence after a compromise.</p>
+        <span class="ioc-badge">Identity IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Process"
+        data-desc="Once a link is confirmed clicked, treating the account as compromised by default until proven otherwise, and checking proxy logs specifically for a POST request to the phishing page — the strongest available signal that credentials were actually typed and submitted, not just that the page loaded."
+        data-why="A GET request only proves the page was viewed; a POST request is the technical evidence that form data actually left the browser — the difference between 'clicked a link' and 'handed over a password' matters enormously for how urgently you contain."
+        data-lookfor="A POST request to the suspicious URL in proxy logs — treat its presence as functionally equivalent to a confirmed credential compromise, and force a password reset and session revocation immediately rather than waiting for further confirmation."
+        data-spl="Proxy logs: filter for POST requests to the phishing domain/path">
+        <div class="tool-top"><span class="tool-name">Credential harvesting response</span><span class="go">details →</span></div>
+        <p class="tool-desc">Assume compromised; a POST request confirms credentials were entered.</p>
+        <span class="ioc-badge">Process</span>
+      </button>
+    </div>
+  </section>
+
+  <p class="empty-state" id="empty">No fields match that filter.</p>
+
+  <footer>
+    Companion reference to the <a href="https://zelihazenginapogeeusa-byte.github.io/zeliha-infosec-journey/osint-field-toolkit.html" target="_blank" rel="noopener noreferrer">OSINT Field Toolkit</a> and the <a href="https://zelihazenginapogeeusa-byte.github.io/zeliha-infosec-journey/splunk-field-guide.html" target="_blank" rel="noopener noreferrer">Splunk Field Guide</a> — same phishing case, the manual read of the message itself before the tools take over. BTL1-aligned. Full write-ups on <a href="https://github.com/zelihazenginapogeeusa-byte/zeliha-infosec-journey" target="_blank" rel="noopener noreferrer">GitHub</a>.
+  </footer>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<aside class="panel" id="panel" role="dialog" aria-modal="true" aria-labelledby="panel-name" style="--dot: var(--c-header);">
+  <div class="panel-head">
+    <div>
+      <p class="panel-cat" id="panel-cat">Category</p>
+      <h2 class="panel-name" id="panel-name">field_name</h2>
+    </div>
+    <button class="panel-close" id="panel-close" type="button" aria-label="Close">×</button>
+  </div>
+  <p class="panel-ioc"><span class="ioc-badge" id="panel-ioc-badge">IOC type</span></p>
+  <div class="panel-body">
+    <div class="panel-field">
+      <h3>What it is</h3>
+      <p id="panel-desc"></p>
+    </div>
+    <div class="panel-field">
+      <h3>Why look at it</h3>
+      <p id="panel-why"></p>
+    </div>
+    <div class="panel-field lookfor">
+      <h3>What to look for</h3>
+      <p id="panel-lookfor"></p>
+    </div>
+    <div class="panel-field spl">
+      <h3>How to check it</h3>
+      <pre id="panel-spl"></pre>
+    </div>
+  </div>
+</aside>
+
+<script>
+  (function () {
+    var input = document.getElementById("search");
+    var categories = Array.prototype.slice.call(document.querySelectorAll(".category"));
+    var empty = document.getElementById("empty");
+
+    input.addEventListener("input", function () {
+      var q = input.value.trim().toLowerCase();
+      var anyVisible = false;
+
+      categories.forEach(function (cat) {
+        var catTools = cat.querySelectorAll(".tool");
+        var catHasMatch = false;
+
+        catTools.forEach(function (tool) {
+          var text = tool.textContent.toLowerCase();
+          var match = q === "" || text.indexOf(q) !== -1;
+          tool.style.display = match ? "" : "none";
+          if (match) { catHasMatch = true; anyVisible = true; }
+        });
+
+        cat.style.display = catHasMatch ? "" : "none";
+      });
+
+      empty.classList.toggle("show", !anyVisible);
+    });
+  })();
+
+  (function () {
+    var panel = document.getElementById("panel");
+    var scrim = document.getElementById("scrim");
+    var closeBtn = document.getElementById("panel-close");
+    var lastFocused = null;
+
+    function openPanel(tool) {
+      var cat = tool.closest(".category");
+      var catName = cat.querySelector(".category-head h2").textContent.trim();
+      var dot = getComputedStyle(tool).borderLeftColor;
+
+      panel.style.setProperty("--dot", dot);
+      document.getElementById("panel-cat").textContent = catName;
+      document.getElementById("panel-name").textContent = tool.querySelector(".tool-name").textContent;
+      document.getElementById("panel-ioc-badge").textContent = tool.getAttribute("data-ioc") || "";
+      document.getElementById("panel-desc").textContent = tool.getAttribute("data-desc") || "";
+      document.getElementById("panel-why").textContent = tool.getAttribute("data-why") || "";
+      document.getElementById("panel-lookfor").textContent = tool.getAttribute("data-lookfor") || "";
+      document.getElementById("panel-spl").textContent = tool.getAttribute("data-spl") || "";
+
+      lastFocused = tool;
+      panel.classList.add("open");
+      scrim.classList.add("open");
+      closeBtn.focus();
+    }
+
+    function closePanel() {
+      panel.classList.remove("open");
+      scrim.classList.remove("open");
+      if (lastFocused) lastFocused.focus();
+    }
+
+    document.querySelectorAll(".tool").forEach(function (tool) {
+      tool.addEventListener("click", function () { openPanel(tool); });
+    });
+
+    closeBtn.addEventListener("click", closePanel);
+    scrim.addEventListener("click", closePanel);
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && panel.classList.contains("open")) closePanel();
+    });
+  })();
+
+  (function () {
+    // Jumpnav pills are plain buttons (not <a href="#...">) on purpose — an
+    // in-page anchor link resolves to a full claudeusercontent.com URL inside
+    // this hosting environment, which triggers an "open external link"
+    // confirmation instead of just scrolling. A button with a click handler
+    // sidesteps that entirely.
+    document.querySelectorAll(".jumpnav button[data-target]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var el = document.getElementById(btn.getAttribute("data-target"));
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    });
+  })();
+</script>
