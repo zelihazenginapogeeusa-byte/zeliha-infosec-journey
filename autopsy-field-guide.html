@@ -1,0 +1,1054 @@
+<title>Autopsy Field Guide</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+<style>
+  :root {
+    --bg: #f5f2ea;
+    --surface: #ffffff;
+    --surface-hover: #f7f3e7;
+    --ink: #221f1a;
+    --ink-muted: #635c50;
+    --ink-faint: #948b7a;
+    --border: #e2dbc8;
+    --border-strong: #cdc2a6;
+    --shadow: 0 1px 2px rgba(34, 31, 26, 0.06);
+    --focus: #1f7d72;
+    --scrim: rgba(34, 31, 26, 0.32);
+    --code-bg: #221f1a;
+    --code-ink: #e8e3d6;
+
+    --c-case: #6b5a1f;
+    --c-timeline: #1e5aa8;
+    --c-deleted: #b3341f;
+    --c-keyword: #1f7d72;
+    --c-webos: #356b30;
+    --c-registry: #7a3f9e;
+    --c-reporting: #3f6b7a;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #14181d;
+      --surface: #1c2127;
+      --surface-hover: #242a31;
+      --ink: #e8e3d6;
+      --ink-muted: #a79f8f;
+      --ink-faint: #746b5c;
+      --border: #2c323a;
+      --border-strong: #3a424c;
+      --shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+      --focus: #52c2b6;
+      --scrim: rgba(0, 0, 0, 0.55);
+      --code-bg: #0e1114;
+      --code-ink: #d8e8e4;
+
+      --c-case: #b09b6f;
+      --c-timeline: #6ba8ef;
+      --c-deleted: #e2624a;
+      --c-keyword: #52c2b6;
+      --c-webos: #6fb85f;
+      --c-registry: #b28ce0;
+      --c-reporting: #6fa8ba;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #14181d;
+    --surface: #1c2127;
+    --surface-hover: #242a31;
+    --ink: #e8e3d6;
+    --ink-muted: #a79f8f;
+    --ink-faint: #746b5c;
+    --border: #2c323a;
+    --border-strong: #3a424c;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+    --focus: #52c2b6;
+    --scrim: rgba(0, 0, 0, 0.55);
+    --code-bg: #0e1114;
+    --code-ink: #d8e8e4;
+
+    --c-case: #b09b6f;
+    --c-timeline: #6ba8ef;
+    --c-deleted: #e2624a;
+    --c-keyword: #52c2b6;
+    --c-webos: #6fb85f;
+    --c-registry: #b28ce0;
+    --c-reporting: #6fa8ba;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: inherit; }
+  code { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+
+  .wrap {
+    max-width: 68rem;
+    margin: 0 auto;
+    padding: 3.5rem 1.5rem 4rem;
+  }
+
+  .masthead { margin-bottom: 2rem; }
+
+  .eyebrow {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--c-timeline);
+    margin: 0 0 0.9rem;
+  }
+
+  h1 {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-weight: 600;
+    font-size: clamp(1.9rem, 4vw, 2.5rem);
+    letter-spacing: -0.01em;
+    margin: 0 0 0.9rem;
+    text-wrap: balance;
+  }
+
+  .dek {
+    max-width: 46rem;
+    color: var(--ink-muted);
+    font-size: 1.02rem;
+    margin: 0 0 1.6rem;
+  }
+
+  .dek code {
+    font-size: 0.88em;
+    background: var(--surface-hover);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 0.05em 0.4em;
+    color: var(--ink);
+  }
+
+  .search-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    max-width: 26rem;
+    margin-bottom: 1.1rem;
+  }
+
+  .search-row svg { flex: none; color: var(--ink-faint); }
+
+  #search {
+    width: 100%;
+    font: inherit;
+    font-size: 0.95rem;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 6px;
+    padding: 0.6rem 0.85rem;
+  }
+
+  #search::placeholder { color: var(--ink-faint); }
+  #search:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+
+  .jumpnav { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+  .jumpnav button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font: inherit;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.76rem;
+    font-weight: 500;
+    text-decoration: none;
+    color: var(--dot);
+    background: color-mix(in srgb, var(--dot) 20%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--dot) 45%, var(--border));
+    border-radius: 999px;
+    padding: 0.32rem 0.75rem 0.32rem 0.6rem;
+    cursor: pointer;
+  }
+
+  .jumpnav button:hover { background: color-mix(in srgb, var(--dot) 34%, var(--surface)); }
+  .jumpnav button:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  .dot {
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 50%;
+    background: var(--dot);
+    flex: none;
+  }
+
+  .hint { font-size: 0.86rem; color: var(--ink-faint); margin: -0.9rem 0 1.3rem; }
+
+  .category {
+    margin-bottom: 2rem;
+    scroll-margin-top: 1.5rem;
+    background: color-mix(in srgb, var(--dot) 16%, var(--bg));
+    border: 1px solid color-mix(in srgb, var(--dot) 32%, var(--border));
+    border-radius: 14px;
+    padding: 1.35rem 1.35rem 1.6rem;
+  }
+
+  .category-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    border-bottom: 3px solid var(--dot);
+    padding-bottom: 0.6rem;
+    margin-bottom: 0.35rem;
+  }
+
+  .category-head h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--dot);
+    margin: 0;
+  }
+
+  .phase-tag {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    color: var(--dot);
+    white-space: nowrap;
+  }
+
+  .category-note {
+    color: var(--ink-muted);
+    font-size: 0.92rem;
+    margin: 0.7rem 0 1rem;
+    max-width: 44rem;
+  }
+
+  .category-spl {
+    display: block;
+    background: var(--code-bg);
+    color: var(--code-ink);
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.8rem;
+    border-radius: 8px;
+    padding: 0.8rem 1rem;
+    margin: 0 0 1.4rem;
+    overflow-x: auto;
+    white-space: pre;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+    gap: 0.85rem;
+  }
+
+  .tool {
+    display: block;
+    width: 100%;
+    text-align: left;
+    font: inherit;
+    cursor: pointer;
+    text-decoration: none;
+    background: color-mix(in srgb, var(--dot) 9%, var(--surface));
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--dot);
+    border-radius: 8px;
+    padding: 1rem 1.1rem;
+    box-shadow: var(--shadow);
+    transition: background 0.15s ease, transform 0.15s ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) { .tool { transition: none; } }
+
+  .tool:hover {
+    background: color-mix(in srgb, var(--dot) 20%, var(--surface));
+    transform: translateY(-1px);
+  }
+
+  .tool:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  .tool-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .tool-name {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-weight: 600;
+    font-size: 0.98rem;
+    color: var(--ink);
+  }
+
+  .go {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.72rem;
+    color: var(--dot);
+    white-space: nowrap;
+  }
+
+  .tool-desc {
+    color: var(--ink-muted);
+    font-size: 0.88rem;
+    margin: 0.4rem 0 0.55rem;
+  }
+
+  .ioc-badge {
+    display: inline-block;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 4px;
+    padding: 0.15rem 0.45rem;
+  }
+
+  .empty-state {
+    display: none;
+    color: var(--ink-muted);
+    font-size: 0.95rem;
+    padding: 1rem 0;
+  }
+
+  .empty-state.show { display: block; }
+
+  footer {
+    border-top: 1px solid var(--border-strong);
+    padding-top: 1.5rem;
+    margin-top: 1rem;
+    color: var(--ink-muted);
+    font-size: 0.88rem;
+  }
+
+  footer a {
+    color: var(--c-keyword);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  footer a:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  /* Detail panel */
+  .scrim {
+    position: fixed;
+    inset: 0;
+    background: var(--scrim);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    z-index: 20;
+  }
+
+  .scrim.open { opacity: 1; pointer-events: auto; }
+
+  @media (prefers-reduced-motion: reduce) { .scrim, .panel { transition: none; } }
+
+  .panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100%;
+    width: min(26rem, 100%);
+    background: var(--surface);
+    border-left: 1px solid var(--border-strong);
+    box-shadow: -8px 0 24px rgba(0, 0, 0, 0.16);
+    transform: translateX(100%);
+    transition: transform 0.22s ease;
+    z-index: 21;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+  .panel.open { transform: translateX(0); }
+
+  .panel-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 1.5rem 1.5rem 1rem;
+    border-top: 4px solid var(--dot);
+  }
+
+  .panel-cat {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--dot);
+    margin: 0 0 0.4rem;
+  }
+
+  .panel-name {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--dot);
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  .panel-close {
+    flex: none;
+    width: 2rem;
+    height: 2rem;
+    display: grid;
+    place-items: center;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--ink-muted);
+    cursor: pointer;
+    font-size: 1.1rem;
+    line-height: 1;
+  }
+
+  .panel-close:hover { background: var(--surface-hover); color: var(--ink); }
+  .panel-close:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  .panel-ioc {
+    margin: 0 1.5rem 1.25rem;
+  }
+
+  .panel-body {
+    padding: 0 1.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .panel-field h3 {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0 0 0.4rem;
+  }
+
+  .panel-field p {
+    margin: 0;
+    font-size: 0.92rem;
+    color: var(--ink);
+  }
+
+  .panel-field.lookfor p {
+    color: var(--ink-muted);
+    background: var(--surface-hover);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.7rem 0.85rem;
+  }
+
+  .panel-field.spl pre {
+    margin: 0;
+    background: var(--code-bg);
+    color: var(--code-ink);
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.82rem;
+    border-radius: 6px;
+    padding: 0.75rem 0.9rem;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+</style>
+
+<div class="wrap">
+  <header class="masthead">
+    <p class="eyebrow">SOC field reference</p>
+    <h1>Autopsy Field Guide</h1>
+    <p class="dek">
+      Digital forensics on the disk itself — what's left sitting still on a host after the network
+      traffic is gone and the process list has moved on. Organized by what each ingest module or
+      view surfaces, why it's worth checking, what a suspicious value looks like, and exactly how
+      to pull it up.
+    </p>
+    <div class="search-row">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <circle cx="6.7" cy="6.7" r="4.7" stroke="currentColor" stroke-width="1.4" />
+        <line x1="10.1" y1="10.1" x2="14.5" y2="14.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+      </svg>
+      <input type="text" id="search" placeholder="Filter fields — e.g. &quot;deleted&quot;, &quot;timeline&quot;, &quot;shellbags&quot;" autocomplete="off" />
+    </div>
+    <nav class="jumpnav" aria-label="Jump to category">
+      <button type="button" data-target="case" style="--dot: var(--c-case);"><span class="dot"></span>Case &amp; Ingest</button>
+      <button type="button" data-target="timeline" style="--dot: var(--c-timeline);"><span class="dot"></span>Timeline &amp; MACB</button>
+      <button type="button" data-target="deleted" style="--dot: var(--c-deleted);"><span class="dot"></span>Deleted Files</button>
+      <button type="button" data-target="keyword" style="--dot: var(--c-keyword);"><span class="dot"></span>Keyword &amp; Hash</button>
+      <button type="button" data-target="webos" style="--dot: var(--c-webos);"><span class="dot"></span>Web &amp; OS Artifacts</button>
+      <button type="button" data-target="registry" style="--dot: var(--c-registry);"><span class="dot"></span>Registry, Email &amp; EXIF</button>
+      <button type="button" data-target="reporting" style="--dot: var(--c-reporting);"><span class="dot"></span>Tagging &amp; Reporting</button>
+    </nav>
+  </header>
+
+  <p class="hint">Click any card for why it matters, what a suspicious value looks like, its IOC type, and exactly how to pull it up.</p>
+
+  <section class="category" data-category="case" id="case" style="--dot: var(--c-case);">
+    <div class="category-head">
+      <h2><span class="dot"></span>Case &amp; Ingest</h2>
+      <span class="phase-tag">Setup</span>
+    </div>
+    <p class="category-note">Setting up right before you touch a single file — the ingest modules enabled here decide what Autopsy actually surfaces later.</p>
+    <code class="category-spl">Case → New Case → Add Data Source → Configure Ingest Modules</code>
+    <div class="grid">
+      <button class="tool" type="button" data-ioc="Setup"
+        data-desc="Creates the case folder structure and lets you name the case, investigator, and case number before any evidence is added."
+        data-why="Everything Autopsy generates — the timeline database, keyword index, reports — lives inside this case folder. Getting the case number and examiner name right here saves re-doing it in every report later."
+        data-lookfor="Use a consistent case-naming convention from the start, matching your ticket/incident number — Autopsy doesn't let you cleanly rename a case's internal folder structure after creation."
+        data-spl="Case → New Case">
+        <div class="tool-top"><span class="tool-name">New Case</span><span class="go">details →</span></div>
+        <p class="tool-desc">Names and structures the case before evidence is added.</p>
+        <span class="ioc-badge">Setup</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Setup"
+        data-desc="Points Autopsy at the actual evidence — a disk image (E01/raw/AFF), a local drive, or a logical set of files — and copies its structure into the case."
+        data-why="This is the one-time step where you choose the acquisition type; picking the wrong image format here, or pointing at a live drive instead of a forensic image, can affect evidentiary integrity."
+        data-lookfor="Verify the hash Autopsy computes on ingest matches the hash recorded at acquisition time — a mismatch means the image is corrupted or was altered before analysis started."
+        data-spl="Case → Add Data Source">
+        <div class="tool-top"><span class="tool-name">Add Data Source</span><span class="go">details →</span></div>
+        <p class="tool-desc">Loads the disk image or drive into the case.</p>
+        <span class="ioc-badge">Setup</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Configuration"
+        data-desc="The checklist of analysis passes Autopsy runs automatically over the data source — Hash Lookup, Keyword Search, EXIF Parser, Recent Activity, Timeline, and more."
+        data-why="Nothing downstream — Timeline, Recent Activity results, tagged hash hits — exists until its corresponding ingest module actually runs. Skipping a module here makes that whole category of evidence invisible later."
+        data-lookfor="Enable Hash Lookup with both a known-bad hash set (to auto-flag malware) and a known-good set like NSRL (to deprioritize OS/application noise) — running with neither wastes the module's value."
+        data-spl="Add Data Source → Configure Ingest Modules">
+        <div class="tool-top"><span class="tool-name">Ingest Modules</span><span class="go">details →</span></div>
+        <p class="tool-desc">The analysis passes that generate everything else.</p>
+        <span class="ioc-badge">Configuration</span>
+      </button>
+      <button class="tool" type="button" data-ioc="File IOC"
+        data-desc="Reference databases of known file hashes — NSRL (known-good OS/application files) to filter out noise, and custom known-bad sets to auto-flag evidence."
+        data-why="The single fastest way to cut a million-file disk image down to the handful of files actually worth a human looking at."
+        data-lookfor="A file that hits your known-bad hash set — Autopsy flags this automatically once the Hash Lookup module has run, no manual searching required."
+        data-spl="Tools → Options → Hash Sets">
+        <div class="tool-top"><span class="tool-name">Hash Sets</span><span class="go">details →</span></div>
+        <p class="tool-desc">Known-good and known-bad reference hash databases.</p>
+        <span class="ioc-badge">File IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Acquisition"
+        data-desc="A dedicated imaging tool (not part of Autopsy itself) for creating a forensic image from a physical drive and for mounting an existing .img/.E01 image as a read-only virtual drive before adding it to a case."
+        data-why="Often the actual acquisition step that happens before Add Data Source — Autopsy analyzes an image, FTK Imager is frequently what created or verified that image in the first place, hash and all."
+        data-lookfor="Confirm the acquisition hash FTK Imager reports matches what Autopsy computes on ingest — the same integrity check as the Add Data Source card above, from the other end."
+        data-spl="FTK Imager → File → Create Disk Image / Image Mounting">
+        <div class="tool-top"><span class="tool-name">FTK Imager</span><span class="go">details →</span></div>
+        <p class="tool-desc">Creates or mounts the forensic image Autopsy will analyze.</p>
+        <span class="ioc-badge">Acquisition</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Triage"
+        data-desc="KAPE (Kroll Artifact Parser and Extractor) — a rapid triage tool that targets and collects only the specific artifacts you name (registry hives, event logs, browser history, Prefetch) from a live or mounted system in minutes, instead of imaging the whole disk first."
+        data-why="Useful when a full disk image would take too long for an urgent triage decision — pull just the high-value artifacts this guide covers (Shellbags, Run keys, Prefetch, event logs) first, then decide whether a full image is still needed."
+        data-lookfor="Run KAPE's built-in targets for the artifact categories you already know matter — no need to hand-pick individual files when a pre-built target list covers the same ground."
+        data-spl="kape.exe --tsource C: --target !BasicCollection --tdest D:\triage">
+        <div class="tool-top"><span class="tool-name">KAPE</span><span class="go">details →</span></div>
+        <p class="tool-desc">Rapid, targeted artifact collection — faster than a full disk image.</p>
+        <span class="ioc-badge">Triage</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Cross-case"
+        data-desc="An optional cross-case database that remembers hashes, file paths, and other artifacts seen in previous cases, so Autopsy can flag anything already seen elsewhere."
+        data-why="Useful when triaging multiple hosts from the same incident — a file or account showing up host after host is a strong lateral-movement or common-malware signal, and this surfaces that automatically."
+        data-lookfor="Any artifact flagged as &quot;previously seen&quot; in another case — worth checking whether that earlier case is actually related to this one."
+        data-spl="Tools → Central Repository">
+        <div class="tool-top"><span class="tool-name">Central Repository</span><span class="go">details →</span></div>
+        <p class="tool-desc">Cross-case memory of hashes and artifacts already seen.</p>
+        <span class="ioc-badge">Cross-case</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="category" data-category="timeline" id="timeline" style="--dot: var(--c-timeline);">
+    <div class="category-head">
+      <h2><span class="dot"></span>Timeline &amp; MACB</h2>
+      <span class="phase-tag">Chronology</span>
+    </div>
+    <p class="category-note">MACB timestamps turn a static file listing into a chronological story — most of the "what happened when" question gets answered here.</p>
+    <code class="category-spl">Tools → Timeline → zoom to the incident window</code>
+    <div class="grid">
+      <button class="tool" type="button" data-ioc="Host IOC"
+        data-desc="The four timestamp types Autopsy tracks per file — Modified (content changed), Accessed (last opened/read), Changed (metadata changed), Born/Created (file first created)."
+        data-why="Different actions leave different combinations of MACB changes — a file Modified but not recently Created was edited, not dropped; a file Created and Modified at nearly the same instant was likely written once and left alone."
+        data-lookfor="A Created timestamp suspiciously recent relative to the rest of the file system, or MACB values that are internally inconsistent (Modified before Created) — the latter is a strong timestomping indicator."
+        data-spl="File → Properties, or the File Metadata tab">
+        <div class="tool-top"><span class="tool-name">MACB timestamps</span><span class="go">details →</span></div>
+        <p class="tool-desc">Modified, Accessed, Changed, Born — per file.</p>
+        <span class="ioc-badge">Host IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Analysis view"
+        data-desc="A dedicated visual view (bar chart or list) plotting every timestamped event across the entire data source on one chronological axis."
+        data-why="Turns thousands of individual file timestamps into a shape you can actually see — a burst of file creation activity in a narrow window is far easier to spot on a chart than by scrolling a file list."
+        data-lookfor="A dense cluster of file creation/modification events in a short window, especially outside business hours — the visual signature of a dropper unpacking a payload or an archive being extracted."
+        data-spl="Tools → Timeline">
+        <div class="tool-top"><span class="tool-name">Timeline tool</span><span class="go">details →</span></div>
+        <p class="tool-desc">Every timestamped event, plotted chronologically.</p>
+        <span class="ioc-badge">Analysis view</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Analysis view"
+        data-desc="Timeline's ability to zoom from a years-wide view down to a minute-by-minute view of one specific window."
+        data-why="Lets you go from &quot;something happened this week&quot; to &quot;here is the exact 90-second sequence of file drops&quot; without losing your place."
+        data-lookfor="Zoom into the exact window a Wireshark or Splunk finding already pointed you to — cross-referencing a network beacon's timestamp against the disk timeline is how you connect the two data sources into one story."
+        data-spl="Timeline → drag to select a range → zoom">
+        <div class="tool-top"><span class="tool-name">Interval / zoom view</span><span class="go">details →</span></div>
+        <p class="tool-desc">Narrow from years-wide down to minute-by-minute.</p>
+        <span class="ioc-badge">Analysis view</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Anti-forensics"
+        data-desc="Recognizing when a file's MACB values have been deliberately and artificially altered to hide when it actually appeared on the system."
+        data-why="A dropped malicious executable timestomped to look like it's been there since Windows was installed will otherwise blend into the noise of legitimate system files."
+        data-lookfor="A Created date that predates the OS installation date, or a Modified timestamp earlier than the Created timestamp — both are physically impossible under normal file system behavior."
+        data-spl="File Metadata tab → compare all four MACB values">
+        <div class="tool-top"><span class="tool-name">Timestomping detection</span><span class="go">details →</span></div>
+        <p class="tool-desc">Spotting artificially altered file timestamps.</p>
+        <span class="ioc-badge">Anti-forensics</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="category" data-category="deleted" id="deleted" style="--dot: var(--c-deleted);">
+    <div class="category-head">
+      <h2><span class="dot"></span>Deleted Files &amp; File System</h2>
+      <span class="phase-tag">Recovery</span>
+    </div>
+    <p class="category-note">What's missing from the live file listing is often more interesting than what's still there.</p>
+    <code class="category-spl">Data Source → Deleted Files</code>
+    <div class="grid">
+      <button class="tool" type="button" data-ioc="File IOC"
+        data-desc="A dedicated listing of files Autopsy has recovered from unallocated space or found marked as deleted in the file system's own metadata."
+        data-why="A deleted file that's still recoverable means whoever removed it either didn't know to securely wipe it, or ran out of time — either way, it's often the single most direct piece of evidence in the case."
+        data-lookfor="A deleted file with a name or extension matching something already flagged elsewhere (a tool name from a Sysmon hit, an exfil archive extension) — a strong sign of attempted cleanup."
+        data-spl="Data Source → Deleted Files">
+        <div class="tool-top"><span class="tool-name">Deleted Files view</span><span class="go">details →</span></div>
+        <p class="tool-desc">Files recovered from unallocated or marked-deleted space.</p>
+        <span class="ioc-badge">File IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="File IOC"
+        data-desc="Autopsy's own classification of every file by its actual binary signature, independent of the extension it was saved with."
+        data-why="Catches a file renamed to hide what it really is — an executable saved as invoice.pdf still gets correctly identified as a PE executable by its file header, not its extension."
+        data-lookfor="Any file where the File Types module's detected type doesn't match its extension — a classic, very cheap evasion technique this module defeats automatically."
+        data-spl="File Types → By Extension → look for type/extension mismatches">
+        <div class="tool-top"><span class="tool-name">File Types / Extension Mismatch</span><span class="go">details →</span></div>
+        <p class="tool-desc">Real file type vs. the extension it was saved with.</p>
+        <span class="ioc-badge">File IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Recovery"
+        data-desc="Space on the disk marked as free by the file system, but which may still physically contain the data of a previously deleted file until it's overwritten."
+        data-why="The last place to look when a file has been deleted and its file-system metadata entry has also been reused — Autopsy can still carve out file fragments based on their binary signatures alone."
+        data-lookfor="Carved file fragments matching a file type you're specifically looking for (JPEG headers, PDF signatures, ZIP magic bytes) even when no file-system entry for them exists anymore."
+        data-spl="Ingest Modules → enable Data Carving before analysis, then check Unallocated
+CLI alternative: scalpel -b -o &lt;output_dir&gt; &lt;disk_image&gt;">
+        <div class="tool-top"><span class="tool-name">Unallocated space / carving</span><span class="go">details →</span></div>
+        <p class="tool-desc">Fragments of deleted files, carved by signature.</p>
+        <span class="ioc-badge">Recovery</span>
+      </button>
+      <button class="tool" type="button" data-ioc="File system"
+        data-desc="The underlying file system's own record-keeping structure — the Master File Table on NTFS, inodes on Linux file systems — that Autopsy parses to reconstruct file listings, including deleted entries."
+        data-why="This is the actual source of the Deleted Files view and the MACB timestamps above — understanding it's a real, parseable structure (not a black box) is what lets you sanity-check what Autopsy shows you."
+        data-lookfor="An MFT entry marked as deleted but whose data runs haven't been reused yet — exactly the condition that makes a deleted file still recoverable."
+        data-spl="File Discovery → File System tab">
+        <div class="tool-top"><span class="tool-name">MFT / inode metadata</span><span class="go">details →</span></div>
+        <p class="tool-desc">The file system's own record of every file, including deleted.</p>
+        <span class="ioc-badge">File system</span>
+      </button>
+      <button class="tool" type="button" data-ioc="File IOC"
+        data-desc="The Recycle Bin's own metadata files — an $I file per deleted item recording the original full path and the exact deletion timestamp, paired with an $R file holding the actual file content."
+        data-why="Distinct from general unallocated-space recovery — the $I file preserves the original path and deletion time even after the $R content itself is gone, which is often exactly the two facts an investigator needs most: where it came from, and when it left."
+        data-lookfor="An $I file with no matching $R — the content is gone, but the path and deletion timestamp alone can still confirm a sensitive file existed and was deliberately removed at a specific time."
+        data-spl="Data Source → $Recycle.Bin → parse $I / $R file pairs">
+        <div class="tool-top"><span class="tool-name">Recycle Bin metadata</span><span class="go">details →</span></div>
+        <p class="tool-desc">Original path and exact deletion time, even after content is gone.</p>
+        <span class="ioc-badge">File IOC</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="category" data-category="keyword" id="keyword" style="--dot: var(--c-keyword);">
+    <div class="category-head">
+      <h2><span class="dot"></span>Keyword &amp; Hash</h2>
+      <span class="phase-tag">Search</span>
+    </div>
+    <p class="category-note">Finding what you already know to look for, and what you don't — by string, by pattern, and passively by hash.</p>
+    <code class="category-spl">Keyword Search → Keyword Lists → New List</code>
+    <div class="grid">
+      <button class="tool" type="button" data-ioc="Search"
+        data-desc="Pre-built or custom lists of exact strings, phrases, or regular expressions that Autopsy searches for across every indexed file in the case."
+        data-why="The direct route from &quot;I'm looking for evidence of X&quot; to a filtered result list, instead of manually opening files one at a time."
+        data-lookfor="Build a case-specific list early — a suspect's name, a project codename, an exfil domain — and re-run it as new data sources get added to the case."
+        data-spl="Keyword Search → Keyword Lists → New List">
+        <div class="tool-top"><span class="tool-name">Keyword Lists</span><span class="go">details →</span></div>
+        <p class="tool-desc">Custom or built-in string/phrase search lists.</p>
+        <span class="ioc-badge">Search</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Search"
+        data-desc="Pattern-based keyword search for values that vary but follow a predictable shape — email addresses, credit card numbers, IP addresses, cryptocurrency wallet addresses."
+        data-why="Covers cases where you don't know the exact value in advance, only its format — much higher recall than an exact-string keyword list for this kind of evidence."
+        data-lookfor="Built-in regex presets already cover common PII patterns (SSNs, phone numbers, emails) — check those before writing a custom pattern from scratch."
+        data-spl="Keyword Search → New Keyword List → Regular Expression">
+        <div class="tool-top"><span class="tool-name">Regex search</span><span class="go">details →</span></div>
+        <p class="tool-desc">Pattern-based search for shape, not exact value.</p>
+        <span class="ioc-badge">Search</span>
+      </button>
+      <button class="tool" type="button" data-ioc="File IOC"
+        data-desc="Automatic flagging of any file whose hash matches an entry in a loaded known-bad hash set, surfaced directly as a notable result without a manual search."
+        data-why="This is passive — it runs during ingest and just waits for you, rather than requiring you to know what to search for in advance."
+        data-lookfor="Check the Hash Set Hits results panel first, before starting any manual keyword search — it's often the fastest path to the actual malicious file in the case."
+        data-spl="Results → Hashset Hits">
+        <div class="tool-top"><span class="tool-name">Hash filtering / notable hits</span><span class="go">details →</span></div>
+        <p class="tool-desc">Auto-flagged files matching a known-bad hash set.</p>
+        <span class="ioc-badge">File IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Command"
+        data-desc="Generating a hash yourself outside Autopsy — Get-FileHash in PowerShell (SHA256 by default), or md5sum/sha1sum/sha256sum on Linux — to check a specific file against a known value or a threat-intel lookup."
+        data-why="Sometimes faster than waiting on a full ingest pass when you already know exactly which file you care about, and it's the same value you'd paste into VirusTotal or a hash-set lookup."
+        data-lookfor="Prefer SHA256 when sharing a hash externally — it's the value most reputation engines and hash-set lists index by default, with MD5/SHA1 kept mainly for compatibility with older sets."
+        data-spl="Get-FileHash &lt;file&gt;  -Algorithm SHA256
+sha256sum &lt;file&gt;">
+        <div class="tool-top"><span class="tool-name">Generating hashes manually</span><span class="go">details →</span></div>
+        <p class="tool-desc">Get-FileHash / sha256sum — for a single file, outside ingest.</p>
+        <span class="ioc-badge">Command</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Execution IOC"
+        data-desc="Windows Prefetch files (C:\Windows\Prefetch\*.pf) — created automatically the first several times an executable runs, recording the run count and the last-run timestamp, and historically one of the most reliable execution-evidence artifacts available."
+        data-why="Complements Shimcache/Amcache directly — Prefetch adds a run count Amcache doesn't always preserve, which is the difference between 'this ran once, out of place' and 'this has been run routinely for months.'"
+        data-lookfor="A Prefetch entry for an executable with a run count of 1, a last-run time inside the incident window, and a file name that doesn't match anything in Installed Programs — the classic one-off malicious execution signature."
+        data-spl="C:\Windows\Prefetch\*.pf
+CLI parser: PECmd.exe -f &lt;file.pf&gt;">
+        <div class="tool-top"><span class="tool-name">Prefetch</span><span class="go">details →</span></div>
+        <p class="tool-desc">Run count and last-run time — complements Shimcache/Amcache.</p>
+        <span class="ioc-badge">Execution IOC</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="category" data-category="webos" id="webos" style="--dot: var(--c-webos);">
+    <div class="category-head">
+      <h2><span class="dot"></span>Web &amp; OS Artifacts</h2>
+      <span class="phase-tag">Recent Activity</span>
+    </div>
+    <p class="category-note">What the user actually did — browsed, downloaded, installed, plugged in — recovered from browser and OS artifacts.</p>
+    <code class="category-spl">Results → Extracted Content → Web History</code>
+    <div class="grid">
+      <button class="tool" type="button" data-ioc="Web IOC"
+        data-desc="Recovered browser history entries — visited URLs, visit timestamps, and visit counts — parsed from each installed browser's history database on the image."
+        data-why="Directly answers what a user was looking at and when, often the clearest link between a phishing click and everything that happened afterward."
+        data-lookfor="A visit to a URL matching a domain already flagged in the Wireshark or Splunk side of the investigation — the disk-side confirmation that the user's browser actually made that request."
+        data-spl="Results → Extracted Content → Web History">
+        <div class="tool-top"><span class="tool-name">Web History</span><span class="go">details →</span></div>
+        <p class="tool-desc">Recovered browser history, per browser.</p>
+        <span class="ioc-badge">Web IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="File IOC"
+        data-desc="Recovered records of files downloaded through a browser, including the source URL and the local save path."
+        data-why="Ties a specific downloaded file directly back to the web page or link that delivered it, closing the loop between a phishing email's link and the payload that landed on disk."
+        data-lookfor="A download whose source URL matches a suspicious domain, saved to a Downloads or Temp folder shortly before other suspicious file-creation activity in the Timeline."
+        data-spl="Results → Extracted Content → Web Downloads">
+        <div class="tool-top"><span class="tool-name">Web Downloads</span><span class="go">details →</span></div>
+        <p class="tool-desc">Downloaded files, source URL and save path.</p>
+        <span class="ioc-badge">File IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Host IOC"
+        data-desc="A recovered list of software installed on the system, parsed from registry uninstall keys and related artifacts."
+        data-why="A quick way to spot unauthorized or unexpected software — a remote access tool, a password cracker, or an archiving utility with no business justification for being there."
+        data-lookfor="Any tool with no legitimate business use for that specific host or role — a pentesting tool on a finance workstation, for instance."
+        data-spl="Results → Extracted Content → Installed Programs">
+        <div class="tool-top"><span class="tool-name">Installed Programs</span><span class="go">details →</span></div>
+        <p class="tool-desc">Software installed, recovered from the registry.</p>
+        <span class="ioc-badge">Host IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Host IOC"
+        data-desc="Recently opened document records and a history of USB storage devices connected to the system, both parsed from registry and shortcut-file artifacts — USB history specifically from HKLM\SYSTEM\CurrentControlSet\Enum\USBSTOR."
+        data-why="Recent Documents shows what a user actually opened and worked with; USB Devices shows a potential path for both bringing malware in and taking data out."
+        data-lookfor="A USB device connected in a time window that overlaps with suspicious file activity in the Timeline — worth correlating both directions, data landing on the host or leaving it."
+        data-spl="Results → Extracted Content → Recent Documents / Devices Attached">
+        <div class="tool-top"><span class="tool-name">Recent Documents / USB Devices</span><span class="go">details →</span></div>
+        <p class="tool-desc">What was opened, and what removable media connected.</p>
+        <span class="ioc-badge">Host IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Identity IOC"
+        data-desc="Recovered autofill entries browsers save from web forms — names, addresses, and sometimes usernames typed into login fields."
+        data-why="Can confirm a specific user actually interacted with a phishing page's login form, beyond just visiting the URL."
+        data-lookfor="An autofill entry tied to a URL already flagged as a phishing page — direct evidence the user engaged with the form, not just loaded the page."
+        data-spl="Results → Extracted Content → Form Autofill">
+        <div class="tool-top"><span class="tool-name">Autofill / Form History</span><span class="go">details →</span></div>
+        <p class="tool-desc">Saved form values — evidence of actual engagement.</p>
+        <span class="ioc-badge">Identity IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Host IOC"
+        data-desc="LNK (shortcut) files, automatically created by Windows when a file is opened, recording the original target path, volume serial number, and MAC timestamps — plus Jump Lists, the per-application list of recently-accessed files with their own access counts, both often surviving after the original file itself is gone."
+        data-why="LNK files can point at a target that no longer exists anywhere on the current file system — including files that were only ever on removable media — which makes them useful for the same 'proof of past access' role Shellbags plays, just anchored to specific files instead of folders."
+        data-lookfor="An LNK file's target path pointing at a removable-media volume serial number, or a Jump List entry for a file with no corresponding entry in Recent Documents — either can reveal access that other artifacts alone would miss."
+        data-spl="LNK: C:\Users\%USERNAME%\AppData\Roaming\Microsoft\Windows\Recent
+Jump Lists: ...\Recent\AutomaticDestinations / ...\CustomDestinations">
+        <div class="tool-top"><span class="tool-name">LNK files / Jump Lists</span><span class="go">details →</span></div>
+        <p class="tool-desc">Shortcut and per-app recent-file evidence, often outliving the target.</p>
+        <span class="ioc-badge">Host IOC</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="category" data-category="registry" id="registry" style="--dot: var(--c-registry);">
+    <div class="category-head">
+      <h2><span class="dot"></span>Registry, Email &amp; EXIF</h2>
+      <span class="phase-tag">Metadata</span>
+    </div>
+    <p class="category-note">The system's own record of itself — accounts, folder access history, mail archives, and what a photo's metadata reveals.</p>
+    <code class="category-spl">Results → Extracted Content → User Accounts</code>
+    <div class="grid">
+      <button class="tool" type="button" data-ioc="Identity IOC"
+        data-desc="Basic system and account information Autopsy parses from the registry — OS version, computer name, and the list of local user accounts with their creation and last-login times."
+        data-why="Establishes the baseline facts of the system before digging into anything else — you need to know which accounts legitimately exist before you can spot one that doesn't belong."
+        data-lookfor="A user account whose creation date doesn't match any onboarding record, or one created shortly before the incident window began."
+        data-spl="Results → Extracted Content → Operating System Information / User Accounts">
+        <div class="tool-top"><span class="tool-name">OS / User Account Info</span><span class="go">details →</span></div>
+        <p class="tool-desc">System baseline and local account list.</p>
+        <span class="ioc-badge">Identity IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Host IOC"
+        data-desc="Registry artifacts recording folder view preferences — which, as a side effect, prove a specific folder was browsed, even if it's since been deleted or is on removable media no longer attached. TypedPaths (NTUSER.DAT) is a related sibling artifact, recording paths a user manually typed into Explorer's address bar."
+        data-why="One of the few artifacts that survives evidence of browsing a folder that no longer exists — useful when a suspect claims they never accessed a particular location."
+        data-lookfor="A Shellbag entry referencing a path that no longer exists on the current file system, or one pointing at removable media — proof of past access independent of what's currently visible."
+        data-spl="Results → Extracted Content → Shell Bags (if module enabled)">
+        <div class="tool-top"><span class="tool-name">Shellbags</span><span class="go">details →</span></div>
+        <p class="tool-desc">Proof a folder was browsed, even after it's gone.</p>
+        <span class="ioc-badge">Host IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Persistence"
+        data-desc="Registry keys where a value pointing at an executable causes that program to launch automatically at logon — most notably HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run and its HKCU equivalent, parsed from the SOFTWARE and NTUSER.DAT hives."
+        data-why="One of the oldest and still most common Windows persistence mechanisms — malware that survives a reboot usually has a Run key entry somewhere, making this one of the first places to check once you suspect persistence rather than a one-off execution."
+        data-lookfor="A Run key value pointing at a binary in a Temp, Downloads, or AppData path — legitimate startup entries almost always point into Program Files or a vendor-specific install directory instead."
+        data-spl="Data Source → Registry → SOFTWARE / NTUSER.DAT → ...\CurrentVersion\Run">
+        <div class="tool-top"><span class="tool-name">Autorun / Run Keys</span><span class="go">details →</span></div>
+        <p class="tool-desc">Registry entries that launch a program automatically at logon.</p>
+        <span class="ioc-badge">Persistence</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Persistence"
+        data-desc="Scheduled Task definitions live as individual XML files on disk under C:\Windows\System32\Tasks, one file per task — not in the registry — recording the trigger (logon, a fixed time, a specific event) and the exact command the task runs."
+        data-why="A second, equally common persistence mechanism alongside Run keys, but easy to miss because it's not registry-based — a task can survive a registry-focused sweep entirely if this on-disk location isn't checked separately."
+        data-lookfor="A task with an innocuous-sounding name whose Actions command runs a script interpreter, an encoded PowerShell argument, or a binary from a Temp/AppData path — the same red flags as a Run key, just in a different file location."
+        data-spl="Data Source → Windows → System32 → Tasks  (parse each task's XML for its Actions element)">
+        <div class="tool-top"><span class="tool-name">Scheduled Tasks (on-disk)</span><span class="go">details →</span></div>
+        <p class="tool-desc">Task Scheduler's on-disk XML — persistence outside the registry.</p>
+        <span class="ioc-badge">Persistence</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Execution IOC"
+        data-desc="Two related but distinct execution-evidence artifacts — Shimcache (Application Compatibility Cache, stored in the SYSTEM hive) and Amcache (C:\Windows\AppCompat\Programs\Amcache.hve) — both recording that a specific executable existed and, for Amcache, additional metadata like first-run timestamp and hash."
+        data-why="Proves a program was present and, in Amcache's case, actually executed — even after the file itself has been deleted, which makes this one of the few artifacts that survives an attacker's own cleanup."
+        data-lookfor="An Amcache entry for an executable that no longer exists on disk and isn't in the Deleted Files view either — a sign it ran from removable media, a mapped share, or was securely wiped after use."
+        data-spl="Data Source → Registry → SYSTEM hive (Shimcache) / Amcache.hve (Amcache)">
+        <div class="tool-top"><span class="tool-name">Shimcache / Amcache</span><span class="go">details →</span></div>
+        <p class="tool-desc">Proof a program existed and ran, even after deletion.</p>
+        <span class="ioc-badge">Execution IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Execution IOC"
+        data-desc="A ROT13-obfuscated registry key recording GUI-launched programs — what a user double-clicked from Explorer or the Start Menu, along with a run count and last-run timestamp."
+        data-why="Captures execution specifically from double-clicking, which command-line-focused artifacts can miss — useful for confirming a user actually launched a payload themselves rather than it running unattended."
+        data-lookfor="A run count of 1 on an unusual executable with a last-run timestamp inside the incident window — a single deliberate double-click is a very different story than a program that's been run routinely for months."
+        data-spl="Data Source → Registry → NTUSER.DAT → ...\UserAssist  (decode ROT13 to read entry names)">
+        <div class="tool-top"><span class="tool-name">UserAssist</span><span class="go">details →</span></div>
+        <p class="tool-desc">ROT13-encoded record of GUI-launched programs.</p>
+        <span class="ioc-badge">Execution IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Email IOC"
+        data-desc="Autopsy's email module extracts messages from common local mail store formats (PST, MBOX) found on the image, including headers, body, and attachments."
+        data-why="When the case has a local mail archive on disk (not just a live mailbox), this reconstructs the same sender/subject/attachment picture the OSINT and Splunk guides build from the network and log side."
+        data-lookfor="An attachment inside a recovered email matching a hash or filename already flagged elsewhere in the case — the disk-side copy of the same phishing payload."
+        data-spl="Ingest Modules → enable Email Parser, then Results → E-Mail Messages">
+        <div class="tool-top"><span class="tool-name">Email Parsing</span><span class="go">details →</span></div>
+        <p class="tool-desc">Local mail archive messages and attachments.</p>
+        <span class="ioc-badge">Email IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Metadata"
+        data-desc="Embedded metadata inside image files — camera model, GPS coordinates, and creation timestamp — extracted automatically by the EXIF ingest module."
+        data-why="Can place a specific device, and sometimes a specific location, at a specific time — most relevant on insider-threat or physical-access cases rather than a typical phishing investigation."
+        data-lookfor="GPS coordinates embedded in an image that don't match the claimed origin or location of the device it was found on."
+        data-spl="Ingest Modules → enable EXIF Parser, then Results → Extracted Content → EXIF Metadata">
+        <div class="tool-top"><span class="tool-name">EXIF / Image Metadata</span><span class="go">details →</span></div>
+        <p class="tool-desc">Camera, GPS, and timestamp embedded in image files.</p>
+        <span class="ioc-badge">Metadata</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="category" data-category="reporting" id="reporting" style="--dot: var(--c-reporting);">
+    <div class="category-head">
+      <h2><span class="dot"></span>Tagging &amp; Reporting</h2>
+      <span class="phase-tag">Documentation</span>
+    </div>
+    <p class="category-note">Turning what you found into a record someone else can trust and act on.</p>
+    <code class="category-spl">Right-click a result → Tag → Bookmark</code>
+    <div class="grid">
+      <button class="tool" type="button" data-ioc="Documentation"
+        data-desc="Autopsy's built-in bookmarking system — mark any file, artifact, or result with a tag (like Bookmark or Notable Item) and an optional comment, without altering the underlying evidence."
+        data-why="The running record of what you actually found and why it mattered, built as you go instead of reconstructed from memory at report time."
+        data-lookfor="Tag consistently as you work, not just at the end — a tag applied in the moment captures your actual reasoning; one added later from memory is a weaker record."
+        data-spl="Right-click a result → Tag → Bookmark / custom tag">
+        <div class="tool-top"><span class="tool-name">Tags &amp; Comments</span><span class="go">details →</span></div>
+        <p class="tool-desc">Bookmark findings in place, without altering evidence.</p>
+        <span class="ioc-badge">Documentation</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Documentation"
+        data-desc="Autopsy's built-in report module, which compiles every tagged item (and optionally every result) into a structured HTML or Excel report."
+        data-why="Turns the case file into a shareable document without manually re-typing every finding — the tags and comments made along the way become the report's content directly."
+        data-lookfor="Generate the report from tagged items only, not the full result set, for a report someone else will actually read — an unfiltered dump of every artifact buries the real findings."
+        data-spl="Tools → Generate Report">
+        <div class="tool-top"><span class="tool-name">Report generation</span><span class="go">details →</span></div>
+        <p class="tool-desc">Compiles tagged findings into HTML/Excel.</p>
+        <span class="ioc-badge">Documentation</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Process"
+        data-desc="Not a built-in Autopsy feature, but the documentation discipline of recording who handled the evidence, when, and what was done to it, at every step from acquisition to analysis."
+        data-why="A technically perfect finding is worthless in a legal or formal proceeding if the chain of custody has a gap — this is process, not a tool feature, but it belongs next to every other step in this category."
+        data-lookfor="Document the acquisition hash, the analyst, and the timestamp before opening a single file — not after something interesting has already been found."
+        data-spl="Maintain alongside the case — outside Autopsy itself">
+        <div class="tool-top"><span class="tool-name">Chain of custody notes</span><span class="go">details →</span></div>
+        <p class="tool-desc">Who handled the evidence, when, and what they did.</p>
+        <span class="ioc-badge">Process</span>
+      </button>
+    </div>
+  </section>
+
+  <p class="empty-state" id="empty">No fields match that filter.</p>
+
+  <footer>
+    Companion reference to the <a href="https://zelihazenginapogeeusa-byte.github.io/zeliha-infosec-journey/deepblue-field-guide.html" target="_blank" rel="noopener noreferrer">DeepBlueCLI Field Guide</a> and the <a href="https://zelihazenginapogeeusa-byte.github.io/zeliha-infosec-journey/splunk-field-guide.html" target="_blank" rel="noopener noreferrer">Splunk Field Guide</a> — same host, the disk instead of the event log. BTL1-aligned. Full write-ups on <a href="https://github.com/zelihazenginapogeeusa-byte/zeliha-infosec-journey" target="_blank" rel="noopener noreferrer">GitHub</a>.
+  </footer>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<aside class="panel" id="panel" role="dialog" aria-modal="true" aria-labelledby="panel-name" style="--dot: var(--c-timeline);">
+  <div class="panel-head">
+    <div>
+      <p class="panel-cat" id="panel-cat">Category</p>
+      <h2 class="panel-name" id="panel-name">field_name</h2>
+    </div>
+    <button class="panel-close" id="panel-close" type="button" aria-label="Close">×</button>
+  </div>
+  <p class="panel-ioc"><span class="ioc-badge" id="panel-ioc-badge">IOC type</span></p>
+  <div class="panel-body">
+    <div class="panel-field">
+      <h3>What it is</h3>
+      <p id="panel-desc"></p>
+    </div>
+    <div class="panel-field">
+      <h3>Why look at it</h3>
+      <p id="panel-why"></p>
+    </div>
+    <div class="panel-field lookfor">
+      <h3>What to look for</h3>
+      <p id="panel-lookfor"></p>
+    </div>
+    <div class="panel-field spl">
+      <h3>How to do it</h3>
+      <pre id="panel-spl"></pre>
+    </div>
+  </div>
+</aside>
+
+<script>
+  (function () {
+    var input = document.getElementById("search");
+    var categories = Array.prototype.slice.call(document.querySelectorAll(".category"));
+    var empty = document.getElementById("empty");
+
+    input.addEventListener("input", function () {
+      var q = input.value.trim().toLowerCase();
+      var anyVisible = false;
+
+      categories.forEach(function (cat) {
+        var catTools = cat.querySelectorAll(".tool");
+        var catHasMatch = false;
+
+        catTools.forEach(function (tool) {
+          var text = tool.textContent.toLowerCase();
+          var match = q === "" || text.indexOf(q) !== -1;
+          tool.style.display = match ? "" : "none";
+          if (match) { catHasMatch = true; anyVisible = true; }
+        });
+
+        cat.style.display = catHasMatch ? "" : "none";
+      });
+
+      empty.classList.toggle("show", !anyVisible);
+    });
+  })();
+
+  (function () {
+    var panel = document.getElementById("panel");
+    var scrim = document.getElementById("scrim");
+    var closeBtn = document.getElementById("panel-close");
+    var lastFocused = null;
+
+    function openPanel(tool) {
+      var cat = tool.closest(".category");
+      var catName = cat.querySelector(".category-head h2").textContent.trim();
+      var dot = getComputedStyle(tool).borderLeftColor;
+
+      panel.style.setProperty("--dot", dot);
+      document.getElementById("panel-cat").textContent = catName;
+      document.getElementById("panel-name").textContent = tool.querySelector(".tool-name").textContent;
+      document.getElementById("panel-ioc-badge").textContent = tool.getAttribute("data-ioc") || "";
+      document.getElementById("panel-desc").textContent = tool.getAttribute("data-desc") || "";
+      document.getElementById("panel-why").textContent = tool.getAttribute("data-why") || "";
+      document.getElementById("panel-lookfor").textContent = tool.getAttribute("data-lookfor") || "";
+      document.getElementById("panel-spl").textContent = tool.getAttribute("data-spl") || "";
+
+      lastFocused = tool;
+      panel.classList.add("open");
+      scrim.classList.add("open");
+      closeBtn.focus();
+    }
+
+    function closePanel() {
+      panel.classList.remove("open");
+      scrim.classList.remove("open");
+      if (lastFocused) lastFocused.focus();
+    }
+
+    document.querySelectorAll(".tool").forEach(function (tool) {
+      tool.addEventListener("click", function () { openPanel(tool); });
+    });
+
+    closeBtn.addEventListener("click", closePanel);
+    scrim.addEventListener("click", closePanel);
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && panel.classList.contains("open")) closePanel();
+    });
+  })();
+
+  (function () {
+    // Jumpnav pills are plain buttons (not <a href="#...">) on purpose — an
+    // in-page anchor link resolves to a full claudeusercontent.com URL inside
+    // this hosting environment, which triggers an "open external link"
+    // confirmation instead of just scrolling. A button with a click handler
+    // sidesteps that entirely.
+    document.querySelectorAll(".jumpnav button[data-target]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var el = document.getElementById(btn.getAttribute("data-target"));
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    });
+  })();
+</script>
