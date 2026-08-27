@@ -1,0 +1,1623 @@
+<title>SPL Field Guide</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+<style>
+  :root {
+    --bg: #f5f2ea;
+    --surface: #ffffff;
+    --surface-hover: #f7f3e7;
+    --ink: #221f1a;
+    --ink-muted: #635c50;
+    --ink-faint: #948b7a;
+    --border: #e2dbc8;
+    --border-strong: #cdc2a6;
+    --shadow: 0 1px 2px rgba(34, 31, 26, 0.06);
+    --focus: #1f7d72;
+    --scrim: rgba(34, 31, 26, 0.32);
+    --code-bg: #221f1a;
+    --code-ink: #e8e3d6;
+
+    --c-default: #5c5346;
+    --c-cmd: #6b5a3e;
+    --c-eventid: #a8560e;
+    --c-account: #3f6b7a;
+    --c-email: #9c3572;
+    --c-endpoint: #7a3f9e;
+    --c-network: #1f7d72;
+    --c-dns: #356b30;
+    --c-web: #2159a6;
+    --c-auth: #4a3f9e;
+    --c-malware: #b3341f;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #14181d;
+      --surface: #1c2127;
+      --surface-hover: #242a31;
+      --ink: #e8e3d6;
+      --ink-muted: #a79f8f;
+      --ink-faint: #746b5c;
+      --border: #2c323a;
+      --border-strong: #3a424c;
+      --shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+      --focus: #52c2b6;
+      --scrim: rgba(0, 0, 0, 0.55);
+      --code-bg: #0e1114;
+      --code-ink: #d8e8e4;
+
+      --c-default: #a89a82;
+      --c-cmd: #b09b6f;
+      --c-eventid: #e8934f;
+      --c-account: #6fa8ba;
+      --c-email: #d874ae;
+      --c-endpoint: #b28ce0;
+      --c-network: #52c2b6;
+      --c-dns: #6fb85f;
+      --c-web: #6ba8ef;
+      --c-auth: #9089e0;
+      --c-malware: #e2624a;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #14181d;
+    --surface: #1c2127;
+    --surface-hover: #242a31;
+    --ink: #e8e3d6;
+    --ink-muted: #a79f8f;
+    --ink-faint: #746b5c;
+    --border: #2c323a;
+    --border-strong: #3a424c;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+    --focus: #52c2b6;
+    --scrim: rgba(0, 0, 0, 0.55);
+    --code-bg: #0e1114;
+    --code-ink: #d8e8e4;
+
+    --c-default: #a89a82;
+    --c-cmd: #b09b6f;
+    --c-eventid: #e8934f;
+    --c-account: #6fa8ba;
+    --c-email: #d874ae;
+    --c-endpoint: #b28ce0;
+    --c-network: #52c2b6;
+    --c-dns: #6fb85f;
+    --c-web: #6ba8ef;
+    --c-auth: #9089e0;
+    --c-malware: #e2624a;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: inherit; }
+  code { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+
+  .wrap {
+    max-width: 68rem;
+    margin: 0 auto;
+    padding: 3.5rem 1.5rem 4rem;
+  }
+
+  .masthead { margin-bottom: 2rem; }
+
+  .eyebrow {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--c-network);
+    margin: 0 0 0.9rem;
+  }
+
+  h1 {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-weight: 600;
+    font-size: clamp(1.9rem, 4vw, 2.5rem);
+    letter-spacing: -0.01em;
+    margin: 0 0 0.9rem;
+    text-wrap: balance;
+  }
+
+  .dek {
+    max-width: 46rem;
+    color: var(--ink-muted);
+    font-size: 1.02rem;
+    margin: 0 0 1.6rem;
+  }
+
+  .dek code {
+    font-size: 0.88em;
+    background: var(--surface-hover);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 0.05em 0.4em;
+    color: var(--ink);
+  }
+
+  .search-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    max-width: 26rem;
+    margin-bottom: 1.1rem;
+  }
+
+  .search-row svg { flex: none; color: var(--ink-faint); }
+
+  #search {
+    width: 100%;
+    font: inherit;
+    font-size: 0.95rem;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 6px;
+    padding: 0.6rem 0.85rem;
+  }
+
+  #search::placeholder { color: var(--ink-faint); }
+  #search:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+
+  .jumpnav { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+  .jumpnav button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font: inherit;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.76rem;
+    font-weight: 500;
+    text-decoration: none;
+    color: var(--dot);
+    background: color-mix(in srgb, var(--dot) 20%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--dot) 45%, var(--border));
+    border-radius: 999px;
+    padding: 0.32rem 0.75rem 0.32rem 0.6rem;
+    cursor: pointer;
+  }
+
+  .jumpnav button:hover { background: color-mix(in srgb, var(--dot) 34%, var(--surface)); }
+  .jumpnav button:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  .dot {
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 50%;
+    background: var(--dot);
+    flex: none;
+  }
+
+  .hint { font-size: 0.86rem; color: var(--ink-faint); margin: -0.9rem 0 1.3rem; }
+
+  .category {
+    margin-bottom: 2rem;
+    scroll-margin-top: 1.5rem;
+    background: color-mix(in srgb, var(--dot) 16%, var(--bg));
+    border: 1px solid color-mix(in srgb, var(--dot) 32%, var(--border));
+    border-radius: 14px;
+    padding: 1.35rem 1.35rem 1.6rem;
+  }
+
+  .category-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    border-bottom: 3px solid var(--dot);
+    padding-bottom: 0.6rem;
+    margin-bottom: 0.35rem;
+  }
+
+  .category-head h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--dot);
+    margin: 0;
+  }
+
+  .phase-tag {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    color: var(--dot);
+    white-space: nowrap;
+  }
+
+  .category-note {
+    color: var(--ink-muted);
+    font-size: 0.92rem;
+    margin: 0.7rem 0 1rem;
+    max-width: 44rem;
+  }
+
+  .category-spl {
+    display: block;
+    background: var(--code-bg);
+    color: var(--code-ink);
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.8rem;
+    border-radius: 8px;
+    padding: 0.8rem 1rem;
+    margin: 0 0 1.4rem;
+    overflow-x: auto;
+    white-space: pre;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+    gap: 0.85rem;
+  }
+
+  .tool {
+    display: block;
+    width: 100%;
+    text-align: left;
+    font: inherit;
+    cursor: pointer;
+    text-decoration: none;
+    background: color-mix(in srgb, var(--dot) 9%, var(--surface));
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--dot);
+    border-radius: 8px;
+    padding: 1rem 1.1rem;
+    box-shadow: var(--shadow);
+    transition: background 0.15s ease, transform 0.15s ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) { .tool { transition: none; } }
+
+  .tool:hover {
+    background: color-mix(in srgb, var(--dot) 20%, var(--surface));
+    transform: translateY(-1px);
+  }
+
+  .tool:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  .tool-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .tool-name {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-weight: 600;
+    font-size: 0.98rem;
+    color: var(--ink);
+  }
+
+  .go {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.72rem;
+    color: var(--dot);
+    white-space: nowrap;
+  }
+
+  .tool-desc {
+    color: var(--ink-muted);
+    font-size: 0.88rem;
+    margin: 0.4rem 0 0.55rem;
+  }
+
+  .ioc-badge {
+    display: inline-block;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 4px;
+    padding: 0.15rem 0.45rem;
+  }
+
+  .empty-state {
+    display: none;
+    color: var(--ink-muted);
+    font-size: 0.95rem;
+    padding: 1rem 0;
+  }
+
+  .empty-state.show { display: block; }
+
+  footer {
+    border-top: 1px solid var(--border-strong);
+    padding-top: 1.5rem;
+    margin-top: 1rem;
+    color: var(--ink-muted);
+    font-size: 0.88rem;
+  }
+
+  footer a {
+    color: var(--c-network);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  footer a:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  /* Detail panel */
+  .scrim {
+    position: fixed;
+    inset: 0;
+    background: var(--scrim);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    z-index: 20;
+  }
+
+  .scrim.open { opacity: 1; pointer-events: auto; }
+
+  @media (prefers-reduced-motion: reduce) { .scrim, .panel { transition: none; } }
+
+  .panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100%;
+    width: min(26rem, 100%);
+    background: var(--surface);
+    border-left: 1px solid var(--border-strong);
+    box-shadow: -8px 0 24px rgba(0, 0, 0, 0.16);
+    transform: translateX(100%);
+    transition: transform 0.22s ease;
+    z-index: 21;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+  .panel.open { transform: translateX(0); }
+
+  .panel-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 1.5rem 1.5rem 1rem;
+    border-top: 4px solid var(--dot);
+  }
+
+  .panel-cat {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--dot);
+    margin: 0 0 0.4rem;
+  }
+
+  .panel-name {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--dot);
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  .panel-close {
+    flex: none;
+    width: 2rem;
+    height: 2rem;
+    display: grid;
+    place-items: center;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--ink-muted);
+    cursor: pointer;
+    font-size: 1.1rem;
+    line-height: 1;
+  }
+
+  .panel-close:hover { background: var(--surface-hover); color: var(--ink); }
+  .panel-close:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  .panel-ioc {
+    margin: 0 1.5rem 1.25rem;
+  }
+
+  .panel-body {
+    padding: 0 1.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .panel-field h3 {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0 0 0.4rem;
+  }
+
+  .panel-field p {
+    margin: 0;
+    font-size: 0.92rem;
+    color: var(--ink);
+  }
+
+  .panel-field.lookfor p {
+    color: var(--ink-muted);
+    background: var(--surface-hover);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.7rem 0.85rem;
+  }
+
+  .panel-field.spl pre {
+    margin: 0;
+    background: var(--code-bg);
+    color: var(--code-ink);
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.82rem;
+    border-radius: 6px;
+    padding: 0.75rem 0.9rem;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+</style>
+
+<div class="wrap">
+  <header class="masthead">
+    <p class="eyebrow">SOC field reference</p>
+    <h1>SPL Field Guide</h1>
+    <p class="dek">
+      The Splunk fields I actually query during an investigation — organized by where they show
+      up (email, endpoint, network, DNS, web, auth, file), why each one is worth pulling, what a
+      suspicious value looks like, and which IOC type it feeds. Click any field for the full note
+      and a ready-to-adapt <code>SPL</code> snippet.
+    </p>
+    <div class="search-row">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <circle cx="6.7" cy="6.7" r="4.7" stroke="currentColor" stroke-width="1.4" />
+        <line x1="10.1" y1="10.1" x2="14.5" y2="14.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+      </svg>
+      <input type="text" id="search" placeholder="Filter fields — e.g. &quot;hash&quot;, &quot;user&quot;, &quot;dns&quot;" autocomplete="off" />
+    </div>
+    <nav class="jumpnav" aria-label="Jump to category">
+      <button type="button" data-target="default" style="--dot: var(--c-default);"><span class="dot"></span>Default Fields</button>
+      <button type="button" data-target="commands" style="--dot: var(--c-cmd);"><span class="dot"></span>Search Commands</button>
+      <button type="button" data-target="eventid" style="--dot: var(--c-eventid);"><span class="dot"></span>Event ID Reference</button>
+      <button type="button" data-target="email" style="--dot: var(--c-email);"><span class="dot"></span>Email</button>
+      <button type="button" data-target="endpoint" style="--dot: var(--c-endpoint);"><span class="dot"></span>Endpoint / Process</button>
+      <button type="button" data-target="network" style="--dot: var(--c-network);"><span class="dot"></span>Network Traffic</button>
+      <button type="button" data-target="dns" style="--dot: var(--c-dns);"><span class="dot"></span>DNS</button>
+      <button type="button" data-target="web" style="--dot: var(--c-web);"><span class="dot"></span>Web / Proxy</button>
+      <button type="button" data-target="auth" style="--dot: var(--c-auth);"><span class="dot"></span>Authentication</button>
+      <button type="button" data-target="account" style="--dot: var(--c-account);"><span class="dot"></span>Account Management</button>
+      <button type="button" data-target="malware" style="--dot: var(--c-malware);"><span class="dot"></span>Malware / File</button>
+    </nav>
+  </header>
+
+  <p class="hint">Click any field for why it matters, what a suspicious value looks like, its IOC type, and a sample SPL query.</p>
+
+  <section class="category" data-category="default" id="default" style="--dot: var(--c-default);">
+    <div class="category-head">
+      <h2><span class="dot"></span>Default Fields</h2>
+      <span class="phase-tag">Every Event</span>
+    </div>
+    <p class="category-note">Not IOCs — the fields Splunk attaches to every event regardless of source. Always there, always worth checking first.</p>
+    <code class="category-spl">index=security host=&quot;WIN-JREYES&quot; sourcetype=&quot;WinEventLog:Security&quot; | table _time, host, source, sourcetype</code>
+    <div class="grid">
+      <button class="tool" type="button" data-ioc="Provenance"
+        data-desc="The name of the machine or device that generated the event, as reported by the forwarder."
+        data-why="Ties every other field in the event back to one specific, physical asset you can actually go isolate, image, or interview a user about."
+        data-lookfor="A hostname that's unfamiliar to you, or a naming pattern that doesn't match your environment's asset inventory at all."
+        data-spl="index=* | stats count by host | sort host">
+        <div class="tool-top"><span class="tool-name">host</span><span class="go">details →</span></div>
+        <p class="tool-desc">Machine or device that generated the event.</p>
+        <span class="ioc-badge">Provenance</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Provenance"
+        data-desc="The exact file path, API endpoint, or input stream the event was read from."
+        data-why="Tells you where in the pipeline the raw data actually came from — useful for confirming a feed is reporting correctly before you trust anything it says."
+        data-lookfor="A source path pointing at an unexpected log file or ingest channel for that sourcetype — often a sign of a misconfigured input, not a real finding."
+        data-spl="index=security sourcetype=&quot;WinEventLog:Security&quot; | stats count by source | sort source">
+        <div class="tool-top"><span class="tool-name">source</span><span class="go">details →</span></div>
+        <p class="tool-desc">Exact file, path, or input the event came from.</p>
+        <span class="ioc-badge">Provenance</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Classification"
+        data-desc="The parsing template Splunk applied to the raw data — WinEventLog:Security, access_combined, stream:tcp, email, and so on."
+        data-why="This is what you filter on before you ever touch a specific field — every category section on this page opens with a sourcetype= in its example search."
+        data-lookfor="Confirm the sourcetype actually matches the fields you expect — a mislabeled sourcetype means every field extraction downstream can silently fail."
+        data-spl="index=* | stats count by sourcetype | sort -count">
+        <div class="tool-top"><span class="tool-name">sourcetype</span><span class="go">details →</span></div>
+        <p class="tool-desc">Format/parsing template applied to the event.</p>
+        <span class="ioc-badge">Classification</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Timeline"
+        data-desc="The timestamp Splunk assigns to the event — extracted from the raw log line when possible, or set to index time otherwise."
+        data-why="The backbone of any timeline correlation across categories — every &quot;what happened right before/after&quot; question on this page runs off this one field."
+        data-lookfor="A large gap between _time and _indextime — it usually means delayed ingestion, but can also point to an offline agent or a tampered clock."
+        data-spl="index=security EventCode=4625 | eval lag=_indextime-_time | where lag &gt; 300 | table _time, _indextime, lag, host">
+        <div class="tool-top"><span class="tool-name">_time</span><span class="go">details →</span></div>
+        <p class="tool-desc">Timestamp Splunk assigned to the event.</p>
+        <span class="ioc-badge">Timeline</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Provenance"
+        data-desc="The named bucket the event was routed into at ingest time — security, network, email, endpoint, and so on."
+        data-why="The first filter in nearly every search on this page — narrows the full dataset down to the relevant slice before a single other field is evaluated."
+        data-lookfor="An event landing in an index that doesn't match its sourcetype — usually a misconfigured forwarder, occasionally a sign data is being routed somewhere it shouldn't."
+        data-spl="index=* | stats count by index, sourcetype | sort index">
+        <div class="tool-top"><span class="tool-name">index</span><span class="go">details →</span></div>
+        <p class="tool-desc">Named bucket the event was routed into.</p>
+        <span class="ioc-badge">Provenance</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Raw Text"
+        data-desc="The full, human-readable description the source writes for the event — on Windows Event Log data, the narrative text that fields like Account_Name, New_Process_Name, and TargetFilename are parsed out of."
+        data-why="The fallback when a field extraction misses something or a sourcetype isn't fully parsed — the complete story is always sitting in here, even before it's broken into individual fields."
+        data-lookfor="Read it directly whenever a search comes back with an unexpected blank or null field — the value is usually still visible in the raw Message text, just not extracted yet."
+        data-spl="index=security sourcetype=&quot;WinEventLog:Security&quot; EventCode=4625 | table _time, host, Message | head 5">
+        <div class="tool-top"><span class="tool-name">Message</span><span class="go">details →</span></div>
+        <p class="tool-desc">Full raw description text the event was parsed from.</p>
+        <span class="ioc-badge">Raw Text</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="category" data-category="cmd" id="commands" style="--dot: var(--c-cmd);">
+    <div class="category-head">
+      <h2><span class="dot"></span>Common Search Commands</h2>
+      <span class="phase-tag">SPL Syntax</span>
+    </div>
+    <p class="category-note">The verbs you chain together before you ever get to a specific field — pipe one into the next.</p>
+    <code class="category-spl">index=network sourcetype=stream:tcp | stats count by src_ip, dest_ip | where count &gt; 50 | sort -count</code>
+    <div class="grid">
+      <button class="tool" type="button" data-ioc="Aggregation"
+        data-desc="Aggregates events into summary statistics — counts, sums, averages, distinct counts — grouped by one or more fields."
+        data-why="The default tool for turning thousands of raw events into a short list of outliers worth reviewing by hand."
+        data-lookfor="A field value with an unusually high or unusually low count relative to its peers — both directions can be a lead."
+        data-spl="index=network sourcetype=stream:tcp | stats count, sum(bytes_out) as total_out by src_ip, dest_ip | sort -total_out">
+        <div class="tool-top"><span class="tool-name">stats</span><span class="go">details →</span></div>
+        <p class="tool-desc">Aggregate events into counts, sums, and other summary stats.</p>
+        <span class="ioc-badge">Aggregation</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Display"
+        data-desc="Displays only the fields you specify, in column form, dropping everything else from view."
+        data-why="Cleans up a wide raw event into a readable, report-ready table — the last step before you screenshot or export results."
+        data-lookfor="Confirm you've included every field the reader needs to act on the row without going back to the raw event."
+        data-spl="index=email sourcetype=email | table _time, sender, recipient, subject, file_name">
+        <div class="tool-top"><span class="tool-name">table</span><span class="go">details →</span></div>
+        <p class="tool-desc">Show only the specified fields as clean columns.</p>
+        <span class="ioc-badge">Display</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Frequency"
+        data-desc="top shows the most frequent values of a field; rare shows the least frequent — same command, opposite direction."
+        data-why="top finds the pattern; rare finds the outlier. In an investigation, the rare value is very often the suspicious one."
+        data-lookfor="A field value with a count of 1 sitting inside a dataset where everything else recurs — a strong first-seen signal worth chasing."
+        data-spl="index=web sourcetype=access_combined | rare limit=10 http_user_agent">
+        <div class="tool-top"><span class="tool-name">top / rare</span><span class="go">details →</span></div>
+        <p class="tool-desc">Most-frequent or least-frequent values of a field.</p>
+        <span class="ioc-badge">Frequency</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Time series"
+        data-desc="Buckets events into time intervals and aggregates a value across each bucket, built for a line/column chart."
+        data-why="The fastest way to spot a spike, a lull, or a regular interval — beaconing malware shows up as an obvious rhythm here."
+        data-lookfor="Connections recurring at a suspiciously exact interval (every 60s, every 5 min) — a hallmark of automated C2 beaconing, not human activity."
+        data-spl="index=network sourcetype=stream:tcp dest_ip=&quot;198.51.100.203&quot; | timechart span=1m count">
+        <div class="tool-top"><span class="tool-name">timechart</span><span class="go">details →</span></div>
+        <p class="tool-desc">Aggregate a value across time buckets.</p>
+        <span class="ioc-badge">Time series</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Calculation"
+        data-desc="Creates a new calculated field from an expression — math, string manipulation, conditional logic, or unit conversion."
+        data-why="Lets you build a custom flag or score inline, instead of eyeballing raw values across dozens of rows."
+        data-lookfor="Use it to build a simple boolean flag (e.g., is_afterhours=1) so a later stats or where command can filter on your own logic, not just the raw fields."
+        data-spl="index=security sourcetype=WinEventLog:Security EventCode=4624 | eval date_hour=strftime(_time,&quot;%H&quot;) | eval is_afterhours=if(date_hour&lt;7 OR date_hour&gt;19, 1, 0) | where is_afterhours=1">
+        <div class="tool-top"><span class="tool-name">eval</span><span class="go">details →</span></div>
+        <p class="tool-desc">Compute a new field from an expression.</p>
+        <span class="ioc-badge">Calculation</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Extraction"
+        data-desc="Extracts a new field from unstructured text using a regular expression, without needing a pre-built field extraction."
+        data-why="Raw logs often bury the useful part (a URL, an IP, a hash) inside a single long text blob — rex is how you pull it out on the fly."
+        data-lookfor="Confirm your regex actually captured the intended value by table-ing the new field right after — a bad pattern silently returns nothing instead of erroring."
+        data-spl="index=email sourcetype=email | rex field=body_text &quot;(?&lt;extracted_url&gt;https?://\S+)&quot; | table _time, extracted_url">
+        <div class="tool-top"><span class="tool-name">rex</span><span class="go">details →</span></div>
+        <p class="tool-desc">Regex-extract a new field from raw text.</p>
+        <span class="ioc-badge">Extraction</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Correlation"
+        data-desc="Groups related events that share a field value and fall within a time window into a single logical transaction."
+        data-why="Reconstructs a sequence of separate log lines — process creation, network connection, DNS query — into one coherent story per host or session."
+        data-lookfor="The duration and event count of each transaction — a session with an unusually long duration or an unexpected mix of event types is worth opening up."
+        data-spl="index=endpoint host=&quot;WIN-JREYES&quot; | transaction host maxspan=5m">
+        <div class="tool-top"><span class="tool-name">transaction</span><span class="go">details →</span></div>
+        <p class="tool-desc">Group related events into one session/story.</p>
+        <span class="ioc-badge">Correlation</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Filter"
+        data-desc="Filters results after aggregation, using a comparison or boolean expression — the SPL equivalent of a HAVING clause."
+        data-why="Runs after stats, so you can threshold on a computed value (like a count) that didn't exist as a raw field in the first place."
+        data-lookfor="Set the threshold based on a known baseline, not a guess — e.g., a failed-logon count above your environment's normal ceiling, not an arbitrary round number."
+        data-spl="index=security sourcetype=WinEventLog:Security EventCode=4625 | stats count by user, src | where count &gt; 10">
+        <div class="tool-top"><span class="tool-name">where</span><span class="go">details →</span></div>
+        <p class="tool-desc">Filter results after aggregation.</p>
+        <span class="ioc-badge">Filter</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Ordering"
+        data-desc="Orders results by one or more fields — ascending by default, descending with a leading minus sign."
+        data-why="The command that makes head, tail, and top actually meaningful — almost always chained in right before one of them."
+        data-lookfor="Double-check the minus sign — sort -count and sort count return opposite ends of the same list, and it's an easy detail to miss mid-investigation."
+        data-spl="index=security sourcetype=WinEventLog:Security EventCode=4625 | stats count by user | sort -count">
+        <div class="tool-top"><span class="tool-name">sort</span><span class="go">details →</span></div>
+        <p class="tool-desc">Order results by one or more fields.</p>
+        <span class="ioc-badge">Ordering</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Limit"
+        data-desc="Returns only the first N results from the pipeline, in whatever order they currently sit in."
+        data-why="Keeps a wide search from flooding the screen — pairs directly with sort to show &quot;the top 10&quot; of anything you've ranked."
+        data-lookfor="Confirm you sorted first — head grabs whatever rows happen to be first in the current order, which is meaningless without an intentional sort ahead of it."
+        data-spl="index=network sourcetype=stream:tcp | stats sum(bytes_out) as total_out by src_ip | sort -total_out | head 10">
+        <div class="tool-top"><span class="tool-name">head</span><span class="go">details →</span></div>
+        <p class="tool-desc">Keep only the first N results.</p>
+        <span class="ioc-badge">Limit</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Limit"
+        data-desc="Returns only the last N results from the pipeline — the mirror of head."
+        data-why="Useful for checking the oldest events in a time-ordered result set, or the bottom of a ranked list instead of the top."
+        data-lookfor="Same caveat as head — tail only means something right after a deliberate sort; otherwise &quot;last&quot; is arbitrary."
+        data-spl="index=email sourcetype=email | sort _time | tail 5">
+        <div class="tool-top"><span class="tool-name">tail</span><span class="go">details →</span></div>
+        <p class="tool-desc">Keep only the last N results.</p>
+        <span class="ioc-badge">Limit</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Cleanup"
+        data-desc="Removes duplicate events based on one or more fields, keeping only the first occurrence of each."
+        data-why="Turns a noisy stream of repeated events into a clean, unique list — e.g., every distinct host that talked to a bad IP, not every packet."
+        data-lookfor="Pair it with sort first — dedup keeps the first row it sees per key, so make sure that's the most recent or most relevant one."
+        data-spl="index=network sourcetype=stream:tcp dest_ip=&quot;198.51.100.203&quot; | sort -_time | dedup src_ip">
+        <div class="tool-top"><span class="tool-name">dedup</span><span class="go">details →</span></div>
+        <p class="tool-desc">Remove duplicate events, keep one per key.</p>
+        <span class="ioc-badge">Cleanup</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Enrichment"
+        data-desc="Enriches events by matching a field against an external reference table (a CSV or KV store) and pulling in extra columns."
+        data-why="This is how you connect raw log data to your own threat-intel context — a known-bad-IP list, an asset inventory, a VIP-user list — without leaving Splunk."
+        data-lookfor="Any row that successfully matches a known-bad lookup table — that's an automatic, high-confidence hit worth escalating immediately."
+        data-spl="index=network sourcetype=stream:tcp | lookup known_bad_ips.csv ip AS dest_ip OUTPUT verdict | where verdict=&quot;malicious&quot;">
+        <div class="tool-top"><span class="tool-name">lookup</span><span class="go">details →</span></div>
+        <p class="tool-desc">Enrich events against an external reference table.</p>
+        <span class="ioc-badge">Enrichment</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="category" data-category="eventid" id="eventid" style="--dot: var(--c-eventid);">
+    <div class="category-head">
+      <h2><span class="dot"></span>Event ID Reference</h2>
+      <span class="phase-tag">Windows Security · Sysmon</span>
+    </div>
+    <p class="category-note">Which activity triggers which Event ID — the vocabulary underneath the Endpoint and Authentication fields above.</p>
+    <code class="category-spl">index=security sourcetype=WinEventLog:Security EventCode=4688 | table _time, host, Account_Name, New_Process_Name, Command_Line</code>
+    <div class="grid">
+      <button class="tool" type="button" data-ioc="Windows Security"
+        data-desc="Logged whenever an account successfully authenticates to a host — interactively, over the network, as a service, or via RDP (Logon_Type distinguishes which)."
+        data-why="The baseline event for every authentication field in the Authentication category above — nothing else fires without a 4624 (or a 4625) first."
+        data-lookfor="Logon_Type=10 (RemoteInteractive/RDP) from an unfamiliar source, or a 4624 for an account that should never log in interactively at all."
+        data-spl="index=security sourcetype=WinEventLog:Security EventCode=4624 | stats count by user, Logon_Type, src">
+        <div class="tool-top"><span class="tool-name">4624 — Successful logon</span><span class="go">details →</span></div>
+        <p class="tool-desc">Windows Security: an account successfully authenticated.</p>
+        <span class="ioc-badge">Windows Security</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Windows Security"
+        data-desc="Logged whenever a logon attempt fails — bad password, disabled account, expired credentials, or an unknown username."
+        data-why="A burst of these is the single clearest brute-force or password-spray signal in the entire Security log."
+        data-lookfor="A high count of 4625 for one account from one source, especially if followed by a 4624 success right after."
+        data-spl="index=security sourcetype=WinEventLog:Security EventCode=4625 | stats count by user, src | where count &gt; 10">
+        <div class="tool-top"><span class="tool-name">4625 — Failed logon</span><span class="go">details →</span></div>
+        <p class="tool-desc">Windows Security: an authentication attempt failed.</p>
+        <span class="ioc-badge">Windows Security</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Windows Security"
+        data-desc="Logged when a logon uses explicit alternate credentials — runas, a scheduled task running as another user, or a mapped network drive with different creds."
+        data-why="One account authenticating as a different one, from the same host, is a classic lateral-movement or credential-reuse signal."
+        data-lookfor="A workstation account explicitly authenticating as a domain admin or service account it has no normal reason to invoke."
+        data-spl="index=security sourcetype=WinEventLog:Security EventCode=4648 | table _time, host, Subject_Account_Name, Target_Account_Name">
+        <div class="tool-top"><span class="tool-name">4648 — Explicit credential logon</span><span class="go">details →</span></div>
+        <p class="tool-desc">Windows Security: logon attempted with explicit (alternate) credentials.</p>
+        <span class="ioc-badge">Windows Security</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Windows Security"
+        data-desc="Logged when a specific access right — read, write, delete — is exercised against an object that has a System Access Control List (SACL) configured for auditing: a file, a registry key, or a service."
+        data-why="Only fires on objects someone deliberately flagged for auditing, so a hit here is high-signal by default — this is the event behind ObjectName, AccessMask, and AccessReason below, the only native event that shows exactly what was touched, not just that a process ran."
+        data-lookfor="A 4663 against a sensitive file or registry hive (NTDS.dit, SAM, SECURITY, a credential store) from an account with no legitimate reason to touch it."
+        data-spl="index=security sourcetype=WinEventLog:Security EventCode=4663 | table _time, host, SubjectUserName, ObjectName, AccessMask">
+        <div class="tool-top"><span class="tool-name">4663 — Object access attempted</span><span class="go">details →</span></div>
+        <p class="tool-desc">Windows Security: an audited file, registry key, or service was accessed.</p>
+        <span class="ioc-badge">Windows Security</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Windows Security"
+        data-desc="Logged when a new logon is granted admin-equivalent special privileges (SeDebugPrivilege, SeBackupPrivilege, and similar)."
+        data-why="This is the event that confirms a session actually has elevated rights — not just that someone attempted to elevate."
+        data-lookfor="A 4672 immediately following a 4624 for an account that isn't a designated administrator — a strong privilege-escalation indicator."
+        data-spl="index=security sourcetype=WinEventLog:Security EventCode=4672 | table _time, user, src">
+        <div class="tool-top"><span class="tool-name">4672 — Admin privileges assigned</span><span class="go">details →</span></div>
+        <p class="tool-desc">Windows Security: special (admin-level) privileges assigned to a new logon.</p>
+        <span class="ioc-badge">Windows Security</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Windows Security"
+        data-desc="Logged when a new process starts — requires 'Audit Process Creation' plus command-line logging enabled to include the full command line."
+        data-why="The Security-log equivalent of Sysmon Event ID 1 — useful when Sysmon isn't deployed but native Windows auditing is."
+        data-lookfor="The same patterns as the Endpoint category's CommandLine field — encoded PowerShell, an Office app as the parent, execution from Temp/AppData."
+        data-spl="index=security sourcetype=WinEventLog:Security EventCode=4688 | table _time, host, Account_Name, New_Process_Name, Command_Line">
+        <div class="tool-top"><span class="tool-name">4688 — New process created</span><span class="go">details →</span></div>
+        <p class="tool-desc">Windows Security: a new process was created.</p>
+        <span class="ioc-badge">Windows Security</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Windows Security"
+        data-desc="Logged whenever a new local or domain user account is created."
+        data-why="Attackers who gain admin access often create a backup account for persistence, in case the original foothold is discovered and killed."
+        data-lookfor="An account created outside your normal onboarding process or ticketing trail, especially one created and then immediately added to an admin group."
+        data-spl="index=security sourcetype=WinEventLog:Security EventCode=4720 | table _time, host, Account_Name, Subject_Account_Name">
+        <div class="tool-top"><span class="tool-name">4720 — User account created</span><span class="go">details →</span></div>
+        <p class="tool-desc">Windows Security: a new user account was created.</p>
+        <span class="ioc-badge">Windows Security</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Windows Security"
+        data-desc="Logged whenever a local or domain user account is deleted."
+        data-why="The cleanup step in a persistence account's lifecycle — attackers who created a backup account often delete it once they're done, to erase the trail."
+        data-lookfor="A 4726 with no matching offboarding ticket, especially one for an account that was created (4720) and added to an admin group (4732) only shortly before."
+        data-spl="index=security sourcetype=WinEventLog:Security EventCode=4726 | table _time, host, Account_Name, Subject_Account_Name">
+        <div class="tool-top"><span class="tool-name">4726 — User account deleted</span><span class="go">details →</span></div>
+        <p class="tool-desc">Windows Security: an existing user account was deleted.</p>
+        <span class="ioc-badge">Windows Security</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Windows Security"
+        data-desc="Logged when an account is added to a security-enabled local group (e.g., the local Administrators group)."
+        data-why="Pairs directly with 4720 — create an account, then add it to an admin group, is the standard two-step persistence pattern."
+        data-lookfor="A newly created account (check 4720 first) added to Administrators or Remote Desktop Users within minutes of creation."
+        data-spl="index=security sourcetype=WinEventLog:Security EventCode=4732 | table _time, host, Member_Name, Group_Name">
+        <div class="tool-top"><span class="tool-name">4732 — Added to local group</span><span class="go">details →</span></div>
+        <p class="tool-desc">Windows Security: a member was added to a security-enabled local group.</p>
+        <span class="ioc-badge">Windows Security</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Windows Security"
+        data-desc="Logged whenever an existing user account's attributes are modified — this is the trigger event behind every field in the Account Management category below."
+        data-why="Most 4738 events are routine HR-driven edits — the rare ones that touch privilege-adjacent fields are what you're actually hunting for."
+        data-lookfor="A 4738 that changes PrimaryGroupId or AllowedToDelegateTo — both far rarer and higher-signal than a routine profile edit."
+        data-spl="index=security sourcetype=WinEventLog:Security EventCode=4738 | table _time, host, SamAccountName, PrimaryGroupId, AllowedToDelegateTo">
+        <div class="tool-top"><span class="tool-name">4738 — User account changed</span><span class="go">details →</span></div>
+        <p class="tool-desc">Windows Security: an existing user account's attributes were modified.</p>
+        <span class="ioc-badge">Windows Security</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Windows Security"
+        data-desc="Logged when the Security event log itself is cleared."
+        data-why="One of the strongest anti-forensics signals available — legitimate admins almost never clear this log, and attackers do it to cover their tracks."
+        data-lookfor="Any occurrence at all, full stop — treat a 1102 as a standalone incident trigger, then work backward from the timestamp to see what's missing."
+        data-spl="index=security sourcetype=WinEventLog:Security EventCode=1102 | table _time, host, Subject_Account_Name">
+        <div class="tool-top"><span class="tool-name">1102 — Audit log cleared</span><span class="go">details →</span></div>
+        <p class="tool-desc">Windows Security: the Security event log was cleared.</p>
+        <span class="ioc-badge">Windows Security</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Sysmon"
+        data-desc="Sysmon's core event — logged every time a process starts, with the full image path, command line, parent process, and hash."
+        data-why="The single richest event in the whole endpoint story — most of the fields in the Endpoint / Process category above come straight from this one event."
+        data-lookfor="Everything covered under Image, CommandLine, and ParentImage in the Endpoint category — this is the event those fields live on."
+        data-spl="index=endpoint EventCode=1 | table _time, host, User, Image, ParentImage, CommandLine">
+        <div class="tool-top"><span class="tool-name">Sysmon 1 — Process creation</span><span class="go">details →</span></div>
+        <p class="tool-desc">Sysmon: a new process was created.</p>
+        <span class="ioc-badge">Sysmon</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Sysmon"
+        data-desc="Logged when a file's creation timestamp is explicitly changed."
+        data-why="Legitimate software almost never rewrites its own file timestamps — this is a deliberate anti-forensics technique called timestomping."
+        data-lookfor="A timestamp change on a newly dropped executable, especially one backdated to make it look like it's been there for months."
+        data-spl="index=endpoint EventCode=2 | table _time, host, Image, TargetFilename, PreviousCreationUtcTime, CreationUtcTime">
+        <div class="tool-top"><span class="tool-name">Sysmon 2 — File time changed</span><span class="go">details →</span></div>
+        <p class="tool-desc">Sysmon: a file's creation timestamp was modified.</p>
+        <span class="ioc-badge">Sysmon</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Sysmon"
+        data-desc="Logged when a process makes an outbound (or inbound) network connection — includes the process, source/destination IP, and port."
+        data-why="Directly links a specific process on a specific host to the Network Traffic category above — this is how you attribute a connection to the binary that made it."
+        data-lookfor="A process with no legitimate reason to reach the network (notepad.exe, calc.exe) showing a Sysmon 3 event at all."
+        data-spl="index=endpoint EventCode=3 Image!=&quot;*\\chrome.exe&quot; Image!=&quot;*\\msedge.exe&quot; | table _time, host, Image, DestinationIp, DestinationPort">
+        <div class="tool-top"><span class="tool-name">Sysmon 3 — Network connection</span><span class="go">details →</span></div>
+        <p class="tool-desc">Sysmon: a process made a network connection.</p>
+        <span class="ioc-badge">Sysmon</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Sysmon"
+        data-desc="Logged when a kernel driver is loaded, including whether it's signed and by whom."
+        data-why="Unsigned or unusually-signed drivers are how attackers get kernel-level access — most legitimate drivers load once at boot from a known publisher."
+        data-lookfor="An unsigned driver, or one signed by a certificate you don't recognize, loading well after boot time."
+        data-spl="index=endpoint EventCode=6 Signed=false | table _time, host, ImageLoaded, Signature">
+        <div class="tool-top"><span class="tool-name">Sysmon 6 — Driver loaded</span><span class="go">details →</span></div>
+        <p class="tool-desc">Sysmon: a kernel-mode driver was loaded.</p>
+        <span class="ioc-badge">Sysmon</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Sysmon"
+        data-desc="Logged when a process loads a DLL (image/module load)."
+        data-why="DLL side-loading and hijacking — a common defense-evasion technique — both show up here as an unexpected image loading into a legitimate process."
+        data-lookfor="A signed, trusted process loading an unsigned DLL from a non-standard directory (e.g., a DLL sitting next to it in Downloads instead of System32)."
+        data-spl="index=endpoint EventCode=7 Signed=false | table _time, host, Image, ImageLoaded">
+        <div class="tool-top"><span class="tool-name">Sysmon 7 — Image loaded</span><span class="go">details →</span></div>
+        <p class="tool-desc">Sysmon: a module/DLL was loaded into a process.</p>
+        <span class="ioc-badge">Sysmon</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Sysmon"
+        data-desc="Logged when one process creates a remote thread inside another process."
+        data-why="This is the mechanism behind classic process injection — the technique malware uses to run its code inside a trusted process to hide from AV."
+        data-lookfor="A process like svchost.exe or explorer.exe having a remote thread created inside it by an unrelated, unsigned process."
+        data-spl="index=endpoint EventCode=8 | table _time, host, SourceImage, TargetImage">
+        <div class="tool-top"><span class="tool-name">Sysmon 8 — CreateRemoteThread</span><span class="go">details →</span></div>
+        <p class="tool-desc">Sysmon: a process created a thread in another process.</p>
+        <span class="ioc-badge">Sysmon</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Sysmon"
+        data-desc="Logged when one process opens a handle to another process, with the requested access rights."
+        data-why="Credential-dumping tools need a handle into lsass.exe before they can read memory out of it — this event catches that request directly."
+        data-lookfor="Any non-security-tool process requesting a handle into lsass.exe, especially with high-privilege access rights like PROCESS_VM_READ."
+        data-spl="index=endpoint EventCode=10 TargetImage=&quot;*\\lsass.exe&quot; | table _time, host, SourceImage, GrantedAccess">
+        <div class="tool-top"><span class="tool-name">Sysmon 10 — Process access</span><span class="go">details →</span></div>
+        <p class="tool-desc">Sysmon: a process opened a handle to another process (e.g., LSASS).</p>
+        <span class="ioc-badge">Sysmon</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Sysmon"
+        data-desc="Logged when a file is created or overwritten on disk."
+        data-why="This is the drop event — the moment a payload, a dropped tool, or a staged exfil archive actually lands on the filesystem."
+        data-lookfor="An executable or script created inside Temp, Downloads, or AppData shortly after a suspicious email attachment or browser download."
+        data-spl="index=endpoint EventCode=11 TargetFilename=&quot;*.exe&quot; | table _time, host, Image, TargetFilename">
+        <div class="tool-top"><span class="tool-name">Sysmon 11 — File created</span><span class="go">details →</span></div>
+        <p class="tool-desc">Sysmon: a file was created or overwritten.</p>
+        <span class="ioc-badge">Sysmon</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Sysmon"
+        data-desc="Logged when a registry key or value is created or deleted — the object-level counterpart to Event ID 13's value-set changes."
+        data-why="Persistence techniques often create a new key before ever setting a value on it, and defense evasion sometimes deletes a key afterward to cover tracks — this event catches both ends that 13 alone would miss."
+        data-lookfor="A new key created under a Run/RunOnce or Services path, or an existing key deleted shortly after a suspicious process ran on the same host."
+        data-spl="index=endpoint EventCode=12 TargetObject=&quot;*\\Run\\*&quot; | table _time, host, Image, TargetObject, EventType">
+        <div class="tool-top"><span class="tool-name">Sysmon 12 — Registry object added/deleted</span><span class="go">details →</span></div>
+        <p class="tool-desc">Sysmon: a registry key or value was created or deleted.</p>
+        <span class="ioc-badge">Sysmon</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Sysmon"
+        data-desc="Logged when a registry value is created or modified."
+        data-why="The Run/RunOnce keys and similar autostart locations are one of the most common persistence mechanisms — this event catches a write to them directly."
+        data-lookfor="A new value written under a Run key, pointing to a script or executable in a user-writable directory."
+        data-spl="index=endpoint EventCode=13 TargetObject=&quot;*\\Run\\*&quot; | table _time, host, Image, TargetObject, Details">
+        <div class="tool-top"><span class="tool-name">Sysmon 13 — Registry value set</span><span class="go">details →</span></div>
+        <p class="tool-desc">Sysmon: a registry value was created or changed.</p>
+        <span class="ioc-badge">Sysmon</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Sysmon"
+        data-desc="Logged when a process resolves a domain name — Sysmon's own DNS query event, independent of the network sensor's DNS logs."
+        data-why="Ties a DNS lookup directly to the process that made it, which stream:dns alone can't always do."
+        data-lookfor="A process with no legitimate networking purpose resolving an external domain — especially one already flagged in the DNS category above."
+        data-spl="index=endpoint EventCode=22 | table _time, host, Image, QueryName, QueryResults">
+        <div class="tool-top"><span class="tool-name">Sysmon 22 — DNS query</span><span class="go">details →</span></div>
+        <p class="tool-desc">Sysmon: a process resolved a domain name.</p>
+        <span class="ioc-badge">Sysmon</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="category" data-category="email" id="email" style="--dot: var(--c-email);">
+    <div class="category-head">
+      <h2><span class="dot"></span>Email</h2>
+      <span class="phase-tag">Phase 1 · Phase 2</span>
+    </div>
+    <p class="category-note">Where the case usually starts — the message itself and what it carried.</p>
+    <code class="category-spl">index=email sourcetype=email | table _time, sender, recipient, subject, file_name</code>
+    <div class="grid">
+      <button class="tool" type="button" data-ioc="Email IOC"
+        data-desc="The From address on the message — the identity the recipient was shown."
+        data-why="Confirms whether the sender is who they claim to be before you trust anything else in the email."
+        data-lookfor="Display-name spoofing (real name, wrong address), a lookalike domain (cloudvaultpro-alerts.net vs cloudvaultpro.com), or a first-time sender to that recipient."
+        data-spl="index=email sourcetype=email | stats count by sender, recipient | where count=1">
+        <div class="tool-top"><span class="tool-name">sender</span><span class="go">details →</span></div>
+        <p class="tool-desc">From address shown to the recipient.</p>
+        <span class="ioc-badge">Email IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Identity IOC"
+        data-desc="The mailbox the message was delivered to."
+        data-why="Shows who was targeted — a single recipient suggests spear-phishing, a broad list suggests a mass campaign."
+        data-lookfor="Finance, HR, or executive accounts receiving unusual traffic — a common BEC targeting pattern."
+        data-spl="index=email sourcetype=email sender=&quot;*cloudvaultpro-alerts.net&quot; | table _time, recipient, subject">
+        <div class="tool-top"><span class="tool-name">recipient</span><span class="go">details →</span></div>
+        <p class="tool-desc">To address the message was delivered to.</p>
+        <span class="ioc-badge">Identity IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Email IOC"
+        data-desc="The subject line of the message."
+        data-why="Fast way to cluster related messages and spot a campaign pattern across mailboxes."
+        data-lookfor="Urgency language (&quot;action required,&quot; &quot;account suspended&quot;), and subjects matching a known campaign template you've already triaged."
+        data-spl="index=email sourcetype=email | top limit=20 subject">
+        <div class="tool-top"><span class="tool-name">subject</span><span class="go">details →</span></div>
+        <p class="tool-desc">Subject line of the email.</p>
+        <span class="ioc-badge">Email IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="File IOC"
+        data-desc="The name and hash of any attachment on the message."
+        data-why="An attachment is a direct execution path — this is what you'd sandbox or hash-check first."
+        data-lookfor="Double extensions (invoice.pdf.exe), macro-enabled Office files, or a hash that already matches a known-bad sample."
+        data-spl="index=email sourcetype=email file_name=* | stats count by file_name, file_hash">
+        <div class="tool-top"><span class="tool-name">file_name / file_hash</span><span class="go">details →</span></div>
+        <p class="tool-desc">Name and hash of the attached file, if any.</p>
+        <span class="ioc-badge">File IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Web IOC"
+        data-desc="Any URL embedded in the email body."
+        data-why="This is the link the victim was actually asked to click — worth extracting before anyone opens it manually."
+        data-lookfor="A shortened or multi-hop redirect chain, or display text that doesn't match the real href behind it."
+        data-spl="index=email sourcetype=email | rex field=body_text &quot;(?&lt;extracted_url&gt;https?://\S+)&quot; | table _time, extracted_url">
+        <div class="tool-top"><span class="tool-name">url (body)</span><span class="go">details →</span></div>
+        <p class="tool-desc">Link embedded in the message body.</p>
+        <span class="ioc-badge">Web IOC</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="category" data-category="endpoint" id="endpoint" style="--dot: var(--c-endpoint);">
+    <div class="category-head">
+      <h2><span class="dot"></span>Endpoint / Process</h2>
+      <span class="phase-tag">Phase 3 · Phase 4</span>
+    </div>
+    <p class="category-note">What actually ran once the attachment or link was opened — Sysmon / EDR telemetry.</p>
+    <code class="category-spl">index=endpoint sourcetype=XmlWinEventLog:Microsoft-Windows-Sysmon/Operational EventCode=1 | table _time, host, User, Image, ParentImage, CommandLine</code>
+    <div class="grid">
+      <button class="tool" type="button" data-ioc="Host IOC"
+        data-desc="The Sysmon event ID — identifies which kind of activity was logged (1=process create, 3=network connect, 7=image load, 11=file create, 22=DNS query)."
+        data-why="Tells you what category of behavior you're looking at before you read a single other field."
+        data-lookfor="EventCode 1 (process create) immediately followed by EventCode 3 (network connect) from the same process — classic dropper-then-callback pattern."
+        data-spl="index=endpoint EventCode=1 Image=&quot;*\\powershell.exe&quot; | table _time, host, User, ParentImage, CommandLine">
+        <div class="tool-top"><span class="tool-name">EventCode</span><span class="go">details →</span></div>
+        <p class="tool-desc">Sysmon event type identifier.</p>
+        <span class="ioc-badge">Host IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Host IOC"
+        data-desc="The full file path of the executable that ran."
+        data-why="Legitimate software runs from predictable locations — this field is the fastest way to spot something out of place."
+        data-lookfor="A binary executing from Temp, Downloads, or AppData instead of Program Files, or a signed system binary (LOLBAS) being invoked in an unusual context."
+        data-spl="index=endpoint EventCode=1 Image=&quot;*\\Temp\\*&quot; OR Image=&quot;*\\AppData\\*&quot; | table _time, host, User, Image, CommandLine">
+        <div class="tool-top"><span class="tool-name">Image</span><span class="go">details →</span></div>
+        <p class="tool-desc">Full path of the process that executed.</p>
+        <span class="ioc-badge">Host IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Host IOC"
+        data-desc="The full command line, including every argument, passed to the process."
+        data-why="This is where obfuscation and intent both live — the arguments tell you what the process was actually asked to do."
+        data-lookfor="Base64-encoded PowerShell (-enc / -EncodedCommand), -nop -w hidden flags, or a suspiciously long, randomized-looking one-liner."
+        data-spl="index=endpoint EventCode=1 CommandLine=&quot;*-enc*&quot; OR CommandLine=&quot;*-EncodedCommand*&quot; | table _time, host, User, Image, CommandLine">
+        <div class="tool-top"><span class="tool-name">CommandLine</span><span class="go">details →</span></div>
+        <p class="tool-desc">Full arguments passed to the executing process.</p>
+        <span class="ioc-badge">Host IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Host IOC"
+        data-desc="The process that launched the one you're looking at."
+        data-why="The parent-child relationship is often the clearest signal — Office apps have no legitimate reason to spawn a shell."
+        data-lookfor="WINWORD.EXE, EXCEL.EXE, or OUTLOOK.EXE as the ParentImage of powershell.exe, cmd.exe, or mshta.exe."
+        data-spl="index=endpoint EventCode=1 ParentImage=&quot;*WINWORD.EXE&quot; OR ParentImage=&quot;*EXCEL.EXE&quot; | table _time, host, User, Image, CommandLine">
+        <div class="tool-top"><span class="tool-name">ParentImage</span><span class="go">details →</span></div>
+        <p class="tool-desc">The parent process that spawned this one.</p>
+        <span class="ioc-badge">Host IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="File IOC"
+        data-desc="The MD5/SHA1/SHA256 hash of the executing or dropped file."
+        data-why="The one field you can cross-check against VirusTotal, MalwareBazaar, or your own threat intel without any ambiguity."
+        data-lookfor="A hash that returns hits on VirusTotal, or one that matches a hash you've already confirmed bad elsewhere in the case."
+        data-spl="index=endpoint EventCode=1 Hashes=* | stats count by Hashes, Image | sort -count">
+        <div class="tool-top"><span class="tool-name">Hashes</span><span class="go">details →</span></div>
+        <p class="tool-desc">File hash of the process image.</p>
+        <span class="ioc-badge">File IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Identity IOC"
+        data-desc="The account context the process ran under."
+        data-why="Ties the activity back to a specific identity — and flags when a low-privilege user context does something only SYSTEM should."
+        data-lookfor="A SYSTEM-level or SERVICE process spawned by a process running under a normal user account — a common privilege-escalation signal."
+        data-spl="index=endpoint EventCode=1 User=&quot;NT AUTHORITY\\SYSTEM&quot; ParentImage!=&quot;*\\services.exe&quot; | table _time, host, ParentImage, Image">
+        <div class="tool-top"><span class="tool-name">User</span><span class="go">details →</span></div>
+        <p class="tool-desc">Account the process executed as.</p>
+        <span class="ioc-badge">Identity IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Host IOC"
+        data-desc="The internal file name embedded in the executable's own PE metadata — independent of whatever the file is actually named on disk."
+        data-why="Catches a renamed binary that a file-name check alone would miss — the metadata inside the file doesn't change just because the file on disk was renamed."
+        data-lookfor="An OriginalFileName that doesn't match the Image path at all — e.g. a file named svchost.exe whose internal metadata says rundll32.exe."
+        data-spl="index=endpoint EventCode=1 | where Image!=OriginalFileName | table _time, host, Image, OriginalFileName">
+        <div class="tool-top"><span class="tool-name">OriginalFileName</span><span class="go">details →</span></div>
+        <p class="tool-desc">Internal file name from the binary's own PE metadata.</p>
+        <span class="ioc-badge">Host IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Host IOC"
+        data-desc="The full path of the file being created, modified, or deleted — the Sysmon field behind file-based events like 2, 11, and 23."
+        data-why="Tells you exactly where on disk something landed, was renamed, or disappeared from — the field that turns a file event into an actual location to go check."
+        data-lookfor="A path in Temp, AppData, or a Startup folder, or a delete event on a file that was flagged earlier in the same investigation."
+        data-spl="index=endpoint EventCode=11 TargetFilename=&quot;*\\AppData\\*&quot; | table _time, host, Image, TargetFilename">
+        <div class="tool-top"><span class="tool-name">TargetFilename</span><span class="go">details →</span></div>
+        <p class="tool-desc">Full path of the file being written, changed, or deleted.</p>
+        <span class="ioc-badge">Host IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Host IOC"
+        data-desc="Sysmon's own UTC timestamp for the event, recorded independently of the _time field Splunk assigns at ingest."
+        data-why="A second timestamp to cross-check against _time — a mismatch is usually just ingestion lag, but on a host that's also shown a Sysmon 2 (file time changed) event, it's worth confirming nothing's been backdated."
+        data-lookfor="A UtcTime meaningfully out of step with _time on a host that's also shown timestomping activity elsewhere in the case."
+        data-spl="index=endpoint EventCode=1 | eval time_str=strftime(_time,&quot;%Y-%m-%d %H:%M:%S&quot;) | table _time, time_str, UtcTime, host, Image">
+        <div class="tool-top"><span class="tool-name">UtcTime</span><span class="go">details →</span></div>
+        <p class="tool-desc">Sysmon's own event timestamp, independent of _time.</p>
+        <span class="ioc-badge">Host IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Host IOC"
+        data-desc="The full path or name of the object being accessed on a 4663 object-access event — a file, a registry key, or a service."
+        data-why="4663 only fires on objects someone deliberately flagged with SACL auditing, so its presence at all means the resource was already considered worth watching — treat any hit as high-signal by default."
+        data-lookfor="An ObjectName pointing at a credential store (SAM, SECURITY, NTDS.dit) or another resource you've specifically flagged for monitoring."
+        data-spl="index=security sourcetype=WinEventLog:Security EventCode=4663 | stats count by ObjectName, SubjectUserName | sort -count">
+        <div class="tool-top"><span class="tool-name">ObjectName</span><span class="go">details →</span></div>
+        <p class="tool-desc">Audited file, registry key, or service being accessed.</p>
+        <span class="ioc-badge">Host IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Host IOC"
+        data-desc="The specific access right requested on the object — read, write, delete, and similar — encoded as a hex value (e.g. 0x10000 = DELETE)."
+        data-why="Distinguishes a read (someone looked at it) from a delete (someone got rid of it) on the same audited object — the difference between reconnaissance and cleanup."
+        data-spl="index=security sourcetype=WinEventLog:Security EventCode=4663 AccessMask=&quot;0x10000&quot; | table _time, host, SubjectUserName, ObjectName"
+        data-lookfor="A delete-level AccessMask (0x10000) on a file already flagged earlier in the case — a strong anti-forensics signal.">
+        <div class="tool-top"><span class="tool-name">AccessMask</span><span class="go">details →</span></div>
+        <p class="tool-desc">Hex-encoded access right requested (read, write, delete).</p>
+        <span class="ioc-badge">Host IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Identity IOC"
+        data-desc="Windows' own explanation of which permission or group membership actually granted (or denied) a 4663 access attempt."
+        data-why="Answers what a raw AccessMask can't — not just what was requested, but which specific privilege or group made it possible."
+        data-lookfor="Access granted through an unexpected group or inherited permission — a sign the account has more effective reach than its assigned role suggests."
+        data-spl="index=security sourcetype=WinEventLog:Security EventCode=4663 | table _time, SubjectUserName, ObjectName, AccessReason">
+        <div class="tool-top"><span class="tool-name">AccessReason</span><span class="go">details →</span></div>
+        <p class="tool-desc">Which permission or group actually granted the access.</p>
+        <span class="ioc-badge">Identity IOC</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="category" data-category="network" id="network" style="--dot: var(--c-network);">
+    <div class="category-head">
+      <h2><span class="dot"></span>Network Traffic</h2>
+      <span class="phase-tag">Phase 5</span>
+    </div>
+    <p class="category-note">Where the host talked to once the payload was live — firewall, NetFlow, and stream data.</p>
+    <code class="category-spl">index=network sourcetype=stream:tcp | stats sum(bytes_out) as total_out by src_ip, dest_ip | sort -total_out</code>
+    <div class="grid">
+      <button class="tool" type="button" data-ioc="Network IOC"
+        data-desc="The internal host that initiated the connection."
+        data-why="Anchors every other network field to a specific machine you can go isolate or image."
+        data-lookfor="A host that doesn't normally make outbound connections suddenly reaching out to the internet directly."
+        data-spl="index=network sourcetype=stream:tcp dest_ip=&quot;198.51.100.203&quot; | table _time, src_ip, dest_ip, dest_port">
+        <div class="tool-top"><span class="tool-name">src_ip</span><span class="go">details →</span></div>
+        <p class="tool-desc">Source IP of the connection.</p>
+        <span class="ioc-badge">Network IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Network IOC"
+        data-desc="The remote IP the internal host connected to."
+        data-why="The single most useful pivot point — check it against AbuseIPDB, GreyNoise, and Shodan before doing anything else."
+        data-lookfor="A rare or first-seen external IP, especially one hosted in an unexpected country or ASN for that user's normal traffic."
+        data-spl="index=network sourcetype=stream:tcp | stats count by dest_ip | where count &gt; 0 | sort -count">
+        <div class="tool-top"><span class="tool-name">dest_ip</span><span class="go">details →</span></div>
+        <p class="tool-desc">Destination IP of the connection.</p>
+        <span class="ioc-badge">Network IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Network IOC"
+        data-desc="The remote port the connection was made to."
+        data-why="Non-standard ports on otherwise normal-looking traffic are a classic C2 tell."
+        data-lookfor="Traffic to 4444, 8080, or 445 headed outbound — ports rarely legitimate for that direction."
+        data-spl="index=network sourcetype=stream:tcp dest_port=4444 OR dest_port=8080 | table _time, src_ip, dest_ip, dest_port">
+        <div class="tool-top"><span class="tool-name">dest_port</span><span class="go">details →</span></div>
+        <p class="tool-desc">Destination port of the connection.</p>
+        <span class="ioc-badge">Network IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Network IOC"
+        data-desc="The transport protocol of the connection (tcp, udp, icmp) or, on some sourcetypes, the identified application-layer protocol (http, dns, smb, rdp)."
+        data-why="Sets the category of traffic you're investigating before src/dest ever matter — a TCP beacon, a UDP tunnel, and an ICMP flood each point to a different kind of activity."
+        data-lookfor="An application-layer protocol running over a port that doesn't match it — SMB or RDP tunneled over port 443 is a well-known way to blend C2 traffic into normal HTTPS volume."
+        data-spl="index=network sourcetype=stream:tcp | stats count by protocol, dest_port | sort -count">
+        <div class="tool-top"><span class="tool-name">protocol</span><span class="go">details →</span></div>
+        <p class="tool-desc">Transport or application-layer protocol of the connection.</p>
+        <span class="ioc-badge">Network IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Network IOC"
+        data-desc="How many bytes moved out of the network on this connection."
+        data-why="A spike in outbound volume, especially after hours, is the clearest signal of possible data exfiltration."
+        data-lookfor="A single host sending far more outbound data than its historical baseline, particularly to a rarely-seen destination."
+        data-spl="index=network sourcetype=stream:tcp | stats sum(bytes_out) as total_out by src_ip | sort -total_out | head 10">
+        <div class="tool-top"><span class="tool-name">bytes_out</span><span class="go">details →</span></div>
+        <p class="tool-desc">Volume of data sent outbound.</p>
+        <span class="ioc-badge">Network IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Network IOC"
+        data-desc="Whether the firewall allowed or blocked the connection attempt."
+        data-why="A string of blocks followed by one allow often marks the moment an attacker found a gap in the rule set."
+        data-lookfor="Repeated blocked attempts to the same destination, then a single allowed connection right after — a possible successful bypass."
+        data-spl="index=network sourcetype=pan:traffic action=blocked | stats count by src_ip, dest_ip | sort -count">
+        <div class="tool-top"><span class="tool-name">action</span><span class="go">details →</span></div>
+        <p class="tool-desc">Allow/block verdict from the firewall.</p>
+        <span class="ioc-badge">Network IOC</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="category" data-category="dns" id="dns" style="--dot: var(--c-dns);">
+    <div class="category-head">
+      <h2><span class="dot"></span>DNS</h2>
+      <span class="phase-tag">Phase 5</span>
+    </div>
+    <p class="category-note">Resolution requests often surface a callback domain before the connection itself ever shows up.</p>
+    <code class="category-spl">index=network sourcetype=stream:dns | stats count by query | sort -count</code>
+    <div class="grid">
+      <button class="tool" type="button" data-ioc="Web IOC"
+        data-desc="The domain name being resolved."
+        data-why="DNS is usually the first thing a payload does — checking here often beats waiting for the actual connection to show up."
+        data-lookfor="Randomized, DGA-looking strings, a newly registered domain, or repeated queries to the same domain at fixed intervals (beaconing)."
+        data-spl="index=network sourcetype=stream:dns | regex query=&quot;^[a-z0-9]{12,}\.&quot; | table _time, src_ip, query">
+        <div class="tool-top"><span class="tool-name">query</span><span class="go">details →</span></div>
+        <p class="tool-desc">Domain name requested.</p>
+        <span class="ioc-badge">Web IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Network IOC"
+        data-desc="The IP address(es) returned for the query."
+        data-why="Links a suspicious domain straight to the infrastructure IP you'll pivot on next."
+        data-lookfor="A resolution to an IP already flagged elsewhere in the case, or an IP outside the ASN/geo you'd expect for that domain."
+        data-spl="index=network sourcetype=stream:dns query=&quot;cloudvaultpro-alerts.net&quot; | table _time, query, answer">
+        <div class="tool-top"><span class="tool-name">answer</span><span class="go">details →</span></div>
+        <p class="tool-desc">IP address(es) the query resolved to.</p>
+        <span class="ioc-badge">Network IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Network IOC"
+        data-desc="The DNS record type requested (A, TXT, NS, MX, etc.)."
+        data-why="Certain record types are rarely queried in bulk by normal endpoints — an unusual mix is worth a second look."
+        data-lookfor="An unusually high volume of TXT queries from one host — a known DNS-tunneling / covert-exfiltration pattern."
+        data-spl="index=network sourcetype=stream:dns record_type=TXT | stats count by src_ip | sort -count">
+        <div class="tool-top"><span class="tool-name">record_type</span><span class="go">details →</span></div>
+        <p class="tool-desc">Type of DNS record requested.</p>
+        <span class="ioc-badge">Network IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Host IOC"
+        data-desc="The internal host that made the DNS query."
+        data-why="Ties a suspicious domain straight back to the machine that asked for it, before you even check the connection logs."
+        data-lookfor="A host you wouldn't expect to be resolving that category of domain at all — e.g. a kiosk machine querying a crypto-mining pool."
+        data-spl="index=network sourcetype=stream:dns src_ip=&quot;10.1.1.50&quot; | stats count by query | sort -count">
+        <div class="tool-top"><span class="tool-name">src_ip</span><span class="go">details →</span></div>
+        <p class="tool-desc">Host that issued the DNS query.</p>
+        <span class="ioc-badge">Host IOC</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="category" data-category="web" id="web" style="--dot: var(--c-web);">
+    <div class="category-head">
+      <h2><span class="dot"></span>Web / Proxy</h2>
+      <span class="phase-tag">Phase 5</span>
+    </div>
+    <p class="category-note">The actual HTTP requests once a link was clicked or a payload called home.</p>
+    <code class="category-spl">index=web sourcetype=access_combined | stats count by url, http_user_agent | sort -count</code>
+    <div class="grid">
+      <button class="tool" type="button" data-ioc="Web IOC"
+        data-desc="The full URL requested."
+        data-why="The most direct link between the email/endpoint side of the case and the phishing infrastructure itself."
+        data-lookfor="A newly registered or lookalike domain, or a long, randomized-looking path used as a C2 check-in beacon."
+        data-spl="index=web sourcetype=access_combined url=&quot;*cvp-verify*&quot; | table _time, src_ip, url, status">
+        <div class="tool-top"><span class="tool-name">url</span><span class="go">details →</span></div>
+        <p class="tool-desc">Full request URL.</p>
+        <span class="ioc-badge">Web IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Web IOC"
+        data-desc="The HTTP verb used for the request (GET, POST, etc.)."
+        data-why="A POST to an unfamiliar external domain is a stronger signal than a GET — it usually means data left the host, not just arrived."
+        data-lookfor="POST requests to a domain that has no legitimate business reason to receive one from this environment."
+        data-spl="index=web sourcetype=access_combined http_method=POST | stats count by url | sort -count">
+        <div class="tool-top"><span class="tool-name">http_method</span><span class="go">details →</span></div>
+        <p class="tool-desc">HTTP method used for the request.</p>
+        <span class="ioc-badge">Web IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Host IOC"
+        data-desc="The client string identifying the requesting application/browser."
+        data-why="Malware C2 traffic frequently uses a hardcoded, outdated, or just-plain-wrong user agent for the host it's running on."
+        data-lookfor="A user agent that doesn't match the browser normally installed on that host, or one that looks scripted (curl, python-requests, custom strings)."
+        data-spl="index=web sourcetype=access_combined | stats count by http_user_agent | sort count | head 10">
+        <div class="tool-top"><span class="tool-name">http_user_agent</span><span class="go">details →</span></div>
+        <p class="tool-desc">Client application string on the request.</p>
+        <span class="ioc-badge">Host IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Web IOC"
+        data-desc="The HTTP status code returned by the server."
+        data-why="Patterns in status codes reveal what the client was trying to do, not just where it went."
+        data-lookfor="A run of 403/404 responses (directory or endpoint brute-forcing) followed by a 200 on an unusual path."
+        data-spl="index=web sourcetype=access_combined status=403 OR status=404 | stats count by url, src_ip | sort -count">
+        <div class="tool-top"><span class="tool-name">status</span><span class="go">details →</span></div>
+        <p class="tool-desc">HTTP response status code.</p>
+        <span class="ioc-badge">Web IOC</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="category" data-category="auth" id="auth" style="--dot: var(--c-auth);">
+    <div class="category-head">
+      <h2><span class="dot"></span>Authentication</h2>
+      <span class="phase-tag">Phase 6 · Attribution</span>
+    </div>
+    <p class="category-note">Did the phishing lure actually lead to a credential being used somewhere.</p>
+    <code class="category-spl">index=security sourcetype=WinEventLog:Security EventCode=4625 | stats count by user, src | where count &gt; 5</code>
+    <div class="grid">
+      <button class="tool" type="button" data-ioc="Identity IOC"
+        data-desc="The account that performed or attempted the logon."
+        data-why="Anchors every other authentication field to a specific identity you can go reset, disable, or interview."
+        data-lookfor="A service account logging in interactively, or any account authenticating well outside its normal hours."
+        data-spl="index=security sourcetype=WinEventLog:Security EventCode=4624 Logon_Type=10 | table _time, user, src">
+        <div class="tool-top"><span class="tool-name">user</span><span class="go">details →</span></div>
+        <p class="tool-desc">Account that authenticated.</p>
+        <span class="ioc-badge">Identity IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Network IOC"
+        data-desc="The IP or host the logon attempt originated from."
+        data-why="Cross-check this straight against AbuseIPDB/GreyNoise — the same field that tells you where the login came from tells you if it's a known-bad source."
+        data-lookfor="A source IP geographically distant from the user's normal login location, or one already flagged elsewhere in the case."
+        data-spl="index=security sourcetype=WinEventLog:Security EventCode=4624 | iplocation src | table _time, user, src, Country">
+        <div class="tool-top"><span class="tool-name">src</span><span class="go">details →</span></div>
+        <p class="tool-desc">Source of the authentication attempt.</p>
+        <span class="ioc-badge">Network IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Host IOC"
+        data-desc="The self-reported name of the client machine that initiated the logon, carried inside the 4624/4625 event itself — distinct from src (its IP) and from host (the server that logged the event)."
+        data-why="A second identifier for the client beyond its IP — useful when the source IP is masked behind NAT, a VPN concentrator, or a proxy that makes every src look identical."
+        data-lookfor="A WorkstationName that doesn't match any asset in your inventory, or one inconsistent with the src IP it's paired with — this value is client-reported and attacker-controlled, so treat a mismatch as a lead, not a fact."
+        data-spl="index=security sourcetype=&quot;WinEventLog:Security&quot; EventCode=4624 | stats count by WorkstationName, src | sort WorkstationName">
+        <div class="tool-top"><span class="tool-name">WorkstationName</span><span class="go">details →</span></div>
+        <p class="tool-desc">Self-reported client hostname on the logon event.</p>
+        <span class="ioc-badge">Host IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Identity IOC"
+        data-desc="Whether the authentication attempt succeeded or failed."
+        data-why="The transition from failure to success is the single strongest brute-force signal in the whole data model."
+        data-lookfor="A burst of failed logons for one account immediately followed by a single success — classic credential-stuffing or brute-force pattern."
+        data-spl="index=security sourcetype=WinEventLog:Security EventCode=4625 | stats count by user, src | where count &gt; 10">
+        <div class="tool-top"><span class="tool-name">action</span><span class="go">details →</span></div>
+        <p class="tool-desc">Success/failure result of the logon.</p>
+        <span class="ioc-badge">Identity IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Identity IOC"
+        data-desc="Which application or service generated the authentication event (VPN, O365, AD, SSO)."
+        data-why="A user's first-ever login to an application they've never touched before is worth a second look on its own."
+        data-lookfor="Authentication to a legacy or rarely-used app right after a phishing click — attackers often go straight for less-monitored systems."
+        data-spl="index=security | stats dc(app) as app_count by user | sort -app_count">
+        <div class="tool-top"><span class="tool-name">app</span><span class="go">details →</span></div>
+        <p class="tool-desc">Application or service the logon was against.</p>
+        <span class="ioc-badge">Identity IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Host IOC"
+        data-desc="The specific Windows security event ID (4624=success, 4625=failure, 4672=admin-level privileges assigned)."
+        data-why="4672 appearing right after 4624 for a normal user is one of the cleanest privilege-escalation signals in Windows logs."
+        data-lookfor="EventCode 4672 (special privileges assigned) immediately following a 4624 logon for an account that isn't normally an admin."
+        data-spl="index=security sourcetype=WinEventLog:Security EventCode=4672 | table _time, user, src">
+        <div class="tool-top"><span class="tool-name">EventCode</span><span class="go">details →</span></div>
+        <p class="tool-desc">Windows Security event ID for the logon type.</p>
+        <span class="ioc-badge">Host IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Identity IOC"
+        data-desc="The numeric type of logon on a 4624/4625 event — 2=interactive, 3=network, 4=batch, 5=service, 7=unlock, 10=RemoteInteractive (RDP), 11=cached credentials."
+        data-why="Tells you how an account logged in, not just that it did — a service account authenticating as type 2 or 10 is far more alarming than the same account as type 5."
+        data-lookfor="LogonType 10 (RDP) from an unfamiliar source, or LogonType 3 (network) for an account that should only ever log on interactively at a console."
+        data-spl="index=security sourcetype=WinEventLog:Security EventCode=4624 | stats count by user, LogonType, src | sort LogonType">
+        <div class="tool-top"><span class="tool-name">LogonType</span><span class="go">details →</span></div>
+        <p class="tool-desc">Numeric logon method (interactive, network, RDP, service...).</p>
+        <span class="ioc-badge">Identity IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Identity IOC"
+        data-desc="The full list of security groups embedded in a logon's access token, captured at the moment of the 4624 event."
+        data-why="Shows the account's actual effective rights at that exact logon — more reliable than checking group membership afterward, since a later change wouldn't show up in this snapshot."
+        data-lookfor="An admin-equivalent group in the token that doesn't show up when you check the account's current group membership separately — a sign the grant was made, used, and reverted."
+        data-spl="index=security sourcetype=WinEventLog:Security EventCode=4624 GroupMembership=&quot;*Admin*&quot; | table _time, user, GroupMembership">
+        <div class="tool-top"><span class="tool-name">GroupMembership</span><span class="go">details →</span></div>
+        <p class="tool-desc">Security groups in the logon's access token.</p>
+        <span class="ioc-badge">Identity IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Host IOC"
+        data-desc="The specific Windows privileges — SeDebugPrivilege, SeBackupPrivilege, SeTcbPrivilege, and similar — assigned to or used by a logon session."
+        data-why="More granular than a 4672 alone — tells you exactly which admin-level capability was in play, not just that some elevated right was granted."
+        data-lookfor="SeDebugPrivilege or SeTcbPrivilege on a session for an account that isn't a designated administrator — both are commonly abused for credential dumping and process injection."
+        data-spl="index=security sourcetype=WinEventLog:Security PrivilegeList=&quot;*SeDebugPrivilege*&quot; | table _time, user, host, PrivilegeList">
+        <div class="tool-top"><span class="tool-name">PrivilegeList</span><span class="go">details →</span></div>
+        <p class="tool-desc">Specific admin-level privileges granted or used.</p>
+        <span class="ioc-badge">Host IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Identity IOC"
+        data-desc="A brute-force variant where a small number of common passwords are tried against many different accounts, instead of many passwords against one account — built specifically to stay under a per-account lockout threshold."
+        data-why="A per-account failed-count filter, like the one on the 4625 card above, won't catch this — each individual account might only see one or two failures. The signal is in the distinct account count coming from one source, not the count per account."
+        data-lookfor="One source IP or host generating 4625 failures against an unusually high number of distinct accounts in a short window — even if no single account crosses a normal lockout threshold."
+        data-spl="index=security sourcetype=WinEventLog:Security EventCode=4625 | stats dc(user) as accounts_targeted by src | where accounts_targeted > 15">
+        <div class="tool-top"><span class="tool-name">Password spray pattern</span><span class="go">details →</span></div>
+        <p class="tool-desc">Few passwords, many accounts — distinct from brute force.</p>
+        <span class="ioc-badge">Identity IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Identity IOC"
+        data-desc="Two successful logons for the same account, from two geolocated source IPs, closer together in time than a real person could plausibly travel between those locations."
+        data-why="A stolen credential used from an attacker's own location often shows up as a second, geographically distant login for an account that just authenticated normally somewhere else minutes earlier."
+        data-lookfor="The same user authenticating from two different countries within an implausibly short window — pair iplocation with streamstats to compute the time and location gap between each account's consecutive logins."
+        data-spl="index=security sourcetype=WinEventLog:Security EventCode=4624 | iplocation src | streamstats current=f last(Country) as prev_country, last(_time) as prev_time by user | eval gap_min=(_time-prev_time)/60 | where Country!=prev_country and gap_min<120">
+        <div class="tool-top"><span class="tool-name">Impossible travel</span><span class="go">details →</span></div>
+        <p class="tool-desc">Same account, two geographies, too little time between.</p>
+        <span class="ioc-badge">Identity IOC</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="category" data-category="account" id="account" style="--dot: var(--c-account);">
+    <div class="category-head">
+      <h2><span class="dot"></span>Account Management</h2>
+      <span class="phase-tag">Phase 6 · Persistence</span>
+    </div>
+    <p class="category-note">Not logons — attribute changes on the account itself. This is where quiet, long-term persistence hides.</p>
+    <code class="category-spl">index=security sourcetype=WinEventLog:Security EventCode=4738 | table _time, SamAccountName, PrimaryGroupId, AllowedToDelegateTo, NewUacValue</code>
+    <div class="grid">
+      <button class="tool" type="button" data-ioc="Identity IOC"
+        data-desc="The pre-Windows 2000 logon name of the account being created or modified."
+        data-why="Anchors every other field in this category to one specific account you can go lock down."
+        data-lookfor="A name that doesn't match your org's naming convention, or one appearing in a 4738/4720 with no matching ticket or HR record."
+        data-spl="index=security sourcetype=WinEventLog:Security EventCode=4720 OR EventCode=4738 | stats count by SamAccountName, EventCode">
+        <div class="tool-top"><span class="tool-name">SamAccountName</span><span class="go">details →</span></div>
+        <p class="tool-desc">Logon name of the account being changed.</p>
+        <span class="ioc-badge">Identity IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Identity IOC"
+        data-desc="Two separate identities on the same event — SubjectUserName is the account that performed the action, TargetUserName is the account the action was performed on."
+        data-why="On any account-management or privilege event, these two are rarely the same account — mixing them up misattributes who actually did something to whom."
+        data-lookfor="A SubjectUserName that isn't a designated administrator or the account's own owner, changing a TargetUserName that belongs to someone else — especially a privileged one."
+        data-spl="index=security sourcetype=WinEventLog:Security EventCode=4738 | table _time, SubjectUserName, TargetUserName, PrimaryGroupId">
+        <div class="tool-top"><span class="tool-name">SubjectUserName / TargetUserName</span><span class="go">details →</span></div>
+        <p class="tool-desc">Who made the change vs. whose account was changed.</p>
+        <span class="ioc-badge">Identity IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Identity IOC"
+        data-desc="The RID of the account's primary group — 512 is Domain Admins, 513 is Domain Users, 516 is Domain Controllers."
+        data-why="Changing this grants group-level rights without generating the 4728/4732 group-membership events most defenders actually watch for — a well-known stealthy privesc trick."
+        data-lookfor="A PrimaryGroupId of 512 on an account that isn't a designated domain admin, with no corresponding group-membership event nearby."
+        data-spl="index=security sourcetype=WinEventLog:Security EventCode=4738 PrimaryGroupId=512 | table _time, SamAccountName, host">
+        <div class="tool-top"><span class="tool-name">PrimaryGroupId</span><span class="go">details →</span></div>
+        <p class="tool-desc">RID of the account's primary AD group.</p>
+        <span class="ioc-badge">Identity IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Identity IOC"
+        data-desc="Configures Kerberos constrained delegation — which services this account is trusted to request tickets on behalf of other users for."
+        data-why="A textbook technique for quiet, long-term persistence and lateral movement once an attacker has domain-admin-equivalent rights, even briefly."
+        data-lookfor="This field being populated at all on an account that previously had no delegation configured — it's rare enough on a normal user or service account to be worth investigating outright."
+        data-spl="index=security sourcetype=WinEventLog:Security EventCode=4738 AllowedToDelegateTo=* | table _time, SamAccountName, AllowedToDelegateTo">
+        <div class="tool-top"><span class="tool-name">AllowedToDelegateTo</span><span class="go">details →</span></div>
+        <p class="tool-desc">Kerberos constrained-delegation targets set on the account.</p>
+        <span class="ioc-badge">Identity IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Identity IOC"
+        data-desc="The User Account Control flag values before (OldUacValue) and after (NewUacValue) a 4738 change."
+        data-why="Shows exactly which security-relevant flag was flipped — not just that 'something changed' on the account."
+        data-lookfor="DONT_REQUIRE_PREAUTH being enabled (opens the account to offline AS-REP roasting), or PASSWD_NOTREQD being set on an account that should require one."
+        data-spl="index=security sourcetype=WinEventLog:Security EventCode=4738 NewUacValue!=OldUacValue | table _time, SamAccountName, OldUacValue, NewUacValue">
+        <div class="tool-top"><span class="tool-name">NewUacValue / OldUacValue</span><span class="go">details →</span></div>
+        <p class="tool-desc">Account-control flags before and after the change.</p>
+        <span class="ioc-badge">Identity IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Identity IOC"
+        data-desc="Timestamp of the account's last password change."
+        data-why="Lets you line up a password reset against the rest of your incident timeline — did it happen before or after the suspicious activity started?"
+        data-lookfor="A reset that doesn't correspond to any help-desk ticket, self-service request, or scheduled rotation policy."
+        data-spl="index=security sourcetype=WinEventLog:Security EventCode=4738 PasswordLastSet=* | table _time, SamAccountName, PasswordLastSet">
+        <div class="tool-top"><span class="tool-name">PasswordLastSet</span><span class="go">details →</span></div>
+        <p class="tool-desc">Timestamp of the account's last password change.</p>
+        <span class="ioc-badge">Identity IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Host IOC"
+        data-desc="The logon script path configured on the account — runs automatically on every interactive logon."
+        data-why="One of the oldest, lowest-visibility persistence mechanisms in Active Directory — nobody checks logon scripts unless they already suspect them."
+        data-lookfor="A path pointing outside the normal NETLOGON share, or a script that wasn't there the last time this account was reviewed."
+        data-spl="index=security sourcetype=WinEventLog:Security ScriptPath=* | stats count by SamAccountName, ScriptPath">
+        <div class="tool-top"><span class="tool-name">ScriptPath</span><span class="go">details →</span></div>
+        <p class="tool-desc">Logon script path configured on the account.</p>
+        <span class="ioc-badge">Host IOC</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="category" data-category="malware" id="malware" style="--dot: var(--c-malware);">
+    <div class="category-head">
+      <h2><span class="dot"></span>Malware / File</h2>
+      <span class="phase-tag">Phase 6 · IOC Extraction</span>
+    </div>
+    <p class="category-note">The verdict fields — what your AV/EDR actually said about the file in question.</p>
+    <code class="category-spl">index=endpoint sourcetype=antivirus signature=* | stats count by signature, file_name, vendor_product</code>
+    <div class="grid">
+      <button class="tool" type="button" data-ioc="File IOC"
+        data-desc="The MD5, SHA1, or SHA256 hash of the file in question."
+        data-why="The single most portable IOC in the whole case — the same value you check on VirusTotal, MalwareBazaar, and every other sandbox."
+        data-lookfor="A hash that already returns detections on VirusTotal, or one that matches a hash you flagged earlier in the same investigation."
+        data-spl="index=endpoint sourcetype=antivirus file_hash=* | stats count by file_hash, file_name">
+        <div class="tool-top"><span class="tool-name">file_hash</span><span class="go">details →</span></div>
+        <p class="tool-desc">Cryptographic hash of the file.</p>
+        <span class="ioc-badge">File IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="File IOC"
+        data-desc="The file name as it appeared on disk."
+        data-why="A quick visual check before you even get to the hash — naming tricks are a cheap, common evasion technique."
+        data-lookfor="A double extension (invoice.pdf.exe), or a name mimicking a legitimate system file (svch0st.exe, scvhost.exe)."
+        data-spl="index=endpoint sourcetype=antivirus | regex file_name=&quot;\.(pdf|docx?|xlsx?)\.exe$&quot;">
+        <div class="tool-top"><span class="tool-name">file_name</span><span class="go">details →</span></div>
+        <p class="tool-desc">Name of the file on disk.</p>
+        <span class="ioc-badge">File IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="Host IOC"
+        data-desc="The full path where the file was written or executed from."
+        data-why="Persistence locations are limited and well-known — this field tells you if the attacker is trying to survive a reboot."
+        data-lookfor="A file written to a Startup folder, Run key path, or scheduled-task directory instead of a normal install location."
+        data-spl="index=endpoint sourcetype=antivirus file_path=&quot;*\\Startup\\*&quot; OR file_path=&quot;*\\Temp\\*&quot;">
+        <div class="tool-top"><span class="tool-name">file_path</span><span class="go">details →</span></div>
+        <p class="tool-desc">Location of the file on the host.</p>
+        <span class="ioc-badge">Host IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="File IOC"
+        data-desc="The detection name assigned by the AV/EDR product, if the file was flagged."
+        data-why="Tells you whether you're dealing with a named, well-understood family or a generic heuristic hit that needs manual review."
+        data-lookfor="A generic name (Trojan.GenericKD, Heur.AdvML) that needs a sandbox run to confirm, versus a named family you already have playbooks for."
+        data-spl="index=endpoint sourcetype=antivirus signature=* | top limit=15 signature">
+        <div class="tool-top"><span class="tool-name">signature</span><span class="go">details →</span></div>
+        <p class="tool-desc">Detection/signature name from the security product.</p>
+        <span class="ioc-badge">File IOC</span>
+      </button>
+      <button class="tool" type="button" data-ioc="File IOC"
+        data-desc="Which security product or sensor generated the alert."
+        data-why="The same file getting flagged by more than one independent product is a strong confidence boost on the verdict."
+        data-lookfor="One hash showing up across multiple distinct vendor_product values — corroboration you can cite directly in the report."
+        data-spl="index=endpoint sourcetype=antivirus file_hash=* | stats dc(vendor_product) as detections by file_hash | where detections &gt; 1">
+        <div class="tool-top"><span class="tool-name">vendor_product</span><span class="go">details →</span></div>
+        <p class="tool-desc">Security product/sensor that generated the alert.</p>
+        <span class="ioc-badge">File IOC</span>
+      </button>
+    </div>
+  </section>
+
+  <p class="empty-state" id="empty">No fields match that filter.</p>
+
+  <footer>
+    Companion reference to the <a href="https://zelihazenginapogeeusa-byte.github.io/zeliha-infosec-journey/Blue-Team/02-DFIR-and-Threat-Intelligence/wireshark-field-guide.html" target="_blank" rel="noopener noreferrer">Wireshark Field Guide</a> and the <a href="https://zelihazenginapogeeusa-byte.github.io/zeliha-infosec-journey/osint-field-toolkit.html" target="_blank" rel="noopener noreferrer">OSINT Field Toolkit</a> — same case, the internal-telemetry side instead of the open-source side. BTL1-aligned.
+  </footer>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<aside class="panel" id="panel" role="dialog" aria-modal="true" aria-labelledby="panel-name" style="--dot: var(--c-network);">
+  <div class="panel-head">
+    <div>
+      <p class="panel-cat" id="panel-cat">Category</p>
+      <h2 class="panel-name" id="panel-name">field_name</h2>
+    </div>
+    <button class="panel-close" id="panel-close" type="button" aria-label="Close">×</button>
+  </div>
+  <p class="panel-ioc"><span class="ioc-badge" id="panel-ioc-badge">IOC type</span></p>
+  <div class="panel-body">
+    <div class="panel-field">
+      <h3>What it is</h3>
+      <p id="panel-desc"></p>
+    </div>
+    <div class="panel-field">
+      <h3>Why look at it</h3>
+      <p id="panel-why"></p>
+    </div>
+    <div class="panel-field lookfor">
+      <h3>What to look for</h3>
+      <p id="panel-lookfor"></p>
+    </div>
+    <div class="panel-field spl">
+      <h3>SPL example</h3>
+      <pre id="panel-spl"></pre>
+    </div>
+  </div>
+</aside>
+
+<script>
+  (function () {
+    var input = document.getElementById("search");
+    var categories = Array.prototype.slice.call(document.querySelectorAll(".category"));
+    var empty = document.getElementById("empty");
+
+    input.addEventListener("input", function () {
+      var q = input.value.trim().toLowerCase();
+      var anyVisible = false;
+
+      categories.forEach(function (cat) {
+        var catTools = cat.querySelectorAll(".tool");
+        var catHasMatch = false;
+
+        catTools.forEach(function (tool) {
+          var text = tool.textContent.toLowerCase();
+          var match = q === "" || text.indexOf(q) !== -1;
+          tool.style.display = match ? "" : "none";
+          if (match) { catHasMatch = true; anyVisible = true; }
+        });
+
+        cat.style.display = catHasMatch ? "" : "none";
+      });
+
+      empty.classList.toggle("show", !anyVisible);
+    });
+  })();
+
+  (function () {
+    var panel = document.getElementById("panel");
+    var scrim = document.getElementById("scrim");
+    var closeBtn = document.getElementById("panel-close");
+    var lastFocused = null;
+
+    function openPanel(tool) {
+      var cat = tool.closest(".category");
+      var catName = cat.querySelector(".category-head h2").textContent.trim();
+      var dot = getComputedStyle(tool).borderLeftColor;
+
+      panel.style.setProperty("--dot", dot);
+      document.getElementById("panel-cat").textContent = catName;
+      document.getElementById("panel-name").textContent = tool.querySelector(".tool-name").textContent;
+      document.getElementById("panel-ioc-badge").textContent = tool.getAttribute("data-ioc") || "";
+      document.getElementById("panel-desc").textContent = tool.getAttribute("data-desc") || "";
+      document.getElementById("panel-why").textContent = tool.getAttribute("data-why") || "";
+      document.getElementById("panel-lookfor").textContent = tool.getAttribute("data-lookfor") || "";
+      document.getElementById("panel-spl").textContent = tool.getAttribute("data-spl") || "";
+
+      lastFocused = tool;
+      panel.classList.add("open");
+      scrim.classList.add("open");
+      closeBtn.focus();
+    }
+
+    function closePanel() {
+      panel.classList.remove("open");
+      scrim.classList.remove("open");
+      if (lastFocused) lastFocused.focus();
+    }
+
+    document.querySelectorAll(".tool").forEach(function (tool) {
+      tool.addEventListener("click", function () { openPanel(tool); });
+    });
+
+    closeBtn.addEventListener("click", closePanel);
+    scrim.addEventListener("click", closePanel);
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && panel.classList.contains("open")) closePanel();
+    });
+  })();
+
+  (function () {
+    // Jumpnav pills are plain buttons (not <a href="#...">) on purpose — an
+    // in-page anchor link resolves to a full claudeusercontent.com URL inside
+    // this hosting environment, which triggers an "open external link"
+    // confirmation instead of just scrolling. A button with a click handler
+    // sidesteps that entirely.
+    document.querySelectorAll(".jumpnav button[data-target]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var el = document.getElementById(btn.getAttribute("data-target"));
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    });
+  })();
+</script>
