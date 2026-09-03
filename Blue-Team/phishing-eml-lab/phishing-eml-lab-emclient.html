@@ -1,224 +1,111 @@
-<!DOCTYPE html>
-<html lang="en" data-theme="dark">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Phishing .eml Lab — eM Client Walkthrough</title>
-<style>
-  :root{
-    --bg:#121417; --panel:#1a1d23; --panel2:#0b0d10; --border:#2a2e37;
-    --text:#e6e8ec; --muted:#8891a1;
-    --crit:#fff176; --crit-text:#3a2f00;
-    --imp:#7fd8d0; --imp-text:#04302c;
-    --danger:#e5484d;
-  }
-  html[data-theme="light"]{
-    --bg:#f4f5f7; --panel:#ffffff; --panel2:#eef0f3; --border:#dde1e6;
-    --text:#1a1d23; --muted:#5a6270;
-    --crit:#fff176; --crit-text:#3a2f00;
-    --imp:#0f8f83; --imp-text:#ffffff;
-    --danger:#d92d3a;
-  }
-  *{box-sizing:border-box;}
-  body{margin:0; background:var(--bg); color:var(--text);
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; line-height:1.6;}
-  .wrap{max-width:960px; margin:0 auto; padding:28px 20px 80px;}
-  header{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:6px; flex-wrap:wrap;}
-  h1{font-size:19px; margin:0; letter-spacing:.02em;}
-  .sub{color:var(--muted); font-size:13px; margin:0 0 26px;}
-  button.icon{
-    font-size:13px; cursor:pointer; background:var(--panel); color:var(--text);
-    border:1px solid var(--border); border-radius:7px; padding:6px 10px;
-  }
-  h2.section{font-size:15px; margin:34px 0 14px; padding-bottom:8px; border-bottom:2px solid var(--border);}
-  p{font-size:13.5px;}
-  code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; background:var(--panel2); padding:1px 6px; border-radius:4px; font-size:12.5px; border:1px solid var(--border);}
+📧 Phishing .eml Lab — eM Client Walkthrough
+☀
+A self-contained header-forensics lab for eM Client — three original, purpose-built .eml samples with planted red flags, no external repo required.
 
-  /* Flow */
-  .flow{display:flex; flex-wrap:wrap; gap:0; align-items:stretch; margin:10px 0 8px;}
-  .flowstep{background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:14px 16px;
-    flex:1 1 190px; min-width:170px; position:relative;}
-  .flowstep .fnum{width:24px; height:24px; border-radius:50%; background:var(--imp); color:var(--imp-text);
-    font-size:12px; font-weight:800; display:flex; align-items:center; justify-content:center; margin-bottom:8px;}
-  .flowstep .ftitle{font-weight:700; font-size:13px; margin-bottom:4px;}
-  .flowstep .fdesc{color:var(--muted); font-size:11.5px; line-height:1.45;}
-  .flowarrow{display:flex; align-items:center; justify-content:center; color:var(--muted); font-size:18px; padding:0 4px; flex:0 0 auto;}
-  @media (max-width:820px){ .flowarrow{ transform:rotate(90deg); padding:6px 0; } }
+The process, at a glance
+1
+Get the sample
+Download one of the 3 custom .eml scenarios from your own repo.
+→
+2
+Install & open eM Client
+Free download, then drag the .eml into a local folder.
+→
+3
+Show Source
+Pull the full raw headers — this is where the real investigation starts.
+→
+4
+Fill the header table
+From, Reply-To, Return-Path, Received chain, SPF/DKIM/DMARC.
+5
+Extract links
+Compare displayed text vs. real href in the raw source.
+→
+6
+Check VirusTotal
+Paste the extracted URLs/IPs/hashes, check reputation.
+→
+7
+Write the triage report
+4–5 line SOC Tier-1-style summary of the verdict.
+Step by step
+1
+Get the sample
+Download the target .eml file from your own zeliha-infosec-journey repo — three original scenarios, purpose-built for this lab, each with a specific set of planted red flags.
 
-  /* Cards */
-  .card{background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:16px 18px; margin-bottom:14px;}
-  .card h3{font-size:13.5px; margin:0 0 8px; display:flex; align-items:center; gap:8px;}
-  .card h3 .stepdot{width:20px; height:20px; border-radius:50%; background:var(--panel2); border:1px solid var(--border);
-    display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:var(--muted); flex-shrink:0;}
-  .card p{margin:0 0 8px; color:var(--muted);}
-  .card p:last-child{margin-bottom:0;}
-  .card .clickpath{background:var(--panel2); border:1px solid var(--border); border-radius:6px; padding:8px 10px; font-size:12px; margin:8px 0;}
-  .warn-box{background:var(--panel2); border-left:3px solid var(--crit); border-radius:6px; padding:10px 14px; margin:14px 0; font-size:12.5px; color:var(--muted);}
-  .warn-box b{color:var(--text);}
+Sample	Scenario	Download
+sample-01-it-helpdesk-reset.eml	Credential-harvesting — fake IT helpdesk password-expiry notice	⬇ download
+sample-02-invoice-overdue.eml	Vendor / BEC-style — fake overdue invoice with a "changed" remittance account	⬇ download
+sample-03-account-suspended.eml	Urgency / account-takeover — fake "unusual sign-in blocked" cloud-storage alert	⬇ download
+Each link opens the file on GitHub — use the Download raw file button there (the ⬇ icon in the file view) to save it locally.
 
-  table.ref-table{width:100%; border-collapse:collapse; font-size:12.5px; margin:6px 0 10px;}
-  table.ref-table th, table.ref-table td{border:1px solid var(--border); padding:7px 10px; text-align:left;}
-  table.ref-table th{background:var(--panel2); color:var(--muted); font-weight:600;}
+2
+Install eM Client, then open the sample
+eM Client is a free desktop email client — the free version is enough for this, nothing paid is required.
 
-  .prompt-box{background:var(--panel2); border:1px solid var(--imp); border-radius:8px; padding:14px 16px; font-size:13px; font-style:italic; color:var(--text);}
-  .prompt-box .plabel{font-style:normal; font-weight:700; color:var(--imp); font-size:10.5px; text-transform:uppercase; letter-spacing:.04em; margin-bottom:6px; display:block;}
+Download: emclient.com/download (Windows) or emclient.com/download-mac (Mac)
+Run the installer → open eM Client → skip/close the "add an account" prompt if you don't want to connect a real mailbox, you don't need one for this lab.
+Then drag the downloaded .eml file directly into a local folder inside eM Client (or File → Open). It opens like a real received email.
 
-  details.answerkey{background:var(--panel); border:1px solid var(--danger); border-radius:10px; overflow:hidden;}
-  details.answerkey summary{cursor:pointer; padding:14px 18px; font-weight:700; font-size:13.5px; list-style:none; color:var(--danger); display:flex; align-items:center; gap:8px;}
-  details.answerkey summary::-webkit-details-marker{display:none;}
-  details.answerkey summary::before{content:"▸"; transition:transform .15s ease;}
-  details.answerkey[open] summary::before{transform:rotate(90deg);}
-  .akbody{padding:0 18px 18px;}
-  .akbody h4{font-size:13px; margin:16px 0 8px;}
-  .akbody h4:first-child{margin-top:0;}
+3
+Pull the raw headers — the step that actually matters
+The normal message view only shows you a summary. The real investigation happens in the raw source.
 
-  footer{margin-top:40px; font-size:11.5px; color:var(--muted); text-align:center;}
+Right-click the email → Show Source (same option is also reachable from the message menu). This opens the full raw MIME source — every header, unfiltered.
+4
+Fill in the header table
+Work through the raw source and record each field — this table doubles as your worksheet:
 
-  @media (max-width:640px){ .flow{flex-direction:column;} }
-</style>
-</head>
-<body>
-<div class="wrap">
+Field	Where to find it in the raw source
+From address	From: header — check it matches the display name
+Reply-To	Reply-To: header — a mismatch from From is a classic red flag
+Return-Path	Return-Path: header — where bounces actually go, often reveals the real sending domain
+Received chain	Stack of Received: headers, read bottom-to-top — traces the actual server hops back to origin
+SPF / DKIM / DMARC	Authentication-Results: header — look for pass / fail / none on each
+Subject / Date / Message-ID	Standard headers near the top of the source
+5
+Extract the suspicious links
+This is the one step eM Client alone doesn't handle as cleanly as VS Code + grep.
 
-  <header>
-    <h1>📧 Phishing .eml Lab — eM Client Walkthrough</h1>
-    <button class="icon" id="themeToggle" title="Toggle light/dark">☀</button>
-  </header>
-  <p class="sub">A self-contained header-forensics lab for eM Client — three original, purpose-built .eml samples with planted red flags, no external repo required.</p>
+In the normal message view, hover a link and check the status bar for the real destination. But when the visible text and the actual target need a side-by-side check, go back to the Show Source view from Step 3 and read the raw <a href="..."> tags directly — that's the only way to catch a link whose displayed text doesn't match where it actually goes.
 
-  <h2 class="section">The process, at a glance</h2>
-  <div class="flow">
-    <div class="flowstep"><div class="fnum">1</div><div class="ftitle">Get the sample</div><div class="fdesc">Download one of the 3 custom .eml scenarios from your own repo.</div></div>
-    <div class="flowarrow">→</div>
-    <div class="flowstep"><div class="fnum">2</div><div class="ftitle">Install &amp; open eM Client</div><div class="fdesc">Free download, then drag the .eml into a local folder.</div></div>
-    <div class="flowarrow">→</div>
-    <div class="flowstep"><div class="fnum">3</div><div class="ftitle">Show Source</div><div class="fdesc">Pull the full raw headers — this is where the real investigation starts.</div></div>
-    <div class="flowarrow">→</div>
-    <div class="flowstep"><div class="fnum">4</div><div class="ftitle">Fill the header table</div><div class="fdesc">From, Reply-To, Return-Path, Received chain, SPF/DKIM/DMARC.</div></div>
-  </div>
-  <div class="flow" style="margin-top:8px;">
-    <div class="flowstep"><div class="fnum">5</div><div class="ftitle">Extract links</div><div class="fdesc">Compare displayed text vs. real href in the raw source.</div></div>
-    <div class="flowarrow">→</div>
-    <div class="flowstep"><div class="fnum">6</div><div class="ftitle">Check VirusTotal</div><div class="fdesc">Paste the extracted URLs/IPs/hashes, check reputation.</div></div>
-    <div class="flowarrow">→</div>
-    <div class="flowstep"><div class="fnum">7</div><div class="ftitle">Write the triage report</div><div class="fdesc">4–5 line SOC Tier-1-style summary of the verdict.</div></div>
-    <div class="flowarrow" style="visibility:hidden;">→</div>
-    <div class="flowstep" style="visibility:hidden;"></div>
-  </div>
+Hybrid approach, by design: eM Client for the email and header investigation, raw source (or a plain text editor, if you export it) for pulling out real URLs, VirusTotal for reputation checks. This isn't a workaround — it mirrors how a real SOC Tier 1 analyst actually works.
+6
+Check IOCs against VirusTotal
+Copy each extracted URL, IP, or attachment hash into VirusTotal and check the detection ratio and any tagged behavior — same as any other IOC reputation check.
 
-  <h2 class="section">Step by step</h2>
+7
+Write the triage report
+Close it out with a short SOC Tier-1-style summary: who it claims to be from, which authentication checks failed, which IOCs came back malicious/suspicious, and your verdict (malicious / suspicious / benign). Reuse the phishing investigation playbook and report template already in your Blue-Team folder for the exact structure.
 
-  <div class="card">
-    <h3><span class="stepdot">1</span> Get the sample</h3>
-    <p>Download the target .eml file from your own <code>zeliha-infosec-journey</code> repo — three original scenarios, purpose-built for this lab, each with a specific set of planted red flags.</p>
-    <table class="ref-table">
-      <tr><th>Sample</th><th>Scenario</th><th>Download</th></tr>
-      <tr><td><code>sample-01-it-helpdesk-reset.eml</code></td><td>Credential-harvesting — fake IT helpdesk password-expiry notice</td><td><a href="https://github.com/zelihazenginapogeeusa-byte/zeliha-infosec-journey/blob/cybersecurity-learning-hub/Blue-Team/phishing-eml-lab/samples/sample-01-it-helpdesk-reset.eml" target="_blank" rel="noopener" style="color:var(--imp);">⬇ download</a></td></tr>
-      <tr><td><code>sample-02-invoice-overdue.eml</code></td><td>Vendor / BEC-style — fake overdue invoice with a "changed" remittance account</td><td><a href="https://github.com/zelihazenginapogeeusa-byte/zeliha-infosec-journey/blob/cybersecurity-learning-hub/Blue-Team/phishing-eml-lab/samples/sample-02-invoice-overdue.eml" target="_blank" rel="noopener" style="color:var(--imp);">⬇ download</a></td></tr>
-      <tr><td><code>sample-03-account-suspended.eml</code></td><td>Urgency / account-takeover — fake "unusual sign-in blocked" cloud-storage alert</td><td><a href="https://github.com/zelihazenginapogeeusa-byte/zeliha-infosec-journey/blob/cybersecurity-learning-hub/Blue-Team/phishing-eml-lab/samples/sample-03-account-suspended.eml" target="_blank" rel="noopener" style="color:var(--imp);">⬇ download</a></td></tr>
-    </table>
-    <p style="font-size:11.5px;">Each link opens the file on GitHub — use the <b>Download raw file</b> button there (the ⬇ icon in the file view) to save it locally.</p>
-  </div>
+How to prove an email is malicious
+No single red flag is proof on its own — a typo or an ugly template doesn't make an email malicious. A defensible verdict comes from correlating multiple independent signals across the headers, the body, and external verification. Below is what to actually check, and what "proof" looks like at each layer.
 
-  <div class="card">
-    <h3><span class="stepdot">2</span> Install eM Client, then open the sample</h3>
-    <p>eM Client is a free desktop email client — the free version is enough for this, nothing paid is required.</p>
-    <div class="clickpath">
-      Download: <a href="https://www.emclient.com/download" target="_blank" style="color:var(--imp);">emclient.com/download</a> (Windows) or <a href="https://www.emclient.com/download-mac" target="_blank" style="color:var(--imp);">emclient.com/download-mac</a> (Mac)<br>
-      Run the installer → open eM Client → skip/close the "add an account" prompt if you don't want to connect a real mailbox, you don't need one for this lab.
-    </div>
-    <p>Then drag the downloaded <code>.eml</code> file directly into a local folder inside eM Client (or <b>File → Open</b>). It opens like a real received email.</p>
-  </div>
-
-  <div class="card">
-    <h3><span class="stepdot">3</span> Pull the raw headers — the step that actually matters</h3>
-    <p>The normal message view only shows you a summary. The real investigation happens in the raw source.</p>
-    <div class="clickpath">Right-click the email → <b>Show Source</b> (same option is also reachable from the message menu). This opens the full raw MIME source — every header, unfiltered.</div>
-  </div>
-
-  <div class="card">
-    <h3><span class="stepdot">4</span> Fill in the header table</h3>
-    <p>Work through the raw source and record each field — this table doubles as your worksheet:</p>
-    <table class="ref-table">
-      <tr><th>Field</th><th>Where to find it in the raw source</th></tr>
-      <tr><td>From address</td><td><code>From:</code> header — check it matches the display name</td></tr>
-      <tr><td>Reply-To</td><td><code>Reply-To:</code> header — a mismatch from <code>From</code> is a classic red flag</td></tr>
-      <tr><td>Return-Path</td><td><code>Return-Path:</code> header — where bounces actually go, often reveals the real sending domain</td></tr>
-      <tr><td>Received chain</td><td>Stack of <code>Received:</code> headers, read <b>bottom-to-top</b> — traces the actual server hops back to origin</td></tr>
-      <tr><td>SPF / DKIM / DMARC</td><td><code>Authentication-Results:</code> header — look for <code>pass</code> / <code>fail</code> / <code>none</code> on each</td></tr>
-      <tr><td>Subject / Date / Message-ID</td><td>Standard headers near the top of the source</td></tr>
-    </table>
-  </div>
-
-  <div class="card">
-    <h3><span class="stepdot">5</span> Extract the suspicious links</h3>
-    <p>This is the one step eM Client alone doesn't handle as cleanly as VS Code + grep.</p>
-    <p>In the normal message view, hover a link and check the status bar for the real destination. But when the visible text and the actual target need a side-by-side check, go back to the <b>Show Source</b> view from Step 3 and read the raw <code>&lt;a href="..."&gt;</code> tags directly — that's the only way to catch a link whose displayed text doesn't match where it actually goes.</p>
-    <div class="warn-box"><b>Hybrid approach, by design:</b> eM Client for the email and header investigation, raw source (or a plain text editor, if you export it) for pulling out real URLs, VirusTotal for reputation checks. This isn't a workaround — it mirrors how a real SOC Tier 1 analyst actually works.</div>
-  </div>
-
-  <div class="card">
-    <h3><span class="stepdot">6</span> Check IOCs against VirusTotal</h3>
-    <p>Copy each extracted URL, IP, or attachment hash into VirusTotal and check the detection ratio and any tagged behavior — same as any other IOC reputation check.</p>
-  </div>
-
-  <div class="card">
-    <h3><span class="stepdot">7</span> Write the triage report</h3>
-    <p>Close it out with a short SOC Tier-1-style summary: who it claims to be from, which authentication checks failed, which IOCs came back malicious/suspicious, and your verdict (malicious / suspicious / benign). Reuse the phishing investigation playbook and report template already in your Blue-Team folder for the exact structure.</p>
-  </div>
-
-  <h2 class="section">Student prompt</h2>
-  <div class="prompt-box">
-    <span class="plabel">Give this to students as-is</span>
-    Open the provided .eml file using eM Client. Do not use VS Code for the initial investigation. Identify the sender, Return-Path, Reply-To, originating IP, SPF/DKIM/DMARC results, and suspicious URLs. Then investigate the extracted IOCs using VirusTotal.
-  </div>
-
-  <h2 class="section">Instructor answer key</h2>
-  <details class="answerkey">
-    <summary>🔒 Planted red flags per sample — don't share this section with students</summary>
-    <div class="akbody">
-
-      <h4>sample-01-it-helpdesk-reset.eml</h4>
-      <table class="ref-table">
-        <tr><th>Red flag</th><th>Where it shows up</th></tr>
-        <tr><td>Reply-To domain mismatch</td><td><code>Reply-To</code> is <code>secure-login-verify.xyz</code>, not <code>northbridge-solutions.com</code></td></tr>
-        <tr><td>Failed authentication</td><td><code>spf=fail</code>, <code>dmarc=fail</code> in Authentication-Results</td></tr>
-        <tr><td>Suspicious relay</td><td>Received chain originates from <code>secure-login-verify.xyz</code>, not an internal mail server</td></tr>
-        <tr><td>Link spoofing</td><td>Displayed text looks like the real portal, but the actual <code>href</code> points to a raw IP (<code>198.51.100.17</code>)</td></tr>
-        <tr><td>Urgency pressure</td><td>"24 hours," account-lock threat</td></tr>
-      </table>
-
-      <h4>sample-02-invoice-overdue.eml</h4>
-      <table class="ref-table">
-        <tr><th>Red flag</th><th>Where it shows up</th></tr>
-        <tr><td>Look-alike domain</td><td><code>From</code> claims <code>aldergate-freight.com</code>, but <code>Reply-To</code>/<code>Return-Path</code> use the subtly different <code>aldergate-freight-billing.com</code></td></tr>
-        <tr><td>SPF passes, but that's not proof</td><td><code>spf=pass</code> here on purpose — the attacker controls their own look-alike domain's SPF record; <code>dkim=fail</code> and <code>dmarc=fail</code> are the real tells</td></tr>
-        <tr><td>"Changed" payment details</td><td>Classic BEC/invoice-fraud pattern — a sudden banking-detail change buried in urgency</td></tr>
-        <tr><td>Link spoofing</td><td>Text reads like a PDF filename, but the <code>href</code> is a raw-IP script path</td></tr>
-      </table>
-
-      <h4>sample-03-account-suspended.eml</h4>
-      <table class="ref-table">
-        <tr><th>Red flag</th><th>Where it shows up</th></tr>
-        <tr><td>Domain mismatch</td><td><code>From</code> claims <code>cloudvaultpro.com</code>; <code>Reply-To</code>/<code>Return-Path</code> use <code>cloudvaultpro-alerts.net</code></td></tr>
-        <tr><td>Failed authentication</td><td><code>spf=softfail</code>, <code>dkim=none</code>, <code>dmarc=fail</code></td></tr>
-        <tr><td>Suspicious originating host</td><td>Received chain shows a generic dynamic/unknown hostname, not a real cloud provider's infrastructure</td></tr>
-        <tr><td>Link spoofing</td><td>Displayed link looks like the real account page; actual <code>href</code> is a raw-IP verification script</td></tr>
-        <tr><td>Fear + urgency</td><td>"Blocked sign-in," 12-hour deadline, threat of automatic suspension</td></tr>
-      </table>
-
-    </div>
-  </details>
-
-  <footer>Original lab — built for this study group. Pairs with the phishing playbooks already in your Blue-Team folder.</footer>
-</div>
-
-<script>
-  const html = document.documentElement;
-  const btn = document.getElementById('themeToggle');
-  function apply(t){ html.setAttribute('data-theme', t); btn.textContent = t === 'dark' ? '☀' : '🌙'; }
-  apply('dark');
-  btn.addEventListener('click', () => apply(html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'));
-</script>
-</body>
-</html>
+8
+Header-level evidence
+Signal	Where to look	Why it counts as evidence
+Authentication failure	Authentication-Results: header	spf=fail / dkim=fail / dmarc=fail on a mail claiming a real, established domain means the sending server was never authorized to send as that domain
+From / Reply-To / Return-Path mismatch	Compare all three headers side by side	Legitimate mail rarely routes replies or bounces to a completely different domain than the one it claims to be from
+Received chain doesn't match the claim	Bottom-most Received: line = first real hop	If that IP/hostname has no relation to the claimed sender (check via WHOIS/rDNS), the message didn't originate where it says it did
+Display name masking the real address	From: header — display name vs. the actual email address	A trusted-looking display name hiding an unrelated address is a classic spoofing/lookalike tactic
+Message-ID domain mismatch	Message-ID: header	Generated by a mail system on a completely different domain than the one the email claims to be from
+9
+Body-level evidence
+Signal	Where to look	Why it counts as evidence
+Displayed link text ≠ real destination	Raw source — compare <a>text</a> to its href=	Deliberate visual deception; one of the single strongest indicators when found
+Suspicious destination type	The actual href target	A raw IP address, a URL shortener, an unusual/newly-seen TLD, or a lookalike domain (extra word, extra hyphen, swapped TLD) of the real brand
+Urgency + credential/payment request combo	Overall body language	Legitimate organizations rarely combine "act within X hours" with "click here to verify / pay now" in the same message
+Attachment type	MIME part / file extension	.html, .js, .vbs, .iso, .lnk, or macro-enabled Office files (.docm/.xlsm) are almost never sent legitimately and are common malware droppers
+10
+External verification — this is what turns "suspicious" into "confirmed"
+Signal	Where to check	Why it counts as evidence
+URL / IP / attachment hash reputation	VirusTotal	Multiple independent engines flagging the same indicator as malicious is third-party confirmation, not just your opinion
+Domain age	WHOIS (e.g. whois.domaintools.com)	A domain registered days or weeks ago while impersonating an established brand is a strong tell — real vendors don't rotate domains that often
+Sending IP reputation / ownership	AbuseIPDB, ASN / reverse-DNS lookup	IP sits on a consumer ISP or unrelated hosting, with no connection to the claimed organization's real infrastructure
+Attachment behavior	Sandbox only — ANY.RUN, Joe Sandbox, Hybrid Analysis (never open it locally)	Confirms actual malicious behavior — dropped files, C2 callbacks — instead of just static suspicion
+What actually counts as "proof": one failed SPF check alone is not proof — plenty of legitimate mail fails SPF due to ordinary misconfiguration. A defensible malicious verdict comes from convergence: e.g. domain impersonation + failed DKIM/DMARC + a link resolving to a raw IP + that same IP/URL flagged malicious on VirusTotal. When you write the triage report, cite the specific header/body evidence together with the external confirmation — that combination is what "proof" means in a real SOC handoff, not a gut feeling.
+Student prompt
+Give this to students as-is
+Open the provided .eml file using eM Client. Do not use VS Code for the initial investigation. Identify the sender, Return-Path, Reply-To, originating IP, SPF/DKIM/DMARC results, and suspicious URLs. Then investigate the extracted IOCs using VirusTotal.
+Original lab — built for this study group. Pairs with the phishing playbooks already in your Blue-Team folder.
