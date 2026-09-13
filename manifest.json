@@ -1,0 +1,15 @@
+{
+  "name": "Cybersecurity Interview Flashcards",
+  "short_name": "CyberCards",
+  "description": "550 SOC / Red Team / Blue Team interview-prep flashcards by Zeliha Zengin, organized by role, with search, smart review and a self-test quiz mode.",
+  "start_url": "./cybersecurity-interview-flashcards.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f5f7fa",
+  "theme_color": "#2f6fb0",
+  "icons": [
+    { "src": "icon-192.png", "type": "image/png", "sizes": "192x192", "purpose": "any maskable" },
+    { "src": "icon-512.png", "type": "image/png", "sizes": "512x512", "purpose": "any maskable" }
+  ]
+}
