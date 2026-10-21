@@ -1,5 +1,4 @@
-[README_10.md](https://github.com/user-attachments/files/33776003/README_10.md)
-<p align="center">
+
   <img src="banner.png" alt="Zeliha's InfoSec Journey — Red / Blue Cybersecurity Learning Hub" width="100%">
 </p>
 
