@@ -1,46 +1,178 @@
-# eJPT / INE — Skill Check CTF Write-ups
+[README_10.md](https://github.com/user-attachments/files/33776003/README_10.md)
+<p align="center">
+  <img src="banner.png" alt="Zeliha's InfoSec Journey — Red / Blue Cybersecurity Learning Hub" width="100%">
+</p>
+
+<p align="center">
+  <a href="https://github.com/zelihazenginapogeeusa-byte/zeliha-infosec-journey/stargazers"><img src="https://img.shields.io/github/stars/zelihazenginapogeeusa-byte/zeliha-infosec-journey?style=flat-square&color=f85149&label=Stars" alt="Stars"></a>
+  <a href="https://github.com/zelihazenginapogeeusa-byte/zeliha-infosec-journey/network/members"><img src="https://img.shields.io/github/forks/zelihazenginapogeeusa-byte/zeliha-infosec-journey?style=flat-square&color=4a9eff&label=Forks" alt="Forks"></a>
+  <a href="https://github.com/zelihazenginapogeeusa-byte/zeliha-infosec-journey/watchers"><img src="https://img.shields.io/github/watchers/zelihazenginapogeeusa-byte/zeliha-infosec-journey?style=flat-square&color=a78bfa&label=Watching" alt="Watchers"></a>
+  <a href="https://github.com/zelihazenginapogeeusa-byte/zeliha-infosec-journey/commits/cybersecurity-learning-hub"><img src="https://img.shields.io/github/last-commit/zelihazenginapogeeusa-byte/zeliha-infosec-journey?style=flat-square&color=8891a3&label=Last%20Commit" alt="Last Commit"></a>
+  <img src="https://img.shields.io/github/repo-size/zelihazenginapogeeusa-byte/zeliha-infosec-journey?style=flat-square&color=4ade80&label=Repo%20Size" alt="Repo Size">
+</p>
+
+<p align="center">
+  <b>A personal, continuously-updated cybersecurity study repo</b><br>
+  Offensive-side notes for <b>eJPT</b> and defensive-side notes for <b>BTL1</b> — cheat sheets, an offline field toolkit, and a study roadmap.
+</p>
+
+<p align="center">
+  <sub>Senior SOC Analyst &amp; Facilitator — expanding into offensive security through eJPT &amp; BTL1.</sub>
+</p>
+
+<p align="center">
+  <a href="https://zelihazenginapogeeusa-byte.github.io/zeliha-infosec-journey/field-toolkit_2.html"><b>🧰 Open the Field Toolkit (live)</b></a> ·
+  <a href="ejpt-roadmap.md"><b>📄 Study Roadmap</b></a>
+</p>
+
+<p align="center">
+  <a href="https://www.linkedin.com/in/zeliha-zengin/"><img src="https://img.shields.io/badge/LinkedIn-0A66C2?style=flat-square&logo=linkedin&logoColor=white" alt="LinkedIn"></a>
+  <a href="https://medium.com/@zeliharich"><img src="https://img.shields.io/badge/Medium-12100E?style=flat-square&logo=medium&logoColor=white" alt="Medium"></a>
+</p>
+
+---
+
+## 📖 What's in here
+
+This repo collects everything gathered while studying for the **eJPT** (eLearnSecurity Junior Penetration Tester) and **BTL1** (Blue Team Level 1) certifications: practical, command-heavy cheat sheets — not theory dumps — each covering one tool or one concept, cross-referenced against its siblings.
+
+|  | Folder | Focus |
+|---|---|---|
+| 🔴 | [`Red-Team/`](Red-Team/) | Recon, enumeration, exploitation, post-exploitation, reporting — eJPT-aligned |
+| 🔵 | [`Blue-Team/`](Blue-Team/) | Detection, triage, forensics, incident response — BTL1-aligned |
+| 🟣 | [`Purple-Team-Mapping/`](./Purple-Team-Mapping) | Attack ↔ detection cross-reference — ties Red-Team techniques to Blue-Team detections across ten kill-chain stages |
+| 🎯 | [`Interview-Prep/`](./Interview-Prep) | Interview Q&A — fundamentals, red team, blue team, behavioral, junior pentest — in flashcard format, plus an interactive study app |
+| 🎴 | [`cybersecurity-interview-flashcards.html`](https://zelihazenginapogeeusa-byte.github.io/zeliha-infosec-journey/cybersecurity-interview-flashcards.html) | Interactive interview-prep flashcard app — 550 SOC/Red Team/Blue Team Q&A cards organized by role, with search, Smart Review mode, star/bookmark list, quiz mode, auto-generated Exam Mode, and study streak tracking (link opens the live version) |
+| 🧰 | [`field-toolkit_2.html`](https://zelihazenginapogeeusa-byte.github.io/zeliha-infosec-journey/field-toolkit_2.html) | Offline, single-file interactive reference — calculators + quick-lookup cards, no install needed (link opens the live version) |
+| 📘 | [`blue-team-study-notes_1.html`](https://zelihazenginapogeeusa-byte.github.io/zeliha-infosec-journey/Blue-Team/blue-team-study-notes_1.html) | Interactive BTL1 study reference — curriculum prioritized by importance, click-to-expand notes with real commands/workflows (Splunk SPL, Wireshark filters, Volatility, DeepBlueCLI, Autopsy, TheHive, report template) |
+| ⏱️ | [btl1-exam-tracker.html](https://htmlpreview.github.io/?https://github.com/zelihazenginapogeeusa-byte/zeliha-infosec-journey/blob/cybersecurity-learning-hub/Blue-Team/btl1-exam-tracker.html) | Interactive BTL1 exam companion — 24h timer + pacing, IOC table, timeline, host/network activity map (Wireshark-ready), MITRE ATT&CK checklist, confidence tracking, and auto-generated report draft (link opens the live version) |
+| 🗺️ | [`ejpt-roadmap.md`](ejpt-roadmap.md) | Study roadmap / progress tracker |
+| 📕 | [`ejpt-study-notes.html`](https://zelihazenginapogeeusa-byte.github.io/zeliha-infosec-journey/Red-Team/ejpt-study-notes.html) | Interactive eJPT study reference — curriculum mapped to your actual course order (TryHackMe Pre-Security → INE eJPTv2 → Junior Pentester Path → Beginner's/Offensive Pentesting Path), click-to-expand notes with real commands/workflows (enumeration, web app testing, Metasploit, Active Directory, pivoting) |
+| 🧭 | [ejpt-study-reference.html](https://htmlpreview.github.io/?https://github.com/zelihazenginapogeeusa-byte/zeliha-infosec-journey/blob/cybersecurity-learning-hub/Red-Team/ejpt-study-reference.html) | Interactive eJPT exam companion — 48h timer + pacing, Hosts/Loot/Timeline tracking, coverage bar, confidence tracking, quick-reference cheat sheet (Nmap, enumeration, web app, Metasploit, privesc, pivoting, AD), Toolbox calculators (Epoch, Base64, hash ID, hex/dec + IP/CIDR), auto-generated report draft |
+| 📋 | [`playbook-index.md`](playbook-index.md) | Quick-access index of every scenario playbook — "which alert just fired, which playbook do I open" |
+| 🔍 | [osint-field-toolkit.html](https://zelihazenginapogeeusa-byte.github.io/zeliha-infosec-journey/osint-field-toolkit.html) | Interactive OSINT investigation reference — 58 tools across 7 categories (email/domain, IP/infrastructure, URL/file sandboxing, phishing intel, threat & breach intel, social/identity, image/metadata) plus a Frameworks & Methodology category (MITRE ATT&CK, D3FEND, Pyramid of Pain, Diamond Model, Cyber Kill Chain, PICERL, STIX/TAXII, MISP, OpenCTI), each with a click-through panel: usage notes, input → output, and an OPSEC reminder. BTL1 phishing analysis + eJPT recon aligned. |
+| 🎣 | [phishing-analysis-field-guide.html](https://zelihazenginapogeeusa-byte.github.io/zeliha-infosec-journey/phishing-analysis-field-guide.html) | Interactive phishing analysis methodology reference — header analysis, SPF/DKIM/DMARC, sender & domain red flags, content & social-engineering patterns, attachment & link analysis, and IOC extraction, each with a click-through panel: what to check and why. BTL1-aligned. |
+| 📧 | [phishing-eml-lab-emclient.html](https://htmlpreview.github.io/?https://github.com/zelihazenginapogeeusa-byte/zeliha-infosec-journey/blob/cybersecurity-learning-hub/Blue-Team/phishing-eml-lab/phishing-eml-lab-emclient.html) | Hands-on phishing .eml triage walkthrough using eM Client — step-by-step analysis flow, how to prove an email is malicious, plus a student practice prompt. Companion lab to the phishing analysis field guide. BTL1-aligned. |
+| 📡 | [splunk-field-guide.html](https://zelihazenginapogeeusa-byte.github.io/zeliha-infosec-journey/splunk-field-guide.html) | SPL and Windows Event ID reference for SIEM triage — default fields, search commands, Security & Sysmon Event IDs (including Kerberos, DCSync, scheduled-task and password-reset events), network beaconing detection, and email/endpoint/network/DNS/web/auth/account-management fields, each with a ready SPL query. BTL1-aligned. |
+| 🦈 | [wireshark-field-guide.html](https://zelihazenginapogeeusa-byte.github.io/zeliha-infosec-journey/wireshark-field-guide.html) | Wireshark field and display-filter reference for packet capture review — TCP flags & Nmap scan signatures, HTTP/DNS/TLS/ARP/DHCP fields, a common-ports quick reference, and credential-exposure indicators. BTL1-aligned. |
+| 💻 | [live-host-triage-field-guide.html](https://zelihazenginapogeeusa-byte.github.io/zeliha-infosec-journey/live-host-triage-field-guide.html) | Live Windows host triage reference — CLI/PowerShell commands for network, process & service, account, and persistence checks, run before the system is ever imaged or its memory captured. BTL1-aligned. |
+| 💽 | [autopsy-field-guide.html](https://zelihazenginapogeeusa-byte.github.io/zeliha-infosec-journey/autopsy-field-guide.html) | Interactive Autopsy disk forensics reference — case/ingest setup, timeline & MACB analysis, deleted files & carving, keyword/hash search, web & OS artifacts, registry/email/EXIF, and tagging/reporting, each with a click-through panel: what to look for and exactly where to find it. BTL1-aligned. |
+| 🔍 | [autopsy-deleted-hidden-disguised-files.html](https://zelihazenginapogeeusa-byte.github.io/zeliha-infosec-journey/autopsy-deleted-hidden-disguised-files.html) | Companion walkthrough to the Autopsy field guide — seven techniques for surfacing files that don't show up in the normal folder view (deleted files, unallocated space, hidden/system attributes, suspicious names, extension mismatches, keyword search, file type sorting), each step click-through for the exact menu path. BTL1-aligned. |
+| 🔷 | [deepblue-field-guide.html](https://zelihazenginapogeeusa-byte.github.io/zeliha-infosec-journey/deepblue-field-guide.html) | Interactive DeepBlueCLI reference for Windows Event Log triage — usage & parameters plus detection patterns (brute force, credential dumping, obfuscated PowerShell, persistence, log clearing), each with the exact detection string and Event ID. BTL1-aligned. |
+| 🧠 | [volatility-field-guide.html](https://zelihazenginapogeeusa-byte.github.io/zeliha-infosec-journey/volatility-field-guide.html) | Interactive Volatility memory forensics reference — acquisition & setup, process analysis, process internals, injection & hooking, network & registry (including credential extraction), and timeline & file activity, each with the exact plugin command. BTL1-aligned. |
+
+Both folders are organized into numbered sub-folders that roughly follow the order you'd actually work through them — recon before exploitation on the Red-Team side, alert-triage before deep forensics on the Blue-Team side. See each folder's own `README.md` for the full file index.
+
+---
+
+## 📝 eJPT / INE — Skill-Check CTF Write-ups
 
 Hands-on walkthroughs from INE's **eJPT (eLearnSecurity Junior Penetration Tester)** path — the Assessment Methodologies and Host & Network Penetration Testing Skill Check CTFs. Each write-up breaks down the **methodology, tools, and thought process** behind the challenge, with the exact commands used.
 
 Every write-up comes in two formats:
+
 - **`.md`** — renders directly here on GitHub (just click the links below)
 - **`.html`** — styled standalone page (open via GitHub Pages or download)
 
 > 🧰 New to a tool used in these labs? See the **[Tools Reference](tools-reference.md)** — every tool explained once, with example commands.
 
----
-
-## 🧭 01 — Assessment Methodologies
+### 🧭 01 — Assessment Methodologies
 
 | # | CTF | Focus |
 | --- | --- | --- |
-| 1 | [Information Gathering CTF 1](01-Assessment-Methodologies/01-information-gathering-ctf-1.md) | OSINT & initial recon |
-| 2 | [Footprinting & Scanning CTF 1](01-Assessment-Methodologies/02-footprinting-scanning-ctf-1.md) | Port/service discovery |
-| 3 | [Enumeration CTF 1](01-Assessment-Methodologies/03-enumeration-ctf-1.md) | Service enumeration |
-| 4 | [Vulnerability Assessment CTF 1](01-Assessment-Methodologies/04-vulnerability-assessment-ctf-1.md) | Finding & validating weaknesses |
+| 1 | [Information Gathering CTF 1](eJPT-INE-Skill_Check-CTF/01-information-gathering-ctf-1.md) | OSINT & initial recon |
+| 2 | [Footprinting & Scanning CTF 1](02-footprinting-scanning-ctf-1.md) | Port/service discovery |
+| 3 | [Enumeration CTF 1](03-enumeration-ctf-1.md) | Service enumeration |
+| 4 | [Vulnerability Assessment CTF 1](04-vulnerability-assessment-ctf-1.md) | Finding & validating weaknesses |
 
-## 🎯 02 — Host & Network Penetration Testing
+### 🎯 02 — Host & Network Penetration Testing
 
 | # | CTF | Focus |
 | --- | --- | --- |
-| 1 | [System-Host Based Attacks CTF 1](02-Host-Network-Penetration-Testing/01-system-host-based-ctf-1.md) | WebDAV brute-force · ASP web shell · SMB |
-| 2 | [System-Host Based Attacks CTF 2](02-Host-Network-Penetration-Testing/02-system-host-based-ctf-2.md) | Shellshock · libssh bypass · sudo hijack |
-| 3 | [Network-Based Attacks CTF 1](02-Host-Network-Penetration-Testing/03-network-based-ctf-1.md) | PCAP analysis of a malware infection |
-| 4 | [The Metasploit Framework CTF 1](02-Host-Network-Penetration-Testing/04-metasploit-framework-ctf-1.md) | MSSQL exploitation · getsystem |
-| 5 | [The Metasploit Framework CTF 2](02-Host-Network-Penetration-Testing/05-metasploit-framework-ctf-2.md) | rsync enum · Roxy-WI RCE · cron |
-| 6 | [Exploitation CTF 1](02-Host-Network-Penetration-Testing/06-exploitation-ctf-1.md) | flatCore CMS · SSH brute-force · WordPress |
-| 7 | [Exploitation CTF 2](02-Host-Network-Penetration-Testing/07-exploitation-ctf-2.md) | CrackMapExec · Pass-the-Hash · IIS web shell |
-| 8 | [Exploitation CTF 3](02-Host-Network-Penetration-Testing/08-exploitation-ctf-3.md) | ProFTPD exploit · SUID privesc |
-| 9 | [Post-Exploitation CTF 1](02-Host-Network-Penetration-Testing/09-post-exploitation-ctf-1.md) | Foothold → cron → root |
-| 10 | [Post-Exploitation CTF 2](02-Host-Network-Penetration-Testing/10-post-exploitation-ctf-2.md) | Hash cracking · PrintSpoofer → SYSTEM |
-| 11 | [Web Application Penetration Testing CTF 1](02-Host-Network-Penetration-Testing/11-web-application-ctf-1.md) | LFI · enumeration · auth bypass |
+| 1 | [System-Host Based Attacks CTF 1](01-system-host-based-ctf-1.md) | WebDAV brute-force · ASP web shell · SMB |
+| 2 | [System-Host Based Attacks CTF 2](02-system-host-based-ctf-2.md) | Shellshock · libssh bypass · sudo hijack |
+| 3 | [Network-Based Attacks CTF 1](03-network-based-ctf-1.md) | PCAP analysis of a malware infection |
+| 4 | [The Metasploit Framework CTF 1](04-metasploit-framework-ctf-1.md) | MSSQL exploitation · getsystem |
+| 5 | [The Metasploit Framework CTF 2](05-metasploit-framework-ctf-2.md) | rsync enum · Roxy-WI RCE · cron |
+| 6 | [Exploitation CTF 1](06-exploitation-ctf-1.md) | flatCore CMS · SSH brute-force · WordPress |
+| 7 | [Exploitation CTF 2](07-exploitation-ctf-2.md) | CrackMapExec · Pass-the-Hash · IIS web shell |
+| 8 | [Exploitation CTF 3](08-exploitation-ctf-3.md) | ProFTPD exploit · SUID privesc |
+| 9 | [Post-Exploitation CTF 1](09-post-exploitation-ctf-1.md) | Foothold → cron → root |
+| 10 | [Post-Exploitation CTF 2](10-post-exploitation-ctf-2.md) | Hash cracking · PrintSpoofer → SYSTEM |
+| 11 | [Web Application Penetration Testing CTF 1](11-web-application-ctf-1.md) | LFI · enumeration · auth bypass |
 
-## 🧰 Reference
+A consolidated "path to the flags" summary of all 15, with Medium links, lives in [`Red-Team/01-Recon-and-OSINT/ine-ejpt-skill-check-ctfs-cheatsheet.md`](Red-Team/01-Recon-and-OSINT/ine-ejpt-skill-check-ctfs-cheatsheet.md).
 
-- [**Tools Reference**](tools-reference.md) — nmap, hydra, crackmapexec, metasploit, wireshark, burp, john/hashcat, cadaver, rsync, PrintSpoofer and more.
+*Write-ups by **Zeliha Zengin** · eJPT preparation · originally published on [Medium](https://medium.com/@zeliharich). All labs are performed in authorized INE training environments for exam preparation — educational use only.*
 
 ---
 
-> ⚠️ All labs are performed in **authorized INE training environments** for eJPT exam preparation. These write-ups are for educational use only.
+## 🧰 Try the field toolkit
 
-*Write-ups by **Zeliha Zengin** · eJPT preparation · originally published on [Medium](https://medium.com/@zeliharich)*
+`field-toolkit_2.html` is a single, self-contained file — calculators (Base64, hash identifier, subnet/CIDR, Hydra command builder, reverse shell generator, and more) plus quick-reference cards for both red and blue team work, filterable by category. No server, no dependencies, no accounts, works fully offline.
+
+<p align="center">
+  <img src="toolkit-preview.png" alt="Field toolkit preview — calculators tab" width="85%">
+</p>
+
+**View it live** — GitHub Pages is already enabled on this repo's default branch (`cybersecurity-learning-hub`), so it's reachable right now at:
+
+```
+https://zelihazenginapogeeusa-byte.github.io/zeliha-infosec-journey/field-toolkit_2.html
+```
+
+*(optional: rename `field-toolkit_2.html` to `index.html` at the repo root if you'd rather the short root URL — `.../zeliha-infosec-journey/` — load it directly)*
+
+---
+
+## 🗂️ Repo structure
+
+```
+zeliha-infosec-journey/
+├── README.md
+├── LICENSE
+├── banner.png
+├── field-toolkit_2.html
+├── toolkit-preview.png
+├── ejpt-roadmap.md
+├── playbook-index.md
+├── Red-Team/
+│   ├── README.md
+│   ├── 01-Recon-and-OSINT/
+│   │   ├── assessment-methodology-report-writing-cheatsheet-professional.md   (shared w/ Blue-Team)
+│   │   ├── osint-cheatsheet.md
+│   │   ├── ejpt-exam-checklist-and-methodology.md
+│   │   └── ... (4 more)
+│   ├── 02-Web-and-Network-Pentesting/
+│   │   ├── nmap-cheatsheet-professional.md
+│   │   ├── gobuster-cheatsheet-professional.md
+│   │   └── ... (6 more)
+│   └── 03-Exploitation-and-Post-Exploitation/
+│       ├── active-directory-enumeration-cheatsheet-professional.md
+│       ├── active-directory-attack-chain-playbook.md
+│       ├── metasploit-cheatsheet-professional.md
+│       └── ... (12 more)
+└── Blue-Team/
+    ├── README.md
+    ├── 01-SOC-and-SIEM-Analysis/
+    │   ├── siem-splunk-elk-cheatsheet-professional.md
+    │   ├── splunk-siem-investigation-playbook.md
+    │   └── ... (5 more)
+    └── 02-DFIR-and-Threat-Intelligence/
+        ├── volatility-autopsy-forensics-cheatsheet-professional.md
+        ├── phishing-cheatsheet.md
+        ├── ransomware-incident-response-playbook.md
+        └── ... (11 more)
+```
+
+*(exact counts drift as new files get added — each folder's own `README.md` is always the source of truth for what's currently inside it.)*
+
+---
+
+## ⚠️ Scope
+
+All techniques documented here are for use in **authorized environments only** — personal labs, CTFs, and engagements covered by written authorization (RoE). Nothing in this repo should be used against systems without explicit permission.
+
+---
+
+<p align="center"><sub>Built while studying — updated as new modules get covered.</sub></p>
